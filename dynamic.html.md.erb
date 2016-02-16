@@ -1,0 +1,211 @@
+---
+title: Dynamic Storage
+---
+## <a id='managing-services'></a> Managing services ##
+[Managing services](../services/managing-services.html#service-connector)
+
+## <a id='oview'></a> Overview ##
+Dynamic Storage, the Cloud Storage of Swisscom, is a pay-per-use Object Storage optimized for storing large data sets (e.g. for backups, archives, big-data etc.) outside of your own data centre. The only way to access this type of storage is via a RESTful API.
+
+Swisscom Dynamic Storage supports two APIs:
+
+* Atmos API
+* Amazon S3 compatible storage
+
+Both APIs are RESTful APIs but with slightly different syntax.
+
+The Atmos API has a lot of very high sophisticated functions, like:
+
+* different policies on each object.
+* invitations, invitation limitations.
+* And many more.
+
+The Amazon S3 API is:
+
+* very well known in the market
+* state of the art, de facto standard
+* providing a big community
+* hundreds of scripts and tools available
+
+<p class='note'><strong>Important</strong>:
+* Swisscom does not support access to the same data with both APIs. There are different accounts and access points.
+* There is no migration path from Atmos API to S3 API or vice versa.
+</p>
+
+## <a id='integrating-your-service'></a> Integrating the Service With Your App ##
+After the [creation](../services/managing-services.html#create) of the service and the [binding](../services/managing-services.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../../apps/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:<pre class="code">
+     {
+       "dynstrg": [
+         {
+           "credentials": {
+           "accessHost": "ds31s3.swisscom.com",
+           "accessKeyID": "SubtenantID/AccountID",
+           "secretAccessKey": "28-Characters"
+           },
+           "label": "dynstrg",
+           "name": "testatmos",
+           "plan": "usage",
+           "tags": []
+         }
+       ]
+     }
+</pre>
+## <a id='sample-application'></a> Sample Application ##
+
+[https://github.com/swisscom/dynstrg-howto](https://github.com/swisscom/dynstrg-howto)
+
+## <a id='How'></a> How to access Dynamic Storage with the Amazon S3 API ##
+<table border="1" class="nice" >
+  <tr>
+    <th></th>
+    <th><p><strong>Amazon S3</strong></p></th>
+    <th><p><strong>Swisscom S3 Compatible Storage</strong></p></th>
+  </tr>
+  <tr>
+    <td><p><strong>Access</strong></p></td>
+    <td><p>Access Key ID</p></td>
+    <td><p>Access Key ID</p></td>
+  </tr>
+  <tr>
+    <td><p><strong>Access key</strong></p></td>
+    <td><p>Secret Access Key</p></td>
+    <td><p>Secret Access Key</p></td>
+  </tr>
+  <tr>
+    <td><p><strong>Path style bucket</strong></p></td>
+    <td><code>http[s]://s3.amazonaws.com/&lt;bucket&gt;</code></td>
+    <td><code>https://ds31s3.swisscom.com/&lt;bucket&gt;</code></td>
+  </tr>
+  <tr>
+    <td><p><strong>Virtual host style bucket</strong></p></td>
+    <td><code>http[s]://&lt;bucket&gt;.s3.amazonaws.com</code></td>
+    <td><code>https://&lt;bucket&gt;.ds31s3.swisscom.com</code></td>
+  </tr>
+</table>
+
+<p class='note'><strong>Impotant</strong>: for security reasons, Swisscom does only support https (443) and no http (80)!
+</p>
+
+## <a id='Using'></a> Using Amazon S3 compatible software on Dynamic Storage ##
+Most of the software that have been developed to use the Amazon S3 API will work with Dynamic Storage. The unsupported operations are rarely used and listed below.
+
+The challenge is often on the configuration side: Sometimes the Amazon URL and ports have been hard coded, sometimes the software is using path style and sometimes virtual style.
+
+## <a id='authentication'></a> Authentication ##
+<p class='note'><strong>From http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html:</strong>
+The Amazon S3 REST API uses a custom HTTP scheme based on a keyed-HMAC (Hash Message Authentication Code) for authentication. To authenticate a request, you first concatenate selected elements of the request to form a string. You then use your AWS secret access key to calculate the HMAC of that string. Informally, we call this process "signing the request," and we call the output of the HMAC algorithm the signature, because it simulates the security properties of a real signature. Finally, you add this signature as a parameter of the request by using the syntax described in this section.
+When the system receives an authenticated request, it fetches the AWS secret access key that you claim to have and uses it in the same way to compute a signature for the message it received. It then compares the signature it calculated against the signature presented by the requester. If the two signatures match, the system concludes that the requester must have access to the AWS secret access key and therefore acts with the authority of the principal to whom the key was issued. If the two signatures do not match, the request is dropped and the system responds with an error message.
+</p>
+
+When using Atmos, the <strong>Access Key ID corresponds to Subtenant ID and Account ID</strong> and the <strong>Secret Access Key corresponds to the Shared Secret Access Key</strong>.
+
+In the newer versions of Amazon SDK the signing method may have changed. In order to make sure that you can use the SDK correctly, you need to overwrite the signing method. This would look like the following example in Java code:
+<pre class="code">
+  ClientConfiguration opts = new ClientConfiguration();
+   opts.setSignerOverride("S3SignerType");  // NOT "AWS3SignerType"
+ 
+   AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("UID", "sharedSecret"), opts);
+</pre>
+
+
+## <a id='getting'></a> Getting better write performance ##
+(excerpt from the Atmos Programmer’s Guide)
+To get the best possible performance:
+
+* Write as many objects in parallel as possible.
+* Use only one request per object for creates and updates. Concurrent access to the same object (on writes) may lead to locking or serialization overhead.
+* Use the Expect: 100-continue request header when creating or updating namespace objects. By using the expect header, the requesting application can avoid sending data when it would fail. Here’s how it works:
+1. The application requesting the create/update sends the expect: 100-continue header in the request, along with the other normal request headers. But they do not send any data.
+2. The system receives the request, validates the headers, and checks to see if an object with that name exists.
+3. If everything is ok, the system sends back the 100-continue response.
+4. If there is an error, (for example the signature is invalid or the object name already exists) the system sends back the normal error response, and the application never sends the request body.
+5. The application will only send data if it gets the 100-continue header back.
+
+## <a id='bucket'></a> Amazon S3 bucket configuration ##
+S3 bucket names are unique through the system. So in case, you get an error while creating a bucket, then please chose a different name.
+
+S3 buckets can be configured in either flat mode or one-to-one mode. Choosing the mode to use depends on whether the keys are hierarchical or not. One-to-one mode is the default. Set the bucket’s mode immediately after creating the bucket. If you change the mode after objects have been ingested, those objects become inaccessible.
+Currently, bucket type change cannot be done by the customer.
+If you need to change the bucket type, please open an incident and ask for type change.
+
+### <a id='one-to-one'></a> One-to-one (default) ###
+One-to-one mode supports applications that treat S3 keys like a traditional directory structure with prefixes separated by slashes. In one-to-one mode, prefix searching performs well as long as you use the standard delimiter (“/”).
+<strong>One-to-one mode’s limitation is that you are limited to 64,000 objects per directory (prefix).</strong>
+A key in one-to-one mode (or hierarchical mode) looks like this:
+<code>/bucket/articles/2013-09/document234/images/header.jpg</code>
+
+### <a id='flat'></a> Flat mode ###
+Flat mode provides the best performance for applications that store millions of keys and the keys are not hierarchical. An example of a flat key is a UUID. Applications that store objects without any hierarchy generally put all of their keys in the root of the bucket without a prefix such as a directory. <strong>Flat mode’s limitation is that listing buckets using the prefix option is not supported.</strong> A key using flat mode looks like this:
+<code>
+/&lt;bucket name&gt;/a1e8eb5c-dc2a-4a02-a71b-0fab8bb28c3b
+</code>
+
+If you need to change the bucket type, please open an incident and ask for mode change.
+
+## <a id='s3-api'></a> The Amazon S3 API operations ##
+
+### <a id='supported'></a> The following operations are supported ###
+Bucket operations:
+
+* Delete Bucket
+* GET Bucket
+* GET Bucket ACL
+* GET Bucket Location
+* GET Bucket Versioning
+* GET Service
+* List Multipart Uploads
+* PUT Bucket
+* PUT Bucket ACL
+
+Object operations:
+
+* DELETE Object
+* DELETE Multiple Objects
+* GET Object
+* GET Object ACL
+* HEAD Object
+* POST Object
+* PUT Object
+* PUT Object ACL
+* Multipart Upload – Initiate, Upload, Complete, Abort, List parts
+
+### <a id='unsupported'></a> The following operations are unsupported: (these fnctions are used very rarely) ###
+Bucket operations:
+
+* Delete Bucket CORS
+* Delete Bucket lifecycle
+* Delete Bucket policy
+* Delete Bucket tagging
+* Delete Bucket website
+* Get Bucket CORS
+* Get Bucket lifecycle
+* Get Bucket tagging
+* Get Bucket policy
+* Get Bucket notification
+* Get Bucket logging
+* Get Bucket requestPayment
+* Get Bucket website
+* Put Bucket CORS
+* Put Bucket lifecycle
+* Put Bucket logging
+* Put Bucket notification
+* Put Bucket policy
+* Put Bucket requestPayment
+* Put Bucket tagging
+* Put Bucket versioning
+* Put Bucket website
+
+Object operations:
+
+* Get Object torrent
+* Get Object versions
+* Post Object restore
+
+### <a id='unsupported'></a> The software doesn't use the Amazon S3 API directly, but S3QL ###
+S3QL is a file system that stores all its data online using storage services like <a href="http://code.google.com/apis/storage/">Google Storage</a>, <a href="http://aws.amazon.com/s3AmazonS3">Amazon S3</a> or <a href="http://openstack.org/projects/storage/">OpenStack</a>. S3QL effectively provides a hard disk of dynamic, infinite capacity that can be accessed from any computer with internet access running Linux, FreeBSD or OS-X.
+S3QL is a standard conforming, full featured UNIX file system that is conceptually indistinguishable from any local file system. Furthermore, S3QL has additional features like compression, encryption, data de-duplication, immutable trees and snapshotting which make it especially suitable for online backup and archival.
+The S3 compatible backend allows S3QL to access any storage service that uses the same protocol as Amazon S3. The storage URL has the form:
+<code>
+s3c://&lt;hostname&gt;:&lt;port&gt;/&lt;bucketname&gt;/&lt;prefix&gt;
+</code>
+Using a S3 compatible url, Dynamic Storage can easily be used as a backend.

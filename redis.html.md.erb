@@ -1,0 +1,28 @@
+---
+title: Redis
+---
+## <a id='managing-services'></a> Managing services ##
+[Managing services](../services/managing-services.html#service-connector)
+
+## <a id='integrating-your-service'></a> Integrating the Service With Your App ##
+After the [creation](../services/managing-services.html#create) of the service and the [binding](../services/managing-services.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../../apps/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+<pre class="code">
+{
+  "redis": [
+   {
+    "credentials": {
+     "host": "v47n9xwgdgq1cejy.service.consul",
+     "password": "okX21RG85anPfDJa",
+     "port": 35719
+    },
+    "label": "redis",
+    "name": "redis-example",
+    "plan": "small",
+    "tags": []
+   }
+  ]
+}  
+</pre>
+## <a id='sample-application'></a> Sample Application ##
+
+[https://github.com/swisscom/cf-redis-example-app](https://github.com/swisscom/cf-redis-example-app)
