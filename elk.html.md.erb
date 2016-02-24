@@ -46,17 +46,13 @@ As soon as the service is binded and the application is restarted, it will start
 ## <a id='sample-application'></a> Sample Application ##
 [https://github.com/swisscom/cf-elk-sample](https://github.com/swisscom/cf-elk-sample)
 
-## <a id='managing-services'></a> Managing services ##
-
-It possible to connect to all services using either
-* [Service Connector](/service-connector/index.html).
-* Custom Proxy APP (e.g. https://github.com/swisscom/cf-kibana-proxy.git)
-
+## <a id='service-connector'></a> Administrating your ELK instances
+To connect to a running ELK instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
 
 For example, to connect to Kibana to see the logs, check the environment
 variables of the app that is bound to the elk service instance. Read out the
 Kibana host and port and connect via [Service
-Connector](/service-connector/index.html). Open your
+Connector](../service-connector/index.html). Open your
 browser and connect to http://localhost:8080 to see the Kibana dashboard.
 <pre class="code">
 cf env APP_NAME | grep kibanaUrl
