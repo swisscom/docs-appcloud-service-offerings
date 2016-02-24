@@ -2,10 +2,7 @@
 title: S3 Dynamic Storage
 ---
 
-## <a id='managing-services'></a> Managing services ##
-[Managing services](/service-connector/index.html)
-
-## <a id='oview'></a> Overview ##
+## <a id='overview'></a> Overview ##
 Dynamic Storage, the Cloud Storage of Swisscom, is a pay-per-use Object Storage optimized for storing large data sets (e.g. for backups, archives, big-data etc.) outside of your own data centre. The only way to access this type of storage is via a RESTful API.
 
 Swisscom Dynamic Storage supports two APIs:
@@ -34,7 +31,7 @@ The Amazon S3 API is:
 </p>
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App ##
-After the [creation](/devguide/services/managing-services.html#create) of the service and the [binding](/devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](/devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:<pre class="code">
+After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:<pre class="code">
      {
        "dynstrg": [
          {
