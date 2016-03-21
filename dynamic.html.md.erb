@@ -60,33 +60,12 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 
 ## <a id='How'></a> How to access Dynamic Storage with the Amazon S3 API
 
-<table border="1" class="nice" >
-  <tr>
-    <th></th>
-    <th><p><strong>Amazon S3</strong></p></th>
-    <th><p><strong>Swisscom S3 Compatible Storage</strong></p></th>
-  </tr>
-  <tr>
-    <td><p><strong>Access</strong></p></td>
-    <td><p>Access Key ID</p></td>
-    <td><p>Access Key ID</p></td>
-  </tr>
-  <tr>
-    <td><p><strong>Access key</strong></p></td>
-    <td><p>Secret Access Key</p></td>
-    <td><p>Secret Access Key</p></td>
-  </tr>
-  <tr>
-    <td><p><strong>Path style bucket</strong></p></td>
-    <td><code>http[s]://s3.amazonaws.com/&lt;bucket&gt;</code></td>
-    <td><code>https://ds31s3.swisscom.com/&lt;bucket&gt;</code></td>
-  </tr>
-  <tr>
-    <td><p><strong>Virtual host style bucket</strong></p></td>
-    <td><code>http[s]://&lt;bucket&gt;.s3.amazonaws.com</code></td>
-    <td><code>https://&lt;bucket&gt;.ds31s3.swisscom.com</code></td>
-  </tr>
-</table>
+|                           | Amazon S3                             | Swisscom S3 Compatible Storage         |
+| ------------------------- | ------------------------------------- | -------------------------------------- |
+| Access                    | Access Key ID                         | Access Key ID                          |
+| Access Key                | Secret Access Key                     | Secret Access Key                      |
+| Bucket Path Style         | `http[s]://s3.amazonaws.com/<bucket>` | `https://ds31s3.swisscom.com/<bucket>` |
+| Bucket Virtual Host Style | `http[s]://<bucket>.s3.amazonaws.com` | `https://<bucket>.ds31s3.swisscom.com` |
 
 <p class='note'>
   <strong>Impotant</strong>: for security reasons, Swisscom does only support https (443) and no http (80)!
@@ -222,7 +201,7 @@ S3QL is a standard conforming, full featured UNIX file system that is conceptual
 The S3 compatible backend allows S3QL to access any storage service that uses the same protocol as Amazon S3. The storage URL has the form:
 
 ```URL
-s3c://&lt;hostname&gt;:&lt;port&gt;/&lt;bucketname&gt;/&lt;prefix&gt;
+s3c://<hostname>:<port>/<bucketname>/<prefix>
 ```
 
 Using a S3 compatible url, Dynamic Storage can easily be used as a backend.
