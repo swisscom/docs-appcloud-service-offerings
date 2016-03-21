@@ -6,23 +6,24 @@ title: Redis
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
 After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
-<pre class="code">
+
+```JSON
 {
   "redis": [
    {
-    "credentials": {
-     "host": "v47n9xwgdgq1cejy.service.consul",
-     "password": "okX21RG85anPfDJa",
-     "port": 35719
-    },
-    "label": "redis",
-    "name": "redis-example",
-    "plan": "small",
-    "tags": []
-   }
+      "credentials": {
+        "host": "v47n9xwgdgq1cejy.service.consul",
+        "password": "okX21RG85anPfDJa",
+        "port": 35719
+      },
+      "label": "redis",
+      "name": "redis-example",
+      "plan": "small",
+      "tags": []
+    }
   ]
 }
-</pre>
+```
 
 ## <a id='service-connector'></a> Administrating your Redis instances
 To connect to a running Redis instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.

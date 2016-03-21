@@ -17,31 +17,32 @@ The ELK stack consisting of Elasticsearch, Logstash, and Kibana gives the power 
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App ##
 After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
-<pre class="code">
+
+```JSON
 {
   "elk": [
-   {
-    "credentials": {
-     "elasticSearchHost": "77gum1z32vota000.service.consul",
-     "elasticSearchPassword": "alksdjflaksdjflkal",
-     "elasticSearchPort": 51760,
-     "elasticSearchUsername": "1laksjdofiasjdfoia",
-     "kibanaPassword": "9yqzbtQfcGPRGBDO",
-     "kibanaUrl": "http://ajosijfowiqje.service.consul:57627",
-     "kibanaUsername": "5E09lqW1log3va97",
-     "logstashHost": "jayowj0jalstqaz1c.service.consul",
-     "logstashPort": 32301,
-     "syslog": "syslog://jayowj0jalstqaz1c.service.consul:32301"
-    },
-    "label": "elk",
-    "name": "iot-logs",
-    "plan": "beta",
-    "syslog_drain_url": "syslog://jayowj0jalstqaz1c.service.consul:32301",
-    "tags": []
-   }
-  ],
+    {
+      "credentials": {
+        "elasticSearchHost": "77gum1z32vota000.service.consul",
+        "elasticSearchPassword": "alksdjflaksdjflkal",
+        "elasticSearchPort": 51760,
+        "elasticSearchUsername": "1laksjdofiasjdfoia",
+        "kibanaPassword": "9yqzbtQfcGPRGBDO",
+        "kibanaUrl": "http://ajosijfowiqje.service.consul:57627",
+        "kibanaUsername": "5E09lqW1log3va97",
+        "logstashHost": "jayowj0jalstqaz1c.service.consul",
+        "logstashPort": 32301,
+        "syslog": "syslog://jayowj0jalstqaz1c.service.consul:32301"
+      },
+      "label": "elk",
+      "name": "iot-logs",
+      "plan": "beta",
+      "syslog_drain_url": "syslog://jayowj0jalstqaz1c.service.consul:32301",
+      "tags": []
+    }
+  ]
 }
-</pre>
+```
 
 As soon as the service is binded and the application is restarted, it will start logging all the stdout including router logs automatically to logstash.
 
@@ -56,7 +57,8 @@ variables of the app that is bound to the elk service instance. Read out the
 Kibana host and port and connect via [Service
 Connector](../service-connector/index.html). Open your
 browser and connect to http://localhost:8080 to see the Kibana dashboard.
-<pre class="code">
+
+<pre class="terminal">
 cf env APP_NAME | grep kibanaUrl
 cf sc 8080 wkk30w3xlclv2pj3.service.consul:59554
 </pre>

@@ -33,23 +33,25 @@ The Amazon S3 API is:
 </p>
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App ##
-After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:<pre class="code">
-     {
-       "dynstrg": [
-         {
-           "credentials": {
-           "accessHost": "ds31s3.swisscom.com",
-           "accessKeyID": "SubtenantID/AccountID",
-           "secretAccessKey": "28-Characters"
-           },
-           "label": "dynstrg",
-           "name": "testatmos",
-           "plan": "usage",
-           "tags": []
-         }
-       ]
-     }
-</pre>
+After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+```JSON
+{
+  "dynstrg": [
+    {
+      "credentials": {
+        "accessHost": "ds31s3.swisscom.com",
+        "accessKeyID": "SubtenantID/AccountID",
+        "secretAccessKey": "28-Characters"
+      },
+      "label": "dynstrg",
+      "name": "testatmos",
+      "plan": "usage",
+      "tags": []
+    }
+  ]
+}
+```
+
 ## <a id='sample-application'></a> Sample Application ##
 
 [https://github.com/swisscom/dynstrg-howto](https://github.com/swisscom/dynstrg-howto)
@@ -100,12 +102,13 @@ When the system receives an authenticated request, it fetches the AWS secret acc
 When using Atmos, the <strong>Access Key ID corresponds to Subtenant ID and Account ID</strong> and the <strong>Secret Access Key corresponds to the Shared Secret Access Key</strong>.
 
 In the newer versions of Amazon SDK the signing method may have changed. In order to make sure that you can use the SDK correctly, you need to overwrite the signing method. This would look like the following example in Java code:
-<pre class="code">
+
+```Java
   ClientConfiguration opts = new ClientConfiguration();
    opts.setSignerOverride("S3SignerType");  // NOT "AWS3SignerType"
 
    AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("UID", "sharedSecret"), opts);
-</pre>
+```
 
 
 ## <a id='getting'></a> Getting better write performance ##
@@ -145,7 +148,8 @@ If you need to change the bucket type, please open an incident and ask for mode 
 ## <a id='s3-api'></a> The Amazon S3 API operations ##
 
 ### <a id='supported'></a> The following operations are supported ###
-Bucket operations:
+
+#### Bucket operations
 
 * Delete Bucket
 * GET Bucket
@@ -157,7 +161,7 @@ Bucket operations:
 * PUT Bucket
 * PUT Bucket ACL
 
-Object operations:
+#### Object operations
 
 * DELETE Object
 * DELETE Multiple Objects
@@ -170,7 +174,8 @@ Object operations:
 * Multipart Upload – Initiate, Upload, Complete, Abort, List parts
 
 ### <a id='unsupported'></a> The following operations are unsupported: (these fnctions are used very rarely) ###
-Bucket operations:
+
+#### Bucket operations
 
 * Delete Bucket CORS
 * Delete Bucket lifecycle
@@ -195,7 +200,7 @@ Bucket operations:
 * Put Bucket versioning
 * Put Bucket website
 
-Object operations:
+#### Object operations
 
 * Get Object torrent
 * Get Object versions
@@ -205,9 +210,11 @@ Object operations:
 S3QL is a file system that stores all its data online using storage services like <a href="http://code.google.com/apis/storage/">Google Storage</a>, <a href="http://aws.amazon.com/s3AmazonS3">Amazon S3</a> or <a href="http://openstack.org/projects/storage/">OpenStack</a>. S3QL effectively provides a hard disk of dynamic, infinite capacity that can be accessed from any computer with internet access running Linux, FreeBSD or OS-X.
 S3QL is a standard conforming, full featured UNIX file system that is conceptually indistinguishable from any local file system. Furthermore, S3QL has additional features like compression, encryption, data de-duplication, immutable trees and snapshotting which make it especially suitable for online backup and archival.
 The S3 compatible backend allows S3QL to access any storage service that uses the same protocol as Amazon S3. The storage URL has the form:
-<code>
+
+```
 s3c://&lt;hostname&gt;:&lt;port&gt;/&lt;bucketname&gt;/&lt;prefix&gt;
-</code>
+```
+
 Using a S3 compatible url, Dynamic Storage can easily be used as a backend.
 
 ## <a id='service-connector'></a> Administrating your Dynamic Storage instances

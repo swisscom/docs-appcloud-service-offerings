@@ -5,29 +5,31 @@ title: MariaDB
 <strong><%= modified_date %></strong>
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
-After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:<pre class="code">
-     {
-       "mariadb": [
-         {
-           "credentials": {
-           "database": "CF",
-           "database_uri": "mysql://h0RG2:Fvoz@10.0.0.7:3336/CF?reconnect=true",
-           "host": "10.0.0.7",
-           "jdbcUrl": "jdbc:mysql://10.0.0.7:3336/CF",
-           "name": "CF",
-           "password": "Fvoz",
-           "port": 3336,
-           "uri": "mysql://h0RG2:Fvoz@10.0.0.7:3336/CF?reconnect=true",
-           "username": "h0RG2"
-           },
-           "label": "mariadb",
-           "name": "testmaria",
-           "plan": "small",
-           "tags": []
-         }
-      ]
+After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+
+```JSON
+{
+  "mariadb": [
+    {
+      "credentials": {
+        "database": "CF",
+        "database_uri": "mysql://h0RG2:Fvoz@10.0.0.7:3336/CF?reconnect=true",
+        "host": "10.0.0.7",
+        "jdbcUrl": "jdbc:mysql://10.0.0.7:3336/CF",
+        "name": "CF",
+        "password": "Fvoz",
+        "port": 3336,
+        "uri": "mysql://h0RG2:Fvoz@10.0.0.7:3336/CF?reconnect=true",
+        "username": "h0RG2"
+      },
+      "label": "mariadb",
+      "name": "testmaria",
+      "plan": "small",
+      "tags": []
     }
-</pre>
+  ]
+}
+```
 
 ## <a id='service-connector'></a> Administrating your MariaDB instances
 To connect to a running MariaDB instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.

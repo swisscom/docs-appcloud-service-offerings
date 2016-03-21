@@ -6,25 +6,26 @@ title: MongoDB
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
 After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
-<pre class="code">
+
+```JSON
+{
+  "mongodb": [
     {
-        "mongodb": [
-          {
-             "credentials": {
-               "database": "B4aoTv0R5jLZ0ert",
-               "database_uri": "mongodb://GUoTS9oD4zwCib:mZCefFh@56nf9pbtprvzu.service.consul:57890/B4aoTv0R5jLZ0ert",
-               "host": "56nf9pbtprvzu.service.consul",
-               "password": "mZCefFh",
-               "uri": "mongodb://GUoTS9oD4zwCib:mZCefFh@56nf9pbtprvzu.service.consul:57890/B4aoTv0R5jLZ0ert",
-               "username": "GUoTS9oD4zwCib"
-            },
-            "label": "mongodb",
-            "plan": "small",
-            "tags": []
-          }
-        ]
-     }
-</pre>
+      "credentials": {
+        "database": "B4aoTv0R5jLZ0ert",
+        "database_uri": "mongodb://GUoTS9oD4zwCib:mZCefFh@56nf9pbtprvzu.service.consul:57890/B4aoTv0R5jLZ0ert",
+        "host": "56nf9pbtprvzu.service.consul",
+        "password": "mZCefFh",
+        "uri": "mongodb://GUoTS9oD4zwCib:mZCefFh@56nf9pbtprvzu.service.consul:57890/B4aoTv0R5jLZ0ert",
+        "username": "GUoTS9oD4zwCib"
+      },
+      "label": "mongodb",
+      "plan": "small",
+      "tags": []
+    }
+  ]
+}
+```
 
 ## <a id='service-connector'></a> Administrating your MongoDB instances
 To connect to a running MongoDB instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
