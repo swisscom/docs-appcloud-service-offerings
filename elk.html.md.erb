@@ -10,12 +10,12 @@ The ELK stack consisting of Elasticsearch, Logstash, and Kibana gives the power 
 
 ## <a id='Quick-Tutorial'></a> Quick Tutorial
 
-1. Create the service: "cf create-service elk small testelk"
-1. Bind your app to the service and restart it: "cf bs APP_NAME testelk"
-1. Create some logs by visiting your web app.
-1. Connect to [Kibana](#service-connector).
-1. Create the [index](#index-patterns-creation).
-1. See and search through your logs.
+1. Create the service: `cf create-service elk small testelk`
+1. Bind your app to the service and restart it: `cf bind-service APP_NAME testelk`
+1. Create some logs by visiting your web app
+1. Connect to [Kibana](#service-connector)
+1. Create the [index](#index-patterns-creation)
+1. See and search through your logs
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
 
@@ -47,7 +47,7 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 }
 ```
 
-As soon as the service is binded and the application is restarted, it will start logging all the stdout including router logs automatically to logstash.
+As soon as the service is bound and the application is restarted, it will start logging all the stdout including router logs automatically to logstash.
 
 ## <a id='sample-application'></a> Sample Application
 
@@ -57,15 +57,11 @@ As soon as the service is binded and the application is restarted, it will start
 
 To connect to a running ELK instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
 
-For example, to connect to Kibana to see the logs, check the environment
-variables of the app that is bound to the elk service instance. Read out the
-Kibana host and port and connect via [Service
-Connector](../service-connector/index.html). Open your
-browser and connect to [http://localhost:8080](http://localhost:8080) to see the Kibana dashboard.
+For example, to connect to Kibana to see the logs, check the environment variables of the app that is bound to the elk service instance. Read out the Kibana host and port and connect via [Service Connector](../service-connector/index.html). Open your browser and connect to [http://localhost:8080](http://localhost:8080) to see the Kibana dashboard.
 
 <pre class="terminal">
 cf env APP_NAME | grep kibanaUrl
-cf sc 8080 wkk30w3xlclv2pj3.service.consul:59554
+cf service-connector 8080 wkk30w3xlclv2pj3.service.consul:59554
 </pre>
 
 Alternatively there is the possiblity to use a proxy app like the Swisscom [Kibana Proxy](https://github.com/swisscom/cf-kibana-proxy) to make your Kibana dashboard publicly available.
@@ -78,11 +74,11 @@ To see logs within Kibana an index pattern needs to be created either specifiy t
 
 <%= image_tag("./images/kibana.png") %>
 
-<p class="note"><strong>Hint</strong>:To see unparsed logs create an index pattern named `unparsed*` or create an index pattern `_all` to see all logs within the same index.</p>
+<p class="note"><strong>Hint</strong>:To see unparsed logs create an index pattern named "unparsed*" or create an index pattern "_all" to see all logs within the same index.</p>
 
 ### <a id='how-it-works'></a> How It Works
 
-For every app that is binded to an ELK service, the stdout ( cf logs <app-name>) is automatically  being sent to the ELK.
+For every app that is bound to an ELK service, the stdout ( `cf logs APP_NAME`) is automatically being sent to the ELK.
 Optionally there is a possibility to directly sent logs to the ELK from you app.
 
 <%= image_tag("./images/elk.png") %>
@@ -91,26 +87,21 @@ Optionally there is a possibility to directly sent logs to the ELK from you app.
 
 All messages that reach Logstash are being processed and send forward to Elasticsearch.
 When a message is either in Syslog format or in JSON format, then it can be properly parsed. These messages are going to an index called "parsed-<data>".
-Messages that do follow a pattern are going to an index called "unparsed-<data>. In the parsed index are also available by default all messages coming from
-CF gorouter.
+Messages that do follow a pattern are going to an index called "unparsed-<data>. In the parsed index are also available by default all messages coming from CF gorouter.
 
-<p class="note"><strong>Note</strong>:whether you are sending logs directly from your to ELK or through the stdout, messages will follow the above pattern. Only in the latter case, your log message has been augmented by a CF Prefix.</p>
+<p class="note">
+  <strong>Note</strong>:whether you are sending logs directly from your to ELK or through the stdout, messages will follow the above pattern. Only in the latter case, your log message has been augmented by a CF Prefix.
+</p>
 
-In Kibana you can manually set up which index you need, either parsed* or/and unparsed* or _all.
+In Kibana you can manually set up which index you need, either `parsed*` or/and `unparsed*` or `_all`.
 
 ## <a id='logrotation'></a> Logrotation
 
-A new index is saved every day (parsed-2015.12.17). By default for all plans
-all parsed indexes will be closed every 30 days. This takes them out of memory,
-which allows Elasticsearch to perform efficientlly,  but keeps them on disk,
-which can be saved (through an Elasticsearch API) or reopened. After 60 days
-all parsed logs will also be removed from disk. Unparsed indexs will be closed
-after 5 days and removed from disk after 10 days. If the disk gets full, the
-oldest logs will be deleted automatically, until disk base usage will be under 90%.
+A new index is saved every day (parsed-2015.12.17). By default for all plans all parsed indexes will be closed every 30 days. This takes them out of memory, which allows Elasticsearch to perform efficientlly, but keeps them on disk, which can be saved (through an Elasticsearch API) or reopened. After 60 days all parsed logs will also be removed from disk. Unparsed indexs will be closed after 5 days and removed from disk after 10 days. If the disk gets full, the oldest logs will be deleted automatically, until disk base usage will be under 90%.
 
-<p class="note"><strong>Hint</strong>:
-To show all indexes within elasticsearch a user can execute the following request: curl "localhost:9200/_cat/indices?v"
-To open an index a user can execute the following request to elasticsearch: curl -XPOST "localhost:9200/parsed-2015.12.06/_open"</p>
+<p class="note">
+  <strong>Hint</strong>: To show all indexes within elasticsearch a user can execute the following request: curl "localhost:9200/_cat/indices?v". To open an index a user can execute the following request to elasticsearch: curl -XPOST "localhost:9200/parsed-2015.12.06/_open".
+</p>
 
 ### <a id='parameters'></a> Parameters
 
