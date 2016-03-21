@@ -70,14 +70,15 @@ Alternatively there is the possiblity to use a proxy app like https://github.com
 ### <a id='index-patterns-creation'></a> Index Patterns creation ###
 To see logs within Kibana an index pattern needs to be created either specifiy the `parsed*` to see the parsed logs.
 
-<%= image_tag("images/kibana.png") %>
+<%= image_tag("./images/kibana.png") %>
 
 <p class="note"><strong>Hint</strong>:To see unparsed logs create an index pattern named `unparsed*` or create an index pattern `_all` to see all logs within the same index.</p>
 
 ### <a id='how-it-works'></a> How It Works  ###
 For every app that is binded to an ELK service, the stdout ( cf logs <app-name>) is automatically  being sent to the ELK.
 Optionally there is a possibility to directly sent logs to the ELK from you app.
-<%= image_tag("images/elk.png") %>
+
+<%= image_tag("./images/elk.png") %>
 
 ### <a id='patterns'></a> Patterns ###
 
