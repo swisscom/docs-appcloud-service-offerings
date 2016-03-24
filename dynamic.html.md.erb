@@ -57,7 +57,7 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 
 ## <a id='sample-application'></a> Sample Application
 
-[https://github.com/swisscom/dynstrg-howto](https://github.com/swisscom/dynstrg-howto)
+Swisscom: [Dynamic Storage How-To](https://github.com/swisscom/dynstrg-howto)
 
 ## <a id='How'></a> How to access Dynamic Storage with the Amazon S3 API
 
@@ -81,7 +81,7 @@ The challenge is often on the configuration side: Sometimes the Amazon URL and p
 ## <a id='authentication'></a> Authentication
 
 <p class='note'>
-  <strong>From http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html:</strong>
+  <strong>From the <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html">AWS S3 docs</a>:</strong>
   The Amazon S3 REST API uses a custom HTTP scheme based on a keyed-HMAC (Hash Message Authentication Code) for authentication. To authenticate a request, you first concatenate selected elements of the request to form a string. You then use your AWS secret access key to calculate the HMAC of that string. Informally, we call this process "signing the request," and we call the output of the HMAC algorithm the signature, because it simulates the security properties of a real signature. Finally, you add this signature as a parameter of the request by using the syntax described in this section. When the system receives an authenticated request, it fetches the AWS secret access key that you claim to have and uses it in the same way to compute a signature for the message it received. It then compares the signature it calculated against the signature presented by the requester. If the two signatures match, the system concludes that the requester must have access to the AWS secret access key and therefore acts with the authority of the principal to whom the key was issued. If the two signatures do not match, the request is dropped and the system responds with an error message.
 </p>
 
@@ -90,16 +90,15 @@ When using Atmos, the <strong>Access Key ID corresponds to Subtenant ID and Acco
 In the newer versions of Amazon SDK the signing method may have changed. In order to make sure that you can use the SDK correctly, you need to overwrite the signing method. This would look like the following example in Java code:
 
 ```Java
-  ClientConfiguration opts = new ClientConfiguration();
-   opts.setSignerOverride("S3SignerType");  // NOT "AWS3SignerType"
+ClientConfiguration opts = new ClientConfiguration();
+opts.setSignerOverride("S3SignerType");  // NOT "AWS3SignerType"
 
-   AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("UID", "sharedSecret"), opts);
+AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("UID", "sharedSecret"), opts);
 ```
 
 ## <a id='getting'></a> Getting better write performance
 
-(excerpt from the Atmos Programmer’s Guide)
-To get the best possible performance:
+To get the best possible performance (excerpt from the <a href="https://community.emc.com/docs/DOC-3481" taget="_blank">Atmos Programmer’s Guide</a>):
 
 * Write as many objects in parallel as possible.
 * Use only one request per object for creates and updates. Concurrent access to the same object (on writes) may lead to locking or serialization overhead.
@@ -121,16 +120,20 @@ If you need to change the bucket type, please open an incident and ask for type 
 ### <a id='one-to-one'></a> One-to-one (default)
 
 One-to-one mode supports applications that treat S3 keys like a traditional directory structure with prefixes separated by slashes. In one-to-one mode, prefix searching performs well as long as you use the standard delimiter (“/”).
-<strong>One-to-one mode’s limitation is that you are limited to 64,000 objects per directory (prefix).</strong>
+**One-to-one mode’s limitation is that you are limited to 64,000 objects per directory (prefix).**
 A key in one-to-one mode (or hierarchical mode) looks like this:
-<code>/bucket/articles/2013-09/document234/images/header.jpg</code>
+
+```URL
+/bucket/articles/2013-09/document234/images/header.jpg
+```
 
 ### <a id='flat'></a> Flat mode
 
-Flat mode provides the best performance for applications that store millions of keys and the keys are not hierarchical. An example of a flat key is a UUID. Applications that store objects without any hierarchy generally put all of their keys in the root of the bucket without a prefix such as a directory. <strong>Flat mode’s limitation is that listing buckets using the prefix option is not supported.</strong> A key using flat mode looks like this:
-<code>
-/&lt;bucket name&gt;/a1e8eb5c-dc2a-4a02-a71b-0fab8bb28c3b
-</code>
+Flat mode provides the best performance for applications that store millions of keys and the keys are not hierarchical. An example of a flat key is a UUID. Applications that store objects without any hierarchy generally put all of their keys in the root of the bucket without a prefix such as a directory. **Flat mode’s limitation is that listing buckets using the prefix option is not supported.** A key using flat mode looks like this:
+
+```URL
+/<bucket name>/a1e8eb5c-dc2a-4a02-a71b-0fab8bb28c3b
+```
 
 If you need to change the bucket type, please open an incident and ask for mode change.
 
