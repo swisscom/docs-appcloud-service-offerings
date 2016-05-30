@@ -1,0 +1,51 @@
+---
+title: MongoDB Enterprise HA
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+## <a id='integrating-your-service'></a> Integrating the Service With Your App
+
+After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+
+```json
+{
+  "mongodbent": [
+   {
+    "credentials": {
+     "database": "rs_a2215d2a-5b5d-0909-8d74-532982b72693",
+     "database_uri": "mongodb://3RlgLecirkFZxOxI:JYmPwXizSsyspGl0@a2215d2a-5b5d-4501-8d74-532982b72693-0.service.consul:33694,a2215d2a-5b5d-4501-8d74-532982b72693-1.service.consul:33694,a2215d2a-5b5d-4501-8d74-532982b72693-2.service.consul:33694/rs_a2215d2a-5b5d-4501-8d74-532982b72693?replicaSet=rs_a2215d2a-5b5d-4501-8d74-532982b72693",
+     "host": "a2215d2a-5b5d-4501-8d74-532982b72693-0.service.consul,a2215d2a-5b5d-4501-8d74-532982b72693-1.service.consul,a2215d2a-5b5d-4501-8d74-532982b72693-2.service.consul",
+     "ops_manager_password": "i7r240A3cTQkVMRdw7P4HCWirA2E2xzL!1aA",
+     "ops_manager_url": "http://opsmanager.service.consul:8080",
+     "ops_manager_user": "llYlttVLBe9T7lmL",
+     "password": "JYmPwXizSsyspGl0",
+     "port": "33694",
+     "replica_set": "rs_a2215d2a-5b5d-4501-8d74-532982b72693",
+     "uri": "mongodb://3RlgLecirkFZxOxI:JYmPwXizSsyspGl0@a2215d2a-5b5d-4501-8d74-532982b72693-0.service.consul:33694,a2215d2a-5b5d-4501-8d74-532982b72693-1.service.consul:33694,a2215d2a-5b5d-4501-8d74-532982b72693-2.service.consul:33694/rs_a2215d2a-5b5d-4501-8d74-532982b72693?replicaSet=rs_a2215d2a-5b5d-4501-8d74-532982b72693",
+     "username": "3RlgLecirkFZxOxI"
+    },
+    "label": "mongodbent",
+    "name": "mongoentluk",
+    "plan": "small3rs",
+    "provider": null,
+    "syslog_drain_url": null,
+    "tags": []
+   }
+  ]
+}
+```
+
+
+## <a id='service-connector'></a> Administrating your MongoDB Enterprise instances
+
+To connect to a running MongoDB instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
+To connect to the Ops Manager to get insights of your mongodb, ou can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI:
+```bash
+cf sc 3000 opsmanager.service.consul:8080
+```
+
+## <a id='sample-application'></a> Sample Application
+
+Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
