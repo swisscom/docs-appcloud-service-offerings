@@ -1,0 +1,168 @@
+---
+title: RabbitMQ Enterprise
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+## <a id='integrating-your-service'></a> Integrating the Service With Your App
+
+After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+
+```json
+{
+  "rabbitmqent": [
+    {
+    "credentials": {
+      "hostname": "rabbitmq.service.consul",
+      "hostnames": [
+       "rabbitmq-node-0.service.consul",
+       "rabbitmq-node-1.service.consul",
+       "rabbitmq-node-2.service.consul"
+      ],
+      "http_api_uri": "http://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq.service.consul:15672/api",
+      "http_api_uris": [
+       "http://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-0.service.consul:15672/api",
+       "http://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-1.service.consul:15672/api",
+       "http://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-2.service.consul:15672/api"
+      ],
+      "password": "rvUgjRjnMa6mejiW",
+      "protocols": {
+       "amqp": {
+        "host": "rabbitmq.service.consul",
+        "hosts": [
+         "rabbitmq-node-0.service.consul",
+         "rabbitmq-node-1.service.consul",
+         "rabbitmq-node-2.service.consul"
+        ],
+        "password": "rvUgjRjnMa6mejiW",
+        "port": 5672,
+        "ssl": false,
+        "uri": "amqp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq.service.consul/bd0c989a-8a16-4641-8bcc-70a99c7c7264",
+        "uris": [
+         "amqp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-0.service.consul/bd0c989a-8a16-4641-8bcc-70a99c7c7264",
+         "amqp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-1.service.consul/bd0c989a-8a16-4641-8bcc-70a99c7c7264",
+         "amqp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-2.service.consul/bd0c989a-8a16-4641-8bcc-70a99c7c7264"
+        ],
+        "username": "i0zRgICRqzDB5fll",
+        "vhost": "bd0c989a-8a16-4641-8bcc-70a99c7c7264"
+       },
+       "management": {
+        "host": "rabbitmq.service.consul",
+        "hosts": [
+         "rabbitmq-node-0.service.consul",
+         "rabbitmq-node-1.service.consul",
+         "rabbitmq-node-2.service.consul"
+        ],
+        "password": "rvUgjRjnMa6mejiW",
+        "path": "/api",
+        "port": 15672,
+        "ssl": false,
+        "uri": "http://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq.service.consul:15672/api",
+        "uris": [
+         "http://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-0.service.consul:15672/api",
+         "http://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-1.service.consul:15672/api",
+         "http://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-2.service.consul:15672/api"
+        ],
+        "username": "i0zRgICRqzDB5fll"
+       },
+       "mqtt": {
+        "host": "rabbitmq.service.consul",
+        "hosts": [
+         "rabbitmq-node-0.service.consul",
+         "rabbitmq-node-1.service.consul",
+         "rabbitmq-node-2.service.consul"
+        ],
+        "password": "rvUgjRjnMa6mejiW",
+        "port": 1883,
+        "ssl": false,
+        "uri": "mqtt://bd0c989a-8a16-4641-8bcc-70a99c7c7264%3Ai0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq.service.consul",
+        "uris": [
+         "mqtt://bd0c989a-8a16-4641-8bcc-70a99c7c7264%3Ai0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-0.service.consul",
+         "mqtt://bd0c989a-8a16-4641-8bcc-70a99c7c7264%3Ai0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-1.service.consul",
+         "mqtt://bd0c989a-8a16-4641-8bcc-70a99c7c7264%3Ai0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-2.service.consul"
+        ],
+        "username": "bd0c989a-8a16-4641-8bcc-70a99c7c7264:i0zRgICRqzDB5fll"
+       },
+       "stomp": {
+        "host": "rabbitmq.service.consul",
+        "hosts": [
+         "rabbitmq.service.consul",
+         "rabbitmq-node-0.service.consul",
+         "rabbitmq-node-1.service.consul",
+         "rabbitmq-node-2.service.consul"
+        ],
+        "password": "rvUgjRjnMa6mejiW",
+        "port": 61613,
+        "ssl": false,
+        "uri": "stomp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq.service.consul",
+        "uris": [
+         "stomp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-0.service.consul",
+         "stomp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-1.service.consul",
+         "stomp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-2.service.consul"
+        ],
+        "username": "i0zRgICRqzDB5fll",
+        "vhost": "bd0c989a-8a16-4641-8bcc-70a99c7c7264"
+       }
+      },
+      "ssl": false,
+      "uri": "amqp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq.service.consul/bd0c989a-8a16-4641-8bcc-70a99c7c7264",
+      "uris": [
+       "amqp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-0.service.consul/bd0c989a-8a16-4641-8bcc-70a99c7c7264",
+       "amqp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-1.service.consul/bd0c989a-8a16-4641-8bcc-70a99c7c7264",
+       "amqp://i0zRgICRqzDB5fll:rvUgjRjnMa6mejiW@rabbitmq-node-2.service.consul/bd0c989a-8a16-4641-8bcc-70a99c7c7264"
+      ],
+      "username": "i0zRgICRqzDB5fll",
+      "vhost": "bd0c989a-8a16-4641-8bcc-70a99c7c7264"
+    },
+    "label": "rabbitmqent",
+      "name": "testrabbit",
+      "plan": "usage",
+      "tags": []
+    }
+  ]
+}
+```
+
+### Offered protocols and plugins
+RabbitMQ Enterprise provides the following protocols which are all exposed in `VCAP_SERVICES`:
+
+- AMQP
+- MQTT
+- STOMP
+- HTTP (API and management interface)
+
+The application should **only** use the `uri` or `hostname` property of the desired protocol within `VCAP_SERVICES` to achieve proper loadbalancing.
+These properties contain `rabbitmq.service.consul` so the connection is established to a HAProxy that automatically distributes requests to all available RabbitMQ nodes.
+
+The alternative properties `uris` and `hostnames` should only be used if single nodes need to be targeted explicitly.
+This can be used to achieve slightly better performance by connecting publishers and subscribers to the queue master node.
+However, this comes with a serious disadvantage, since the connections fail in case the single node goes down.
+
+The full list of exposed plugins:
+
+- `rabbitmq_mqtt`
+- `rabbitmq_stomp`
+- `rabbitmq_management`
+- `rabbitmq_management_visualizer`
+- `rabbitmq_consistent_hash_exchange`
+
+### Advanced configuration
+In most cases, connecting your applications to the loadbalanced service is completely sufficient.
+For some high end setups, getting the last drop of performance and scalability from the cluster is an advanced task and might include strategies which need more logic on the client side:
+
+#### Non-HA queues
+By default, every queue created on RabbitMQ Enterprise is created on one node (the queue master) and is replicated to other nodes to achieve high availability.
+
+In certain cases, high availability is sacrificed to avoid the overhead of replication to achieve higher performance. For this, just create the queue with the prefix `appcloud-non-ha` and it will not be replicated to other nodes.
+
+#### Consistent Hash exchange
+For a different approach to scale your queues on the cluster, the [Consistent hash exchange plugin](https://github.com/rabbitmq/rabbitmq-consistent-hash-exchange) is enabled.
+
+## <a id='service-connector'></a> Administrating your RabbitMQ instances
+
+To connect to a running RabbitMQ instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
+
+## <a id='sample-application'></a> Sample Application
+
+Cloud Foundry: [RabbitMQ Example](https://github.com/cloudfoundry-samples/rabbitmq-cloudfoundry-samples)
