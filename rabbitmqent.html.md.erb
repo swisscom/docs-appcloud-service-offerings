@@ -160,7 +160,7 @@ In certain cases, high availability is sacrificed to avoid the overhead of repli
 For a different approach to scale your queues on the cluster, the [Consistent hash exchange plugin](https://github.com/rabbitmq/rabbitmq-consistent-hash-exchange) is enabled.
 
 ## Per-Queue Message TTL of 14 days
-To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://www.rabbitmq.com/ttl.html#per-queue-message-ttl) is set to **14 days**. Messages that are longer than 14 days in a queue are discarded.
+To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://www.rabbitmq.com/ttl.html#per-queue-message-ttl) is set to **14 days**. Messages that are in the queue for longer than 14 days are automatically discarded.
 
 ## <a id='service-connector'></a> Administrating your RabbitMQ instances
 
