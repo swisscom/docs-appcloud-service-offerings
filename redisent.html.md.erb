@@ -1,0 +1,73 @@
+---
+title: Redis Enterprise
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+## <a id='integrating-your-service'></a> Integrating the Service With Your App
+
+After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+
+```json
+{
+  "redisent": [
+    {
+      "credentials": {
+        "host": "09a2ff2e-e485-49ce-b175-06206beeab42-master.service.consul",
+        "master": "redis://09a2ff2e-e485-49ce-b175-06206beeab42",
+        "password": "HGiTVNno25gf6Gc3",
+        "port": 33505,
+        "sentinels": [
+          {
+            "host": "09a2ff2e-e485-49ce-b175-06206beeab42-2.service.consul",
+            "port": 27348
+          },
+          {
+            "host": "09a2ff2e-e485-49ce-b175-06206beeab42-0.service.consul",
+            "port": 27348
+          },
+          {
+            "host": "09a2ff2e-e485-49ce-b175-06206beeab42-1.service.consul",
+            "port": 27348
+          }
+        ],
+        "servers": [
+          {
+            "host": "09a2ff2e-e485-49ce-b175-06206beeab42-2.service.consul",
+            "port": 33505
+          },
+          {
+            "host": "09a2ff2e-e485-49ce-b175-06206beeab42-0.service.consul",
+            "port": 33505
+          },
+          {
+            "host": "09a2ff2e-e485-49ce-b175-06206beeab42-1.service.consul",
+            "port": 33505
+          }
+        ]
+      },
+      "label": "redisent",
+      "name": "redisent-example",
+      "plan": "large",
+      "provider": null,
+      "syslog_drain_url": null,
+      "tags": [],
+      "volume_mounts": []
+    }
+  ]
+}
+```
+
+You can connect to your service in two ways:
+* directly via the `"host"` and `"port"`, which always points to the currently elected master. See the [Redis sample app](https://github.com/swisscom/cf-redis-example-app).
+* by discovering the current master via one of the "`sentinels`". Be sure to use one of the [supported client libraries](http://redis.io/clients) with the sentinel feature. See the [Redis Enterprise sample app](https://github.com/swisscom/cf-redis-example-app/tree/redisent).
+
+## <a id='service-connector'></a> Administrating your Redis instances
+
+To connect to a running Redis instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
+
+## <a id='sample-application'></a> Sample Application
+
+Swisscom: [Redis Enterprise Example](https://github.com/swisscom/cf-redis-example-app#...)
+Swisscom: [Redis Example](https://github.com/swisscom/cf-redis-example-app)
