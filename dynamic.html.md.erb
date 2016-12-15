@@ -7,30 +7,30 @@ owner: Services
 
 ## <a id='overview'></a> Overview
 
-Dynamic Storage, the Cloud Storage of Swisscom, is a pay-per-use Object Storage optimized for storing large data sets (e.g. for backups, archives, big-data etc.) outside of your own data centre. The only way to access this type of storage is via a RESTful API.
+Dynamic Storage, the Cloud Storage of Swisscom, is a pay-per-use object storage optimized for storing large data sets (e.g. for backups, archives, big-data etc.) for your applications. From these, you can access your stored data through a RESTful API.
 
 Swisscom Dynamic Storage supports two APIs:
 
-* Atmos API
-* Amazon S3 compatible storage
+* [Atmos API](https://www.emc.com/techpubs/vipr/ds_atmos_supported_features-2.htm)
+* [Amazon S3 API](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html) (Currently only [V2 signing](https://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html) is supported. There is no support for V4 signing yet.)
 
-Both APIs are RESTful APIs but with slightly different syntax.
+Both APIs are RESTful APIs but have a slightly different syntax.
 
 The Atmos API has a lot of very high sophisticated functions, like:
 
-* different policies on each object.
-* invitations, invitation limitations.
-* And many more.
+* Different policies on each object
+* Invitations and invitation limitations
+* And many more...
 
 The Amazon S3 API is:
 
-* very well known in the market
-* state of the art, de facto standard
-* providing a big community
-* hundreds of scripts and tools available
+* Very well known in the market
+* State of the art, de facto standard
+* Providing a big community
+* Has Hundreds of scripts and tools available
 
 <p class='note'>
-  <strong>Important</strong>: Swisscom does not support access to the same data with both APIs. There are different accounts and access points. There is no migration path from Atmos API to S3 API or vice versa.
+  <strong>Important</strong>: Swisscom does not support access to the same data with both APIs. There are different accounts and access points. There is no migration path from the Atmos API to the S3 API or vice versa.
 </p>
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
@@ -69,12 +69,12 @@ Swisscom: [Dynamic Storage How-To](https://github.com/swisscom/dynstrg-howto)
 | Bucket Virtual Host Style | `http[s]://<bucket>.s3.amazonaws.com` | `https://<bucket>.ds31s3.swisscom.com` |
 
 <p class='note'>
-  <strong>Impotant</strong>: for security reasons, Swisscom does only support https (443) and no http (80)!
+  <strong>Impotant</strong>: for security reasons, Swisscom does only support HTTPS (443) and no HTTP (80)!
 </p>
 
 ## <a id='Using'></a> Using Amazon S3 compatible software on Dynamic Storage
 
-Most of the software that have been developed to use the Amazon S3 API will work with Dynamic Storage. The unsupported operations are rarely used and listed below.
+Most of the software that has been developed to use the Amazon S3 API will work with Dynamic Storage as long as they support [V2 signing](https://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html). The unsupported operations are rarely used and listed below.
 
 The challenge is often on the configuration side: Sometimes the Amazon URL and ports have been hard coded, sometimes the software is using path style and sometimes virtual style.
 
@@ -87,7 +87,7 @@ The challenge is often on the configuration side: Sometimes the Amazon URL and p
 
 When using Atmos, the <strong>Access Key ID corresponds to Subtenant ID and Account ID</strong> and the <strong>Secret Access Key corresponds to the Shared Secret Access Key</strong>.
 
-In the newer versions of Amazon SDK the signing method may have changed. In order to make sure that you can use the SDK correctly, you need to overwrite the signing method. This would look like the following example in Java code:
+In the newer versions of Amazon SDK the signing method have changed. In order to make sure that you can use the SDK correctly, you need to overwrite the signing method to use V2 signing. This would look like the following example in Java code:
 
 ```Java
 ClientConfiguration opts = new ClientConfiguration();
@@ -102,12 +102,13 @@ To get the best possible performance (excerpt from the <a href="https://communit
 
 * Write as many objects in parallel as possible.
 * Use only one request per object for creates and updates. Concurrent access to the same object (on writes) may lead to locking or serialization overhead.
-* Use the Expect: 100-continue request header when creating or updating namespace objects. By using the expect header, the requesting application can avoid sending data when it would fail. Here’s how it works:
-1. The application requesting the create/update sends the expect: 100-continue header in the request, along with the other normal request headers. But they do not send any data.
-1. The system receives the request, validates the headers, and checks to see if an object with that name exists.
-1. If everything is ok, the system sends back the 100-continue response.
-1. If there is an error, (for example the signature is invalid or the object name already exists) the system sends back the normal error response, and the application never sends the request body.
-1. The application will only send data if it gets the 100-continue header back.
+* Use the `expect: 100-continue` request header when creating or updating namespace objects. By using the expect header, the requesting application can avoid sending data when it would fail. Here’s how it works:
+
+  1. The application requesting the create/update sends the `expect: 100-continue` header in the request, along with the other normal request headers. But they do not send any data.
+  1. The system receives the request, validates the headers, and checks to see if an object with that name exists.
+  1. If everything is ok, the system sends back the 100-continue response.
+  1. If there is an error, (for example the signature is invalid or the object name already exists) the system sends back the normal error response, and the application never sends the request body.
+  1. The application will only send data if it gets the 100-continue header back.
 
 ## <a id='bucket'></a> Amazon S3 bucket configuration
 
