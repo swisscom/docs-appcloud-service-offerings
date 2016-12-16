@@ -89,7 +89,7 @@ When using Atmos, the <strong>Access Key ID corresponds to Subtenant ID and Acco
 
 In the newer versions of Amazon SDK the signing method have changed. In order to make sure that you can use the SDK correctly, you need to overwrite the signing method to use V2 signing. This would look like the following example in Java code:
 
-```Java
+```java
 ClientConfiguration opts = new ClientConfiguration();
 opts.setSignerOverride("S3SignerType");  // NOT "AWS3SignerType"
 
