@@ -34,7 +34,7 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 ```
 
 <p class="note">
-  <strong>Important:</strong> Please be aware that the number of concurrent connections to MariaDB is limited depending on the service plan you chose. You can manage this by using connection pooling.
+Please be aware that the number of concurrent connections to MariaDB is limited depending on the service plan you chose. You can manage this by using connection pooling.
 </p>
 
 ## <a id='service-connector'></a> Administrating your MariaDB instances
@@ -47,4 +47,19 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 ## <a id='limitations'></a> Known Limitations
 
-The base of our HA MariaDB offering is built by a galera cluster, which brings some [known limitations](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it.
+The base of our HA MariaDB offering is built by a Galera cluster, which brings some [known limitations](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it.
+
+Our Galera aaS is a shared Galera cluster. Each customer have their own Database (`CREATE DATABSE`) with rights inside their own database.
+
+## <a id='definer'></a> Definer and bind-service (Credentials changing)
+
+With `cf bind-service` the service broker creates new credentials (`cf env $APP` to view them). This will break Routines, Triggers, Views and Events because they still have the old user hardcoded.
+
+Error Code:
+
+```
+Error: 1449 SQLSTATE: HY000 (ER_NO_SUCH_USER)
+Message: The user specified as a definer ('%s'@'%s') does not exist
+```
+
+See MariaDB Blog posting [Changing the DEFINER of MySQL stored routines etc.](https://mariadb.com/resources/blog/changing-definer-mysql-stored-routines-etc) for ideas howto fix this.
