@@ -10,27 +10,29 @@ owner: Services
 After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
 
 ```json
-{
+
   "mariadb": [
-    {
-      "credentials": {
-        "database": "CF",
-        "database_uri": "mysql://h0RG2:Fvoz@10.0.0.7:3336/CF?reconnect=true",
-        "host": "10.0.0.7",
-        "jdbcUrl": "jdbc:mysql://10.0.0.7:3336/CF",
-        "name": "CF",
-        "password": "Fvoz",
-        "port": 3336,
-        "uri": "mysql://h0RG2:Fvoz@10.0.0.7:3336/CF?reconnect=true",
-        "username": "h0RG2"
-      },
-      "label": "mariadb",
-      "name": "testmaria",
-      "plan": "small",
-      "tags": []
-    }
+   {
+    "credentials": {
+     "database": "CF",
+     "database_uri": "mysql://h0RG2:FvozC@10.0.0.7:3306/CF?reconnect=true",
+     "host": "10.0.0.7",
+     "jdbcUrl": "jdbc:mysql://10.0.0.7:3306/CF?user=h0RG2\u0026password=FvozC",
+     "name": "CF",
+     "password": "FvozC",
+     "port": 3306,
+     "uri": "mysql://h0RG2:FvozC@10.0.0.7:3306/CF?reconnect=true",
+     "username": "h0RG2"
+    },
+    "label": "mariadb",
+    "name": "testmariadb",
+    "plan": "small",
+    "provider": null,
+    "syslog_drain_url": null,
+    "tags": [],
+    "volume_mounts": []
+   }
   ]
-}
 ```
 
 <p class="note">
@@ -47,19 +49,23 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 ## <a id='limitations'></a> Known Limitations
 
-The base of our HA MariaDB offering is built by a Galera cluster, which brings some [known limitations](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it.
+Our HA MariaDB offering is based on Galera cluster, which brings some [known limitations](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it.
 
-Our Galera aaS is a shared Galera cluster. Each customer have their own Database (`CREATE DATABSE`) with rights inside their own database.
+Our Galera aaS is a shared Galera cluster. Each customer has their own database (`CREATE DATABSE`) with all privileges.
+
+```
+GRANT ALL PRIVILEGES ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
+```
 
 ## <a id='definer'></a> Definer and bind-service (Credentials changing)
 
-With `cf bind-service` the service broker creates new credentials (`cf env $APP` to view them). This will break Routines, Triggers, Views and Events because they still have the old user hardcoded.
+With `cf bind-service` the service broker (Cloud Foundry component) creates new credentials for security reasons (`cf env APP_NAME` to view them). This will break existing routines, triggers, views and events because they are still using the old user.
 
-Error Code:
+Error Code from MariaDB backend:
 
 ```
 Error: 1449 SQLSTATE: HY000 (ER_NO_SUCH_USER)
 Message: The user specified as a definer ('%s'@'%s') does not exist
 ```
 
-See MariaDB Blog posting [Changing the DEFINER of MySQL stored routines etc.](https://mariadb.com/resources/blog/changing-definer-mysql-stored-routines-etc) for ideas howto fix this.
+See MariaDB Blog post [Changing the DEFINER of MySQL stored routines etc.](https://mariadb.com/resources/blog/changing-definer-mysql-stored-routines-etc) for ideas how to fix this.
