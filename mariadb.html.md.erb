@@ -10,7 +10,6 @@ owner: Services
 After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
 
 ```json
-
   "mariadb": [
    {
     "credentials": {
@@ -49,11 +48,13 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 ## <a id='limitations'></a> Known Limitations
 
-Our HA MariaDB offering is based on Galera cluster, which brings some [known limitations](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it.
+Our HA MariaDB offering is based on Galera, which brings some [known limitations](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it.
 
-Our Galera aaS is a shared Galera cluster. Each customer has their own database (`CREATE DATABSE`) with all privileges.
+Our Galera aaS is a shared cluster. Each customer has their own database.
+Simplified, the service broker executes the following statements:
 
-```
+```sql
+CREATE DATABSE CF_DATABASE_NAME
 GRANT ALL PRIVILEGES ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
 ```
 
@@ -61,11 +62,11 @@ GRANT ALL PRIVILEGES ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
 
 With `cf bind-service` the service broker (Cloud Foundry component) creates new credentials for security reasons (`cf env APP_NAME` to view them). This will break existing routines, triggers, views and events because they are still using the old user.
 
-Error Code from MariaDB backend:
+Error code from MariaDB backend:
 
-```
+```txt
 Error: 1449 SQLSTATE: HY000 (ER_NO_SUCH_USER)
 Message: The user specified as a definer ('%s'@'%s') does not exist
 ```
 
-See MariaDB Blog post [Changing the DEFINER of MySQL stored routines etc.](https://mariadb.com/resources/blog/changing-definer-mysql-stored-routines-etc) for ideas how to fix this.
+See MariaDB blog post [Changing the DEFINER of MySQL stored routines etc.](https://mariadb.com/resources/blog/changing-definer-mysql-stored-routines-etc) for ideas on how to fix this.
