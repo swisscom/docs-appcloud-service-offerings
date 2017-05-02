@@ -38,7 +38,7 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 ```
 
 
-## <a id='service-connector'></a> Administrating your MongoDB Enterprise instances
+## <a id='service-connector'></a> Administrating Your MongoDB Enterprise Instances
 
 To connect to a running MongoDB instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
 
@@ -47,14 +47,28 @@ To connect to a running MongoDB instance with your local development tools, you 
 Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
 
 ## <a id='opsmanager'></a> MongoDB Ops Manager
-We use Ops Manager API among other tools for automation. The customer receives access to [Ops Manager](https://docs.opsmanager.mongodb.com/current/) to see detailed performance metrics and health state.
 
-To connect to the Ops Manager to get insights of your mongodb, ou can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI:
+As a MongoDB Enterprise customer, you receive access to the [Ops Manager](https://docs.opsmanager.mongodb.com/current/) to see detailed performance metrics and health state.
+
+To connect to the Ops Manager to get insights of your MongoDB, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI:
 
 ```bash
-cf sc 3000 opsmanager.service.consul:8080
+cf sc 8080 opsmanager.service.consul:8080
 ```
 
 ## <a id='enterprise'></a> MongoDB Enterprise
 
 Our [MongoDB Enterprise](https://www.mongodb.com/products/mongodb-enterprise-advanced) offering consists of 3 dedicated VMs configured as a replicaset. 
+
+## <a id='hostmappings'></a> Ops Manager Host Mappings
+
+There is a known bug with host mappings. When the deployment overview shows incorrect information, you need to delete the host mappings on `http://opsmanager.service.consul:8080/v2/$GROUP_ID#deployment/hostMappingTab`. Please replace `$GROUP_ID` with your actual group ID. 
+
+![Host mappings overview](images/overview_hosts_mappings.png?raw=true)
+![Delete host mapping button](images/delete_host_mapping.png?raw=true)
+
+## <a id='roles'></a> Roles
+
+On the MongoDB replicaset you will receive the role `readWrite@rs_DBNAME`.
+
+On the MongoDB Ops Manager you will receive the role `Monitoring Admin`.
