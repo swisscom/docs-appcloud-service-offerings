@@ -10,18 +10,18 @@ owner: Services
 After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
 
 ```json
-  "mariadb": [
-   {
+"mariadb": [
+  {
     "credentials": {
-     "database": "CF",
-     "database_uri": "mysql://h0RG2:FvozC@10.0.0.7:3306/CF?reconnect=true",
-     "host": "10.0.0.7",
-     "jdbcUrl": "jdbc:mysql://10.0.0.7:3306/CF?user=h0RG2\u0026password=FvozC",
-     "name": "CF",
-     "password": "FvozC",
-     "port": 3306,
-     "uri": "mysql://h0RG2:FvozC@10.0.0.7:3306/CF?reconnect=true",
-     "username": "h0RG2"
+      "database": "CF",
+      "database_uri": "mysql://h0RG2:FvozC@10.0.0.7:3306/CF?reconnect=true",
+      "host": "10.0.0.7",
+      "jdbcUrl": "jdbc:mysql://10.0.0.7:3306/CF?user=h0RG2\u0026password=FvozC",
+      "name": "CF",
+      "password": "FvozC",
+      "port": 3306,
+      "uri": "mysql://h0RG2:FvozC@10.0.0.7:3306/CF?reconnect=true",
+      "username": "h0RG2"
     },
     "label": "mariadb",
     "name": "testmariadb",
@@ -30,15 +30,15 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
     "syslog_drain_url": null,
     "tags": [],
     "volume_mounts": []
-   }
-  ]
+  }
+]
 ```
 
 <p class="note">
 Please be aware that the number of concurrent connections to MariaDB is limited depending on the service plan you chose. You can manage this by using connection pooling.
 </p>
 
-## <a id='service-connector'></a> Administrating your MariaDB instances
+## <a id='service-connector'></a> Administrating Your MariaDB Instances
 
 To connect to a running MariaDB instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
 
@@ -48,17 +48,16 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 ## <a id='limitations'></a> Known Limitations
 
-Our HA MariaDB offering is based on Galera, which brings some [known limitations](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it.
+Our HA MariaDB offering is based on Galera, which brings some [known limitations](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it. Please read this article carefully.
 
-Our Galera aaS is a shared cluster. Each customer has their own database.
-Simplified, the service broker executes the following statements:
+Our Galera aaS is a shared cluster. Each customer has their own database. Put simply, the service broker executes the following statements:
 
 ```sql
 CREATE DATABSE CF_DATABASE_NAME
 GRANT ALL PRIVILEGES ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
 ```
 
-## <a id='definer'></a> Definer and bind-service (Credentials changing)
+## <a id='definer'></a> Definer and bind-service (Change Credentials)
 
 With `cf bind-service` the service broker (Cloud Foundry component) creates new credentials for security reasons (`cf env APP_NAME` to view them). This will break existing routines, triggers, views and events because they are still using the old user.
 
@@ -69,4 +68,4 @@ Error: 1449 SQLSTATE: HY000 (ER_NO_SUCH_USER)
 Message: The user specified as a definer ('%s'@'%s') does not exist
 ```
 
-See MariaDB blog post [Changing the DEFINER of MySQL stored routines etc.](https://mariadb.com/resources/blog/changing-definer-mysql-stored-routines-etc) for ideas on how to fix this.
+See the MariaDB blog post [Changing the DEFINER of MySQL stored routines etc.](https://mariadb.com/resources/blog/changing-definer-mysql-stored-routines-etc) for ideas on how to fix this.
