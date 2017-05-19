@@ -1,0 +1,180 @@
+---
+title: S3 Dynamic Storage
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+## <a id='overview'></a> Overview
+
+Dynamic Storage, the Cloud Storage of Swisscom, is a pay-per-use object storage optimized for storing large data sets (e.g. for backups, archives, pictures etc.) for your applications. From these, you can access your stored data through a RESTful API.
+
+Swisscom Dynamic Storage supports the S3 API:
+
+* [Amazon S3 API](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html)
+
+The Amazon S3 API is:
+
+* Very well known in the market
+* State of the art, de facto standard
+* Providing a big community
+* Has Hundreds of scripts and tools available
+
+## <a id='integrating-your-service'></a> Integrating the Service With Your App
+
+After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+
+```json
+{
+  "dynstrg": [
+    {
+      "credentials": {
+        "accessHost": "ds11s3.swisscom.com",
+        "accessKeyID": "<Namespace-AccountName>",
+        "secretAccessKey": "40-Characters"
+      },
+      "label": "dynstrg",
+      "name": "testecs",
+      "plan": "usage",
+      "tags": []
+    }
+  ]
+}
+```
+
+## <a id='sample-application'></a> Sample Application
+
+Swisscom: [Dynamic Storage How-To](https://github.com/swisscom/dynstrg-howto)
+
+## <a id='endpoints'></a> ECS endpoints / access points
+
+| Trust Level               | URL                                              | Usecase
+| ------------------------- | -------------------------------------------|---------------------------------------------------------------------------|
+| Public                    | https://ds11s3.swisscom.com          | Customers which would like to connect through internet to our service      |
+
+## <a id='How'></a> How to access Dynamic Storage with the Amazon S3 API
+
+|                           | Amazon S3                             | Swisscom S3 Compatible Storage                      |
+| ------------------------- | ------------------------------------- | ----------------------------------------------------|
+| Access                    | Access Key ID                         | Access Key ID                                       |
+| Access Key                | Secret Access Key                     | Secret Access Key                                   |
+| Bucket Path Style         | http[s]://s3.amazonaws.com/<bucket>   | https://ds11s3.swisscom.com/<bucket>                |
+| Bucket Virtual Host Style | http[s]://<bucket>.s3.amazonaws.com   | https://<bucket>.ds11s3.swisscom.com                |
+| Namespace-style URL       | -                                     | https//<namespace>.ds11s3NS.swisscom.com/<bucket>   |
+
+<p class='note'>
+  <strong>Important</strong>: For security reasons, we only support HTTPS (443) and no HTTP (80)!
+</p>
+
+## <a id='Naming'></a> Bucket/Object naming convention
+
+Bucket name
+The following rules apply to the naming of S3 buckets in ECS:
+
+* Names must be between 3 and 255 characters in length.
+* Names can include dot (.), hyphen (-), and underscore (_) characters and alphanumeric characters ([a-zA-Z0-9]).
+* Names can start with a hyphen (-) or alphanumeric character.
+
+The name does not support:
+
+* Starting with a dot (.)
+* Containing a double dot (..)
+* Ending with a dot (.)
+* Name must not be formatted as IPv4 address
+
+Object Name
+
+* The following rules apply to the naming of ECS S3 objects:
+* Cannot be null or an empty string
+* Length range is 1Ö1024 (Unicode char)
+* No validation on characters!
+
+## <a id='Using'></a> Using Amazon S3 compatible software on Dynamic Storage
+
+Most of the software that has been developed to use the Amazon S3 API will work with Dynamic Storage.
+
+The unsupported operations are rarely used and listed below.
+
+The challenge is often on the configuration side: Sometimes the Amazon URL and ports have been hard coded, sometimes the software is using path style and sometimes virtual style.
+
+## <a id='authentication'></a> Authentication
+
+<p class='note'>
+  <strong>From the <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html">AWS S3 docs</a>:</strong>
+  The Amazon S3 REST API uses a custom HTTP scheme based on a keyed-HMAC (Hash Message Authentication Code) for authentication. To authenticate a request, you first concatenate selected elements of the request to form a string. You then use your AWS secret access key to calculate the HMAC of that string. Informally, we call this process "signing the request," and we call the output of the HMAC algorithm the signature, because it simulates the security properties of a real signature. Finally, you add this signature as a parameter of the request by using the syntax described in this section. When the system receives an authenticated request, it fetches the AWS secret access key that you claim to have and uses it in the same way to compute a signature for the message it received. It then compares the signature it calculated against the signature presented by the requester. If the two signatures match, the system concludes that the requester must have access to the AWS secret access key and therefore acts with the authority of the principal to whom the key was issued. If the two signatures do not match, the request is dropped and the system responds with an error message.
+</p>
+
+When using ECS, the <strong>Access Key ID corresponds to <Namespace-Account></strong> and the <strong>Secret Access Key corresponds to the Shared Secret Access Key</strong>.
+
+## <a id='bucket'></a> Amazon S3 bucket configuration
+
+S3 bucket names are unique through the Amazon system, but not on Dynamic Storage.
+
+## <a id='s3-api'></a> The Amazon S3 API operations
+
+### <a id='supported'></a> The following operations are supported
+
+#### Signatures
+
+* Signature v2
+* Signature v4
+
+#### Bucket operations
+
+* GET Bucket
+* GET Bucket ACL
+* GET Bucket Location
+* GET Bucket Versioning
+* GET Service
+* GET Bucket lifecycle
+* GET Bucket policy
+* List Multipart Uploads
+* PUT Bucket
+* PUT Bucket ACL
+* PUT Bucket lifecycle
+* PUT Bucket versioning
+* PUT Bucket policy
+* DELETE Bucket
+* DELETE Bucket lifecycle
+* DELETE Bucket policy
+
+#### Object operations
+
+* DELETE Object
+* DELETE Multiple Objects
+* GET Object
+* GET Object ACL
+* GET Object versions
+* HEAD Object
+* POST Object
+* POST Object restore
+* PUT Object
+* PUT Object ACL
+
+* Multipart Upload ñ Initiate, Upload, Complete, Abort, List parts
+
+### <a id='unsupported'></a> The following operations are unsupported: (these functions are used very rarely)
+
+#### Bucket operations
+
+* DELETE Bucket tagging
+* DELETE Bucket website
+* GET Bucket notification
+* GET Bucket logging
+* GET Bucket requestPayment
+* GET Bucket website
+* PUT Bucket logging
+* PUT Bucket notification
+* PUT Bucket requestPayment
+* PUT Bucket tagging
+* PUT Bucket website
+
+#### Object operations
+
+* GET Object torrent
+
+Using a S3 compatible url, Dynamic Storage can easily be used as a backend.
+
+## <a id='service-connector'></a> Administrating your Dynamic Storage instances
+
+To connect to a running Dynamic Storage instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
