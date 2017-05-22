@@ -58,18 +58,19 @@ Swisscom: [Dynamic Storage How-To](https://github.com/swisscom/dynstrg-howto)
 | ------------------------- | ------------------------------------- | ----------------------------------------------------|
 | Access                    | Access Key ID                         | Access Key ID                                       |
 | Access Key                | Secret Access Key                     | Secret Access Key                                   |
-| Bucket Path Style         | http[s]://s3.amazonaws.com/<bucket>   | https://ds11s3.swisscom.com/<bucket>                |
-| Bucket Virtual Host Style | http[s]://<bucket>.s3.amazonaws.com   | https://<bucket>.ds11s3.swisscom.com                |
-| Namespace-style URL       | -                                     | https//<namespace>.ds11s3NS.swisscom.com/<bucket>   |
+| Bucket Path Style         | http[s]://s3.amazonaws.com/\<bucket\>   | https://ds11s3.swisscom.com/\<bucket\>                |
+| Bucket Virtual Host Style | http[s]://\<bucket\>.s3.amazonaws.com   | https://\<bucket\>.ds11s3.swisscom.com                |
+| Namespace-style URL       | -                                     | https://\<namespace\>.ds11s3NS.swisscom.com/\<bucket\>   |
 
 <p class='note'>
   <strong>Important</strong>: For security reasons, we only support HTTPS (443) and no HTTP (80)!
 </p>
 
-## <a id='Naming'></a> Bucket/Object naming convention
+## <a id='Naming'></a> Bucket/Object naming conventions
 
-Bucket name
-The following rules apply to the naming of S3 buckets in ECS:
+### Bucket name
+
+Please follow these conventions when naming of S3 buckets in ECS:
 
 * Names must be between 3 and 255 characters in length.
 * Names can include dot (.), hyphen (-), and underscore (_) characters and alphanumeric characters ([a-zA-Z0-9]).
@@ -82,14 +83,18 @@ The name does not support:
 * Ending with a dot (.)
 * Name must not be formatted as IPv4 address
 
-Object Name
+### Object Name
 
 * The following rules apply to the naming of ECS S3 objects:
 * Cannot be null or an empty string
-* Length range is 1Ö1024 (Unicode char)
+* Length range is 1-1024 (Unicode char)
 * No validation on characters!
 
-## <a id='Using'></a> Using Amazon S3 compatible software on Dynamic Storage
+## <a id='namespace-style-url'></a> Namespace-style URL
+
+In comparison to Amazon S3, we are using namespaces which allows you to create bucket names which are only unique within your namespace. This means, on the one hand, that your bucket names don't need to be globally unique. On the other hand, you need to use namespace-style URL (e.g. https://8bb3085l69c42879b4aga5ce7016ffff.ds11s3NS.swisscom.com/mybucket/myobject) for to access your content for static webpages.
+
+## <a id='using'></a> Using Amazon S3 compatible software on Dynamic Storage
 
 Most of the software that has been developed to use the Amazon S3 API will work with Dynamic Storage.
 
@@ -105,10 +110,6 @@ The challenge is often on the configuration side: Sometimes the Amazon URL and p
 </p>
 
 When using ECS, the <strong>Access Key ID corresponds to <Namespace-Account></strong> and the <strong>Secret Access Key corresponds to the Shared Secret Access Key</strong>.
-
-## <a id='bucket'></a> Amazon S3 bucket configuration
-
-S3 bucket names are unique through the Amazon system, but not on Dynamic Storage.
 
 ## <a id='s3-api'></a> The Amazon S3 API operations
 
@@ -151,7 +152,11 @@ S3 bucket names are unique through the Amazon system, but not on Dynamic Storage
 * PUT Object
 * PUT Object ACL
 
-* Multipart Upload ñ Initiate, Upload, Complete, Abort, List parts
+* Multipart Upload: Initiate, Upload, Complete, Abort, List parts
+
+#### More details
+
+To get more information about the underlying EMC ECS product, please consult their [documentation](https://www.emc.com/techpubs/api/ecs/v3-0-0-0/index.htm).
 
 ### <a id='unsupported'></a> The following operations are unsupported: (these functions are used very rarely)
 
@@ -173,8 +178,4 @@ S3 bucket names are unique through the Amazon system, but not on Dynamic Storage
 
 * GET Object torrent
 
-Using a S3 compatible url, Dynamic Storage can easily be used as a backend.
-
-## <a id='service-connector'></a> Administrating your Dynamic Storage instances
-
-To connect to a running Dynamic Storage instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
+Using a S3 compatible URL, Dynamic Storage can easily be used as a backend.
