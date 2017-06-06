@@ -57,6 +57,25 @@ CREATE DATABSE CF_DATABASE_NAME
 GRANT ALL PRIVILEGES ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
 ```
 
+## <a id='alter'></a> Cluster Stalls on Long-running ALTER
+
+If you attempt to run a long-running `ALTER` statement on MariaDB/Galera, during that period all other Galera nodes will stall leading to huge performance issues throughout the cluster.
+
+See [CLUSTER STALLS ON ALTER](http://galeracluster.com/documentation-webpages/clusterstallonalter.html) and [SCHEMA UPGRADES](http://galeracluster.com/documentation-webpages/schemaupgrades.html) for background information from the Galera developers.
+
+Attention, you can't set the variable `wsrep_OSU_method='RSU'` as written in the external link, because you don't have `SUPER` privileges in our MariaDB offering.
+
+Please don't run `ALTER` statments which take long to run (it depends on the table size). 
+
+Some example statements which shouldn't be used:
+
+- `ANALYZE TABLE`
+- `OPTIMIZE TABLE`
+- `REPAIR TABLE`
+- `ALTER TABLE tbl REORGANIZE PARTITION`
+
+If you need to execute long running `ALTER` statements, please contact our support. We will find a solution with you.
+
 ## <a id='definer'></a> Definer and bind-service (Change Credentials)
 
 With `cf bind-service` the service broker (Cloud Foundry component) creates new credentials for security reasons (`cf env APP_NAME` to view them). This will break existing routines, triggers, views and events because they are still using the old user.
