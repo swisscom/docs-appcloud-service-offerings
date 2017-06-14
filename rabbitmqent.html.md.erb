@@ -163,9 +163,16 @@ For a different approach to scale your queues on the cluster, the [Consistent ha
 ## Per-Queue Message TTL of 14 days
 To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://www.rabbitmq.com/ttl.html#per-queue-message-ttl) is set to **14 days**. Messages that are in the queue for longer than 14 days are automatically discarded.
 
-## <a id='service-connector'></a> Administrating your RabbitMQ instances
+## <a id='managing'></a> Managing your RabbitMQ instances
 
-To connect to a running RabbitMQ instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
+To get access to the RabbitMQ management console, you can use the [`cf ssh` command](../devguide/deploy-apps/ssh-services.html). Here's how it works:
+
+1. You'll need to use an app as a host for SSH-ing. Any running app will do. If you don't have one yet, push a default app through the web console
+1. Create a service key for your RabbitMQ instance with `cf create-service-key <service-name> manage` (replace the term in `<>` with your service's name)
+1. Look at the service key's credentials with `cf service-key <service-name> manage`
+1. SSH into your app with `cf ssh -L 13000:<credentials.hostname>:<credentials.management_port> <app-name>` (replace the values in `<>` with the actual values from the service key and with your app's name)
+1. Open your browser and visit <http://localhost:13000> and use `<credentials.username>` and `<credentials.password>` from your service key as the credentials
+1. When you're done, simply close the terminal window with the open SSH connection
 
 ## <a id='sample-application'></a> Sample Application
 
