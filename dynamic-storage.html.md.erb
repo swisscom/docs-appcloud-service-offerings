@@ -179,3 +179,123 @@ To get more information about the underlying EMC ECS product, please consult the
 * GET Object torrent
 
 Using a S3 compatible URL, Dynamic Storage can easily be used as a backend.
+
+#### Best Practices
+
+#### App Design
+
+•	Don’t require low latency
+•	Don’t execute serial workflows.  Process many operations in parallel.
+•	Be prepared to handle failures
+	–	Most SDKs have built-in retry mechanisms to handle this for you
+•	Avoid listing buckets during normal workflows
+	–	S3 API can only list serially and only returns 1000 per page.  This means 1000 API calls per million objects
+	–	Best suited for periodic cleanup/consistency tasks
+
+#### Namespaces, Buckets and Objects
+
+•	Bucket names must be unique within a namespace
+•	For best performance, we recommend to have less than 1000 buckets in a namespace (AWS limits to 100, standard S3 API cannot paginate)
+•	Namespace and Bucket names should be DNS compatible
+	–	They can appear in a DNS record if using virtually-hosted buckets
+	–	In particular, no underscores, no capital letters  not accessible through DNS
+•	The number of objects is not a problem
+	–	No need to enforce limits like in a traditional FS
+	–	ECS is designed to handle trillions of objects
+•	Ideally, object size should be >100 KB
+	–	ECS internal buffer size is 2 MB, you will see better performance if you align your object size to it
+•	S3 has no support for directory structures
+	–	Uses a flat structure 
+	–	Some drivers and apps emulate a directory structure (prefix+delimiter)
+•	Use metadata search (ie date range) for listing objects
+	–	Be prepared to paginate bucket listings
+	–	Align the range to your app and request only what is needed
+	–	Marker, NextMarker, MaxKeys
+
+#### Large Objects
+
+•	Use multipart uploads for large objects (>100 MB)
+	–	Allows you to pause and resume uploads
+	–	Improves throughput  parallel uploads
+	–	For size < 1 GB, use multiple of 2 MB (e.g. 8 MB)
+	–	For size > 1 GB, use exactly 128 MB part size (to fill a full chunk)
+•	Use Byte Range Reads for parallel downloads of large objects
+•	In Java, use the TransferManager
+•	In .NET, use TransferUtility
+
+#### Traffic
+
+•	You can bypass your application server with pre-signed URLs
+	–	Authentication encoded into the URL itself, executed by client
+	–	Users will download and upload object directly from/to ECS as “you”
+•	Object update frequency should be low
+	–	Object storage platforms are not designed for transactional workloads  performance impact
+	–	Ideally, WORM content (e.g. sensor data, images, videos) 
+•	Avoid HEAD + PUT for conditional overwrite
+	–	Understand your reasons for doing so; it’s generally not necessary	
+	–	If you must, use PUT with If-None-Match / If-Match instead.
+		›	Use “If-None-Match: *” to conditionally create if object doesn’t exist.
+		›	Use “If-Match: {Etag}” to conditionally overwrite an object if Etag matches.
+•	Use the object copy operation
+	–	Instead of downloading and uploading the object again
+•	Beware concurrent write requests for the same object
+	–	200 OK means transaction committed
+	–	Order not guaranteed
+	–	If order needs to be guaranteed, use Conditional PUTs (ECS extension) 
+•	Consider using client-side compression for slow links and compressible content
+	–	ECS Java SDK supports ZIP and LZMA
+
+#### ECS Extensions
+
+•	Metadata Search
+	–	Offload some searching from your database
+	–	Support for “<,>,<=,>=,=,!=, AND/OR”
+	–	Enabled at bucket level at creation time
+•	Byte Range uploads
+	–	Update objects partially
+	–	AWS objects are immutable
+•	Atomic append
+	–	Useful for multi-client streams (e.g. syslog, sensor data)
+
+#### Retention and Expiration
+
+•	Retention means you cannot update, overwrite, or delete the object until the retention period ends
+•	There are two ways to assign retention:
+	–	At the bucket level (compatible with generic S3)
+	–	Explicit retention period at an object level
+•	Expiration will automatically delete the object when it expires
+	–	In S3 this is set using “Bucket Lifecycle”.
+•	Retention overrides Expiration
+	–	An object will never get expired until its retention ends
+	–	Retention can be redefined at any time
+	
+#### Security
+
+•	Store your secret keys securely
+	–	Your secret key is essentially your password.  Use the same protections you would for a password.
+•	Grant as few permissions as possible
+	–	e.g. no need to grant read-write permissions if your app only needs to read data
+•	Use client-side encryption for maximum protection
+	–	But keep your master key secure
+	–	If you lose your master key, you lose your data
+	–	Pre-signed URLs will not work unless the receiver knows your encryption keys.
+
+#### Data Management
+
+•	Use separate buckets for your environments
+	–	e.g. dev, test, staging, production
+	–	Easier for developers and DevOps to manage 
+
+#### TSO (Temporary Site Outage)
+
+•	FS buckets (NFS/HDFS) will be read-only during TSO
+•	There is some delay before TSO is enabled (5 minutes)
+
+#### Implementation
+
+•	Use a SDK for your programming language
+	–	No need to reinvent the wheel
+•	Use ECS Object Client if you want to take advantage of ECS features
+	–	Currently available for Java only
+•	Use AWS SDK if you want to maintain compatibility with AWS
+
