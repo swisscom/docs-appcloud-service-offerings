@@ -72,3 +72,25 @@ There is a known bug with host mappings. When the deployment overview shows inco
 On the MongoDB replicaset you will receive the role `readWrite@rs_DBNAME`.
 
 On the MongoDB Ops Manager you will receive the role `Monitoring Admin`.
+
+## <a id='bestpractises'></a> Best Practises for Developers
+
+- Write Concern Majority
+
+Please read [Replica Set Read and Write Semantics](https://docs.mongodb.com/manual/applications/replication). Swisscom MongoDB experts recommend a "Write Concern" of `majority` to avoid [Rollbacks During Replica Set Failover](https://docs.mongodb.com/manual/core/replica-set-rollbacks/).
+
+- Check Ops Manager metrics regularly
+
+Please check regular Ops Manager metrics and graphs. The performance statistics are particularly important after App deployments.
+
+- Use an Application Driver Maintained by the MongoDB team
+
+It’s critical to find a driver that [is well-maintained](https://docs.mongodb.com/ecosystem/drivers/) and stays up to date with the latest MongoDB features.
+
+- Index Early and Often
+
+Without question, the most common database performance issue is due to improper indexing (or a complete lack thereof). Have a look at [Indexes docs](https://docs.mongodb.com/manual/indexes/).
+
+- Consider a query timeout
+
+MongoDB targets operations for termination if the associated cursor exceeds its allotted time limit. See [cursor.maxTimeMS()](https://docs.mongodb.com/manual/reference/method/cursor.maxTimeMS/) in Cursor Methods for more details.
