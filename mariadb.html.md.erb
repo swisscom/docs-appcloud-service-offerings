@@ -5,6 +5,12 @@ owner: Services
 
 <strong><%= modified_date %></strong>
 
+## <a id='about'></a> About MariaDB
+MariaDB is a community-developed fork of the MySQL relational database management system. Development is led by some of the original developers of MySQL, who forked it due to concerns over its acquisition by Oracle Corporation.
+
+See [MariaDB versus MySQL - Compatibility](https://mariadb.com/kb/en/mariadb/mariadb-vs-mysql-compatibility/) article for differences between the two projects.
+
+
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
 
 After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
@@ -77,3 +83,9 @@ Message: The user specified as a definer ('%s'@'%s') does not exist
 ```
 
 See the MariaDB blog post [Changing the DEFINER of MySQL stored routines etc.](https://mariadb.com/resources/blog/changing-definer-mysql-stored-routines-etc) for ideas on how to fix this.
+
+## <a id='testenv'></a> Testing with the same parameters
+
+We use Open Source [Cloud Foundry MySQL Service](https://github.com/cloudfoundry/cf-mysql-release) in our offering.
+
+Our deployment uses some non-default MariaDB parameters. Please make sure your development environment uses the relevant paramaters from [this list](https://github.com/swisscom/docs-appcloud-service-offerings/blob/master/mysqld_config.txt). Some paramaters you can ignore (example is `wsrep%`), others like `sql-mode` affect your backend code.
