@@ -67,10 +67,10 @@ Next, create an SSH tunnel to your old DB through the dummy app (or any other ap
 cf ssh dummy-app -L 13000:<old-db-host>:<old-db-port>
 ```
 
-Now that we're connected, we can dump the old database using `sqldump`. Open a new terminal and run the following command:
+Now that we're connected, we can dump the old database using `mysqldump`. Open a new terminal and run the following command:
 
 ```bash
-$ mysqldump --host localhost --port 13000 --username <old-db-username> --password <old-db-password> <old-db-database-name> --single-transaction  >  /tmp/my-db-dump.sql
+$ mysqldump --host 127.0.0.1 --port 13000 --username <old-db-username> --password <old-db-password> <old-db-database-name> --single-transaction  >  /tmp/my-db-dump.sql
 ```
 
 Please make sure the last line is something like `-- Dump completed on 2017-08-15 11:06:17`.
@@ -84,7 +84,7 @@ $ cf ssh dummy-app -L 13000:<new-db-host>:<new-db-port>
 Now we'll use the `mysql` CLI to restore the dump we created in the new MariaDB:
 
 ```bash
-mysql --show-warnings --host localhost --port 13000 --username <new-db-username> --password <new-db-password> <new-db-database-name> < /tmp/my-db-dump.sql
+mysql --show-warnings --host 127.0.0.1 --port 13000 --username <new-db-username> --password <new-db-password> <new-db-database-name> < /tmp/my-db-dump.sql
 ```
 Maybe you see errors or warnings. For example:
 
