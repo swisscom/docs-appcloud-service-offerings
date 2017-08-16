@@ -50,6 +50,14 @@ Swisscom: [Dynamic Storage How-To](https://github.com/swisscom/dynstrg-howto)
 
 Before deleting a Dynamic Storage service instance, you must remove all its buckets and objects. Otherwise the deletion will fail.
 
+To do so, you can use the [S3cmd](http://s3tools.org/s3cmd) tool and run the following command for each bucket:
+
+```shell
+$ s3cmd del --recursive s3://bucket-name
+```
+
+In case you don't have any credentials for your Dynamic Storage instance, you can get them by creating a [service key](../devguide/services/service-keys.html).
+
 ## <a id='endpoints'></a> ECS endpoints / access points
 
 | Trust Level               | URL                                              | Usecase
