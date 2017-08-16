@@ -46,6 +46,10 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 
 Swisscom: [Dynamic Storage How-To](https://github.com/swisscom/dynstrg-howto)
 
+## <a id='delete'></a> Deleting a Service Instance
+
+Before deleting a Dynamic Storage service instance, you must remove all its buckets and objects. Otherwise the deletion will fail.
+
 ## <a id='endpoints'></a> ECS endpoints / access points
 
 | Trust Level               | URL                                              | Usecase
@@ -205,7 +209,7 @@ Using a S3 compatible URL, Dynamic Storage can easily be used as a backend.
 * Ideally, the object size should be >100 KB
   * The ECS internal buffer size is 2 MB, you will see better performance if you align your object size to that
 * S3 has no support for directory structures
-  * Uses a flat structure 
+  * Uses a flat structure
   * Some drivers and apps emulate a directory structure (prefix+delimiter)
 * Use metadata search (i.e. date range) for listing objects
   * Be prepared to paginate bucket listings
@@ -230,9 +234,9 @@ Using a S3 compatible URL, Dynamic Storage can easily be used as a backend.
   * Users will download and upload object directly from/to ECS as "you"
   * Object update frequency should be low
   * Object storage platforms are not designed for transactional workloads and performance impact
-  * Ideally, WORM content (e.g. sensor data, images, videos) 
+  * Ideally, WORM content (e.g. sensor data, images, videos)
 * Avoid HEAD + PUT for conditional overwrite
-  * Understand your reasons for doing so; it’s generally not necessary	
+  * Understand your reasons for doing so; it’s generally not necessary
   * If you must, use PUT with If-None-Match / If-Match instead.
     * Use `If-None-Match: *` to conditionally create if object doesn’t exist.
     * Use `If-Match: {Etag}` to conditionally overwrite an object if Etag matches.
@@ -241,7 +245,7 @@ Using a S3 compatible URL, Dynamic Storage can easily be used as a backend.
 * Beware concurrent write requests for the same object
   * 200 OK means transaction committed
   * Order not guaranteed
-  * If order needs to be guaranteed, use Conditional PUTs (ECS extension) 
+  * If order needs to be guaranteed, use Conditional PUTs (ECS extension)
 * Consider using client-side compression for slow links and compressible content
   * ECS Java SDK supports ZIP and LZMA
 
@@ -268,7 +272,7 @@ Using a S3 compatible URL, Dynamic Storage can easily be used as a backend.
 * Retention overrides Expiration
   * An object will never get expired until its retention ends
   * Retention can be redefined at any time
-	
+
 ### Security
 
 * Grant as few permissions as possible
@@ -282,7 +286,7 @@ Using a S3 compatible URL, Dynamic Storage can easily be used as a backend.
 
 * Use separate buckets for your environments
   * e.g. dev, test, staging, production
-  * Easier for developers and DevOps to manage 
+  * Easier for developers and DevOps to manage
 
 ### Implementation
 
