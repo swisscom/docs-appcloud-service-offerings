@@ -7,47 +7,47 @@ owner: Services
 
 We have a completely new [MariaDB](https://docs.developer.swisscom.com/service-offerings/mariadb.html) service in store for you. It comes with many improvements (e.g. MariaDB version 10) and we recommend to upgrade as soon as possible.
 
-```bash
+<pre class="terminal">
 $ cf marketplace | grep mariadb
 mariadb       small*, medium*, large*, free      MariaDB SQL database v5.5.4
 mariadbent    usage*                             MariaDB Galera Cluster SQL database v10.1.x
-```
+</pre>
 
 *Important*: Please make sure that you have the latest [cf CLI](https://github.com/cloudfoundry/cli) installed before you follow this migration guide.
 
 First, create a new MariaDB Ent instance and bind it to your app using the old MariaDB service:
 
-```bash
+<pre class="terminal">
 $ cf create-service mariadbent usage my-db-new
 $ cf bind-service my-awesome-app my-db-new
-```
+</pre>
 
 Next, stop your app:
 
-```bash
+<pre class="terminal">
 $ cf stop my-awesome-app
-```
+</pre>
 
 As a next step, we'll have to install the MariaDB client (which contains `mysqldump`)
 
 On macOS, you can use [Homebrew](https://brew.sh/). For other systems, please refer to your package manager.
 
-```bash
+<pre class="terminal">
 $ brew install mariadb # macOS only
-```
+</pre>
 
 Next, we'll use [`cf ssh`](https://docs.developer.swisscom.com/devguide/deploy-apps/ssh-services.html) to access our services. You can either use an existing running app (Don't use an app which is bound to your MariaDB service. These need to remain stopped for data consistency reasons.) in the same space or just push a dummy app if you don't have one. This app will only be used to SSH into so we get access to our service instances.
 
-```bash
+<pre class="terminal">
 # Only needed if you don't have a running app in your space
 $ git clone https://github.com/cloudfoundry-community/cf-env.git
 $ cd cf-env
 $ cf push dummy-app --no-route
-```
+</pre>
 
 Now, we'll need to create [serivce keys](https://docs.developer.swisscom.com/devguide/services/service-keys.html) for our service instances to get access credentials for them. To get these, run the following commands:
 
-```bash
+<pre class="terminal">
 # Old database
 $ cf create-service-key my-db migration
 $ cf service-key my-db migration
@@ -57,41 +57,41 @@ $ cf service-key my-db migration
 $ cf create-service-key my-db-new migration
 $ cf service-key my-db-new migration
 { ... }
-```
+</pre>
 
 We'll use these credentials in the following steps, so remember how to get them. Please replace the terms in `<...>` with the respective value from these service keys.
 
 Next, create an SSH tunnel to your old DB through the dummy app (or any other app you intend to use).
 
-```bash
+<pre class="terminal">
 cf ssh dummy-app -L 13000:<old-db-host>:<old-db-port>
-```
+</pre>
 
 Now that we're connected, we can dump the old database using `mysqldump`. Open a new terminal and run the following command:
 
-```bash
+<pre class="terminal">
 $ mysqldump --host 127.0.0.1 --port 13000 --username <old-db-username> --password <old-db-password> <old-db-database-name> --single-transaction  >  /tmp/my-db-dump.sql
-```
+</pre>
 
 Please make sure the last line is something like `-- Dump completed on 2017-08-15 11:06:17`.
 
 Next, create an SSH tunnel to the new MariaDB. Open the terminal where you have the SSH connection open, press `ctrl+c` and run the following command:
 
-```bash
+<pre class="terminal">
 $ cf ssh dummy-app -L 13000:<new-db-host>:<new-db-port>
-```
+</pre>
 
 Now we'll use the `mysql` CLI to restore the dump we created in the new MariaDB:
 
-```bash
+<pre class="terminal">
 mysql --show-warnings --host 127.0.0.1 --port 13000 --username <new-db-username> --password <new-db-password> <new-db-database-name> < /tmp/my-db-dump.sql
-```
+</pre>
 Maybe you see errors or warnings. For example:
 
-```bash
+<pre class="terminal">
 ERROR 1044 (42000) at line 660 in file: 'mysqldump-legacy-mariadb-20170815-110613.sql': Access denied for user '$USER'@'%' to database '$DB_NAME'
 Query OK, 0 rows affected (0.07 sec)
-```
+</pre>
 
 If you do get errors, jump to the respective line number and investigate. One significant difference is that, in new MariaDB, the statement `LOCK TABLES` is not supported anymore.
 
@@ -99,33 +99,33 @@ If you need support, please ask on [Stack Overflow #swisscomdev] (https://docs.d
 
 Now, we can unbind the old MariaDB service and rename the new database to use the real name:
 
-```bash
+<pre class="terminal">
 $ cf unbind-service my-awesome-app my-db
 $ cf rename-service my-db my-db-old
 $ cf rename-service my-db-new my-db
-```
+</pre>
 
 *Important*: The new service will be under `mariadbent` instead of `mariadb` in the `VCAP_SERVICES` environment variable. If your app code uses these names in the JSON structure to bind to the app, please change it accordingly.
 
 Now it's time to start your app again with the new MariaDB
 
-```bash
+<pre class="terminal">
 $ cf start my-awesome-app
-```
+</pre>
 
 For some apps, you'll also need to do a restage so they can pick up all environment variables properly:
 
-```bash
+<pre class="terminal">
 # Optional
 $ cf restage my-awesome-app
-```
+</pre>
 
 As soon as everything is working properly, you can remove the service keys and the old database:
 
-```bash
+<pre class="terminal">
 $ cf delete-service-key my-old migration
 $ cf delete-service-key my-db-old migration
 $ cf delete-service my-db-old
-```
+</pre>
 
 You have now migrated your app to the new MariaDB service. Congrats! Please repeat for all apps using the old one.
