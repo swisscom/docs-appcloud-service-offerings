@@ -61,11 +61,11 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 
 You can connect to your service by discovering the current master via one of the "`sentinels`". Be sure to use one of the [supported client libraries](http://redis.io/clients) with the sentinel feature. See the [Redis Enterprise sample app](https://github.com/swisscom/cf-redis-example-app/tree/redisent).
 
-For administrative work you can connect directly via the `"host"` and `"port"`, which always points to the currently elected master. Please note that this connection variant should not be used for your production applications, always use sentinel-based discovery when possible. See the [Service Connector](https://docs.developer.swisscom.com/service-connector/) and [Redis CLI](https://redis.io/topics/rediscli).
+For administrative work, you can connect directly via the `"host"` and `"port"`, which always points to the currently elected master. Please note that this connection variant should not be used for your production applications, always use sentinel-based discovery when possible.
 
-## <a id='service-connector'></a> Administrating your Redis instances
+## <a id='administrative'></a> Administrating your Redis instances
 
-To connect to a running Redis instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
+To connect to a running Redis instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
 
 ## <a id='sample-application'></a> Sample Application
 

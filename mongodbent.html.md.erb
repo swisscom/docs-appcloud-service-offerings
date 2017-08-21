@@ -38,9 +38,9 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 ```
 
 
-## <a id='service-connector'></a> Administrating Your MongoDB Enterprise Instances
+## <a id='administrating'></a> Administrating Your MongoDB Enterprise Instances
 
-To connect to a running MongoDB instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
+To connect to a running MongoDB Enterprise instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
 
 ## <a id='sample-application'></a> Sample Application
 
@@ -50,13 +50,9 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 As a MongoDB Enterprise customer, you receive access to the [Ops Manager](https://docs.opsmanager.mongodb.com/current/) to see detailed performance metrics and health state.
 
-To connect to the Ops Manager to get insights of your MongoDB, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI:
+To connect to the Ops Manager to get insights of your MongoDB, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
 
-```bash
-cf sc 8080 opsmanager.service.consul:8080
-```
-
-## <a id='specifications'></a> Specifications 
+## <a id='specifications'></a> Specifications
 
 Our [MongoDB Enterprise](https://www.mongodb.com/products/mongodb-enterprise-advanced) offering consists of 3 dedicated VMs configured as a replicaset.
 

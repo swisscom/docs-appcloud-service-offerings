@@ -14,7 +14,7 @@ The ELK stack consisting of Elasticsearch, Logstash, and Kibana gives the power 
 1. Create the service: `cf create-service elk small testelk`
 1. Bind your app to the service and restart it: `cf bind-service APP_NAME testelk`
 1. Create some logs by visiting your web app
-1. Connect to [Kibana](#service-connector)
+1. Connect to [Kibana](#administrating)
 1. Create the [index](#index-patterns-creation)
 1. See and search through your logs
 
@@ -54,18 +54,11 @@ As soon as the service is bound and the application is restarted, it will start 
 
 Swisscom: [ELK Example](https://github.com/swisscom/cf-elk-sample)
 
-## <a id='service-connector'></a> Administrating your ELK instances
+## <a id='administrating'></a> Administrating your ELK instances
 
-To connect to a running ELK instance with your local development tools, you can use the Swisscom [Service Connector](../service-connector/index.html) plugin for the Cloud Foundry CLI.
+To connect to a running ELK instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
 
-For example, to connect to Kibana to see the logs, check the environment variables of the app that is bound to the elk service instance. Read out the Kibana host and port and connect via [Service Connector](../service-connector/index.html). Open your browser and connect to [http://localhost:8080](http://localhost:8080) to see the Kibana dashboard.
-
-<pre class="terminal">
-cf env APP_NAME | grep kibanaUrl
-cf service-connector 8080 wkk30w3xlclv2pj3.service.consul:59554
-</pre>
-
-Alternatively there is the possiblity to use a proxy app like the Swisscom [Kibana Proxy](https://github.com/swisscom/cf-kibana-proxy) to make your Kibana dashboard publicly available.
+Alternatively there is the possiblity to use a proxy app like the Swisscom [Kibana Proxy](https://github.com/swisscom/cf-kibana-proxy) to make your Kibana dashboard available to your browser.
 
 ## <a id='index-patterns'></a> Index Patterns
 
