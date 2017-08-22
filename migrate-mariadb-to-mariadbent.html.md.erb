@@ -39,6 +39,8 @@ $ brew install mariadb
 
 Next, we'll use [`cf ssh`](https://docs.developer.swisscom.com/devguide/deploy-apps/ssh-services.html) to access our services. You can either use an existing running app (Don't use an app which is bound to your MariaDB service. These need to remain stopped for data consistency reasons.) in the same space or just push a dummy app if you don't have one. This app will only be used to SSH into so we get access to our service instances.
 
+*Important*: Please make sure that the app you are using has been pushed or restarted within the last month since it needs to use the latest [security groups](https://docs.cloudfoundry.org/concepts/asg.html) to be able to connect to the new MariaDB Enterprise.
+
 <pre class="terminal">
 # Only needed if you don't have a running app in your space
 $ git clone https://github.com/cloudfoundry-community/cf-env.git
