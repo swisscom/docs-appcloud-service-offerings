@@ -84,16 +84,8 @@ In case you don't have any credentials for your Dynamic Storage instance, you ca
 
 Please follow these conventions when naming of S3 buckets in ECS:
 
-* Names must be between 3 and 255 characters in length.
-* Names can include dot (.), hyphen (-), and underscore (_) characters and alphanumeric characters ([a-zA-Z0-9]).
-* Names can start with a hyphen (-) or alphanumeric character.
-
-The name does not support:
-
-* Starting with a dot (.)
-* Containing a double dot (..)
-* Ending with a dot (.)
-* Name must not be formatted as IPv4 address
+* Names must be between 3 and 63 characters long.
+* Names must be DNS compliant: lowercase alphanumeric characters (`[a-z0-9]`) and hyphens (`-`).
 
 ### Object Name
 
