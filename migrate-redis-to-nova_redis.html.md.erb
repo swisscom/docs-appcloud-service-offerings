@@ -1,0 +1,120 @@
+---
+title: Migrate from legacy Redis to Nova Redis
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+We have a completely new [Redis](https://docs.developer.swisscom.com/service-offerings/nova_redis.html) service in store for you. It comes with many improvements (e.g. high availability, redundancy) and we recommend to upgrade as soon as possible.
+
+<pre class="terminal">
+$ cf marketplace | grep redis
+redis         small*, medium*, large*            Redis in-memory data structure store v3.2.3
+nova_redis    small*, large*, xlarge*, medium*   Redis (nova) in-memory data structure store v3.2.9
+</pre>
+
+*Important*: Please make sure that you have the latest [cf CLI](https://github.com/cloudfoundry/cli) installed before you follow this migration guide.
+
+First, create a new Nova_Redis instance and bind it to your app using the old Redis service:
+
+<pre class="terminal">
+$ cf create-service nova_redis small my-redis-new
+$ cf bind-service my-awesome-app my-redis-new
+</pre>
+
+Next, stop your app:
+
+<pre class="terminal">
+$ cf stop my-awesome-app
+</pre>
+
+As a next step, we'll have to backup the data currently saved in your old redis instance.
+
+We'll use [`cf ssh`](https://docs.developer.swisscom.com/devguide/deploy-apps/ssh-services.html) to access our old service. As the proxy, you can either use an existing running app (Don't use an app which is bound to your Redis service. These need to remain stopped for data consistency reasons.) in the same space or just push a dummy app if you don't have one. This app will only be used to SSH into so we get access to our service instances.
+
+<pre class="terminal">
+# Only needed if you don't have a running app in your space
+$ git clone https://github.com/cloudfoundry-community/cf-env.git
+$ cd cf-env
+$ cf push proxy-app --no-route
+</pre>
+
+Now, we'll need to create a [service key](https://docs.developer.swisscom.com/devguide/services/service-keys.html) for our service instance to retrieve access credentials. To get these, run the following commands:
+
+<pre class="terminal">
+# Old database
+$ cf create-service-key my-redis migration
+$ cf service-key my-redis migration
+{ ... }
+
+# New database
+$ cf create-service-key my-redis-new migration
+$ cf service-key my-redis-new migration
+{ ... }
+</pre>
+
+We'll use these credentials in the following steps, so remember how to get them. Please replace the terms in `<...>` with the respective value from these service keys.
+
+Next, create an SSH tunnel to your old DB through the proxy app (or any other app you intend to use).
+
+<pre class="terminal">
+$ cf ssh proxy-app -L 13000:&lt;old-redis-host&gt;:&lt;old-redis-port&gt;
+</pre>
+
+Now that we're connected, we can dump the old redis contents using of the many tools available on the internet to backup and restore redis data. In this example we are going to use [redis-dump-load](https://github.com/p/redis-dump-load), but using an older version than the master branch. The old redis instance does not support the `info` command for security reasons, and the master branch of redis-dump-load uses this command.
+
+<pre class="terminal">
+$ git clone https://github.com/p/redis-dump-load.git
+$ cd redis-dump-load
+$ git checkout f35053d69a5677949fd1b833a0df8152e0658374
+</pre>
+
+We will now dump the content of our service in a local file.
+
+<pre class="terminal">
+$ ./redisdl.py --host localhost -p 13000 --password &lt;your_password&gt; --output=dump.rdb
+</pre>
+
+Next, we will create an SSH tunnel to the new Redis-Nova instance. Open the terminal where you have the previous SSH connection opened, press `ctrl+c` and run the following command:
+
+<pre class="terminal">
+$ cf ssh proxy-app -L 13000:&lt;new-redis-host&gt;:&lt;new-redis-port&gt;
+</pre>
+
+Now we'll use the `redis-dump-load` tool again to restore the dump we created in the new Redis:
+
+<pre class="terminal">
+./redisdl.py --load --host localhost -p 13000 --password &lt;your_password&gt; dump.rdb
+</pre>
+
+If you need support, please ask on [Stack Overflow #swisscomdev] (https://docs.developer.swisscom.com/devguide-sc/support.html).
+
+Now, we can unbind the old Redis service and rename the new database to use the real name:
+
+<pre class="terminal">
+$ cf unbind-service my-awesome-app my-redis
+$ cf rename-service my-redis my-redis-old
+$ cf rename-service my-redis-new my-redis
+</pre>
+
+Now it's time to start your app again with the new MariaDB
+
+<pre class="terminal">
+$ cf start my-awesome-app
+</pre>
+
+For some apps, you'll also need to do a restage so they can pick up all environment variables properly:
+
+<pre class="terminal">
+# Optional
+$ cf restage my-awesome-app
+</pre>
+
+As soon as everything is working properly, you can remove the service keys and the old database:
+
+<pre class="terminal">
+$ cf delete-service-key my-redis-old migration
+$ cf delete-service my-redis-old
+</pre>
+
+You have now migrated your app to the new Redis service. Congrats! Please repeat for all apps using the old one.
