@@ -73,7 +73,7 @@ cf ssh proy-app -L 13000:&lt;old-db-host&gt;:&lt;old-db-port&gt;
 Now that we're connected, we can dump the old database using `mysqldump`. Open a new terminal and run the following command:
 
 <pre class="terminal">
-$ mysqldump --protocol TCP --port 13000 --user &lt;old-db-username&gt; --password --single-transaction &lt;old-db-database&gt; &gt; /tmp/my-db-dump.sql
+$ mysqldump --protocol TCP --port 13000 --user &lt;old-db-username&gt; --password --single-transaction --skip-add-locks &lt;old-db-database&gt; &gt; /tmp/my-db-dump.sql
 Enter password: &lt;old-db-password&gt;
 </pre>
 
