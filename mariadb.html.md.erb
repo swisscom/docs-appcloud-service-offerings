@@ -10,26 +10,27 @@ owner: Services
 After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
 
 ```json
-"mariadb": [
+"mariadbent": [
   {
     "credentials": {
-      "database": "CF",
-      "database_uri": "mysql://h0RG2:FvozC@10.0.0.7:3306/CF?reconnect=true",
-      "host": "10.0.0.7",
-      "jdbcUrl": "jdbc:mysql://10.0.0.7:3306/CF?user=h0RG2\u0026password=FvozC",
-      "name": "CF",
-      "password": "FvozC",
+      "host": "galera-service.service.consul",
+      "hostname": "galera-service.service.consul",
       "port": 3306,
-      "uri": "mysql://h0RG2:FvozC@10.0.0.7:3306/CF?reconnect=true",
-      "username": "h0RG2"
+      "name": "CF_9B81CA4D_E5BE_427E_991D_99FA13ABAE21",
+      "database": "CF_9B81CA4D_E5BE_427E_991D_99FA13ABAE21",
+      "username": "9raLhQ5kFQaBLSYj",
+      "password": "LlsrR1V9hs0xXOAu",
+      "database_uri": "mysql://9raLhQ5kFQaBLSYj:LlsrR1V9hs0xXOAu@galera-service.service.consul:3306/CF_9B81CA4D_E5BE_427E_991D_99FA13ABAE21?reconnect=true",
+      "uri": "mysql://9raLhQ5kFQaBLSYj:LlsrR1V9hs0xXOAu@galera-service.service.consul:3306/CF_9B81CA4D_E5BE_427E_991D_99FA13ABAE21?reconnect=true",
+      "jdbcUrl": "jdbc:mysql://galera-service.service.consul:3306/CF_9B81CA4D_E5BE_427E_991D_99FA13ABAE21?user=9raLhQ5kFQaBLSYj&password=LlsrR1V9hs0xXOAu"
     },
-    "label": "mariadb",
-    "name": "testmariadb",
-    "plan": "small",
-    "provider": null,
     "syslog_drain_url": null,
-    "tags": [],
-    "volume_mounts": []
+    "volume_mounts": [],
+    "label": "mariadbent",
+    "provider": null,
+    "plan": "usage",
+    "name": "my-db",
+    "tags": []
   }
 ]
 ```
