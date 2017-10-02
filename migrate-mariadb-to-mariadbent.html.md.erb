@@ -67,7 +67,7 @@ We'll use these credentials in the following steps, so remember how to get them.
 Next, create an SSH tunnel to your old DB through the proxy app (or any other app you intend to use).
 
 <pre class="terminal">
-cf ssh proy-app -L 13000:&lt;old-db-host&gt;:&lt;old-db-port&gt;
+cf ssh proxy-app -L 13000:&lt;old-db-host&gt;:&lt;old-db-port&gt;
 </pre>
 
 Now that we're connected, we can dump the old database using `mysqldump`. Open a new terminal and run the following command:
@@ -82,7 +82,7 @@ Please make sure the last line is something like `-- Dump completed on 2017-08-1
 Next, create an SSH tunnel to the new MariaDB. Open the terminal where you have the SSH connection open, press `ctrl+c` and run the following command:
 
 <pre class="terminal">
-$ cf ssh proy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
+$ cf ssh proxy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
 </pre>
 
 Now we'll use the `mysql` CLI to restore the dump we created in the new MariaDB:
