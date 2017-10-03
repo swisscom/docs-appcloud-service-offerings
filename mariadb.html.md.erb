@@ -75,7 +75,7 @@ A summary of Galera limitations is on [Galera Caveats](http://mysql.rjweb.org/do
 > Dear DBA:
 
 > - `ALTER`s are handled differently. See [SCHEMA UPGRADES](http://galeracluster.com/documentation-webpages/schemaupgrades.html)
-> - `TRIGGER`s and `EVENT`s may need checking.
+> - `TRIGGER`s and `EVENT`s may need checking. By default, with row-based replication, triggers run on the master, and the effects of their executions are replicated to the slaves.
 
 Please add a **primary key** to every table you create. This is because of *Row Based Replication*.
 
