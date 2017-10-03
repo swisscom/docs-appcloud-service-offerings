@@ -57,13 +57,36 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 ## <a id='limitations'></a> Known Limitations
 
-Our HA MariaDB offering is based on Galera, which brings some [known limitations](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it. Please read this article carefully.
+Our HA MariaDB offering is based on Galera, which brings some [known limitations (from mariadb.com)](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it. Please read this article carefully.
 
-Our Galera aaS is a shared cluster. Each customer has their own database. Put simply, the service broker executes the following statements:
+A summary of Galera limitations is on [Galera Caveats](http://mysql.rjweb.org/doc.php/galera) (blockquote modified for our offering):
+
+> Dear Schema Designer:
+
+> - InnoDB only, always have PK.
+
+> Dear Developer:
+
+> - Check for errors, even after `COMMIT`.
+> - Moderate sized transactions.
+> - Don't make assumptions about `AUTO_INCREMENT` values other than uniqueness. Not monotonicity, not gapless. (This applies for non-Galera, but probably happens more often here.)
+> - Handling of "critical reads" is quite different (arguably better).
+
+> Dear DBA:
+
+> - `ALTER`s are handled differently. See [SCHEMA UPGRADES](http://galeracluster.com/documentation-webpages/schemaupgrades.html)
+> - `TRIGGER`s and `EVENT`s may need checking. By default, with row-based replication, triggers run on the master, and the effects of their executions are replicated to the slaves.
+
+Please add a **primary key** to every table you create. This is because of *Row Based Replication*.
+
+Please contact Swisscom Application Cloud support when you need to issue **long running DDL changes** (for example `ALTER TABLE` with thousends of records). Long running DDL causes an outage for all customers on the cluster.
+
+Our Galera aaS is a **shared cluster**. Each customer has their own database. Put simply, the service broker executes the following statements:
 
 ```sql
 CREATE DATABSE CF_DATABASE_NAME
-GRANT ALL PRIVILEGES ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
+GRANT ALL ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
+REVOKE LOCK TABLES ON `CF_DATABASE_NAME`.* FROM 'USER'@'SUBNET'
 ```
 
 ## <a id='definer'></a> Definer and bind-service (Change Credentials)
@@ -78,3 +101,7 @@ Message: The user specified as a definer ('%s'@'%s') does not exist
 ```
 
 See the MariaDB blog post [Changing the DEFINER of MySQL stored routines etc.](https://mariadb.com/resources/blog/changing-definer-mysql-stored-routines-etc) for ideas on how to fix this.
+
+## <a id='migration'></a> Migrate your service instance
+
+See [Migrate from legacy MariaDB to MariaDB Ent](./migrate-mariadb-to-mariadbent.html) how to migrate your service instance to a new database cluster.
