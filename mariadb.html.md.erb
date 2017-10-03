@@ -70,23 +70,23 @@ A summary of Galera limitations is on [Galera Caveats](http://mysql.rjweb.org/do
 > - Check for errors, even after `COMMIT`.
 > - Moderate sized transactions.
 > - Don't make assumptions about `AUTO_INCREMENT` values other than uniqueness. Not monotonicity, not gapless. (This applies for non-Galera, but probably happens more often here.)
-- Handling of "critical reads" is quite different (arguably better).
+> - Handling of "critical reads" is quite different (arguably better).
 
 > Dear DBA:
 
-> - `ALTER`s are handled differently.
+> - `ALTER`s are handled differently. See [SCHEMA UPGRADES](http://galeracluster.com/documentation-webpages/schemaupgrades.html)
 > - `TRIGGER`s and `EVENT`s may need checking.
-> - Several `VARIABLE`s need to be set differently.
 
 Please add a **primary key** to every table you create. This is because of *Row Based Replication*.
 
-Please contact Swisscom Application Cloud support when you need to issue **long running DDL changes** (for example `ALTER TABLE`). Long running DDL causes an outage for all customers on the cluster.
+Please contact Swisscom Application Cloud support when you need to issue **long running DDL changes** (for example `ALTER TABLE` with thousends of records). Long running DDL causes an outage for all customers on the cluster.
 
 Our Galera aaS is a **shared cluster**. Each customer has their own database. Put simply, the service broker executes the following statements:
 
 ```sql
 CREATE DATABSE CF_DATABASE_NAME
-GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, REFERENCES, INDEX, ALTER, CREATE TEMPORARY TABLES, EXECUTE, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, EVENT, TRIGGER ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
+GRANT ALL ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
+REVOKE LOCK TABLES ON `CF_DATABASE_NAME`.* FROM 'USER'@'SUBNET'
 ```
 
 ## <a id='definer'></a> Definer and bind-service (Change Credentials)
