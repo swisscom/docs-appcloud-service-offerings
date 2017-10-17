@@ -77,7 +77,11 @@ $ mysqldump --protocol TCP --port 13000 --user &lt;old-db-username&gt; --passwor
 Enter password: &lt;old-db-password&gt;
 </pre>
 
-After the dump has successfully been created, please open the /tmp/my-db-dump.sql file and make sure the last line is something like `-- Dump completed on 2017-08-15 11:06:17`.
+After the dump has successfully been created, please make sure the last line is something like `-- Dump completed on 2017-08-15 11:06:17` by running the following command:
+
+<pre class="terminal">
+$ tail -f /tmp/my-db-dump.sql
+</pre>
 
 Next, create an SSH tunnel to the new MariaDB. Open the terminal where you have the SSH connection open, press `ctrl+c` of `ctrl+d` and run the following command:
 
