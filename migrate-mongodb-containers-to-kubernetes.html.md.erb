@@ -5,19 +5,37 @@ owner: Services
 
 <strong><%= modified_date %></strong>
 
-We have a completely new MongoDB container service in store for you. It comes with many improvements (recent MongoDB version and high availability with replica set) and we recommend to upgrade as soon as possible.
+We have a completely new MongoDB container service (managed by [Kubernetes Container Orchestration)](https://kubernetes.io) in store for you. It comes with many improvements (MongoDB version 3.4.9 and high availability with replica set) and we recommend to test as soon as possible.
 
 <pre class="terminal">
 $ cf marketplace | grep mongodb
+mongodb        small*, medium*, large*            MongoDB NoSQL Database v3.2.9
+mongodbent     small3rs*, medium3rs*, large3rs*   MongoDB Enterprise HA v3.2.6
+nova_mongodb   large*, small*, medium*            MongoDB cluster (nova)
 </pre>
+
+*Note*: The offer `mongodbent` is not container based, it uses on VMs for large deployments.
 
 *Important*: Please make sure that you have the latest [cf CLI](https://github.com/cloudfoundry/cli) installed before you follow this migration guide.
 
 First, create a new MongoDB Container instance and bind it to your app using the old MongoDB Container service:
 
 <pre class="terminal">
-$ cf create-service mariadbent usage my-db-new
+$ cf create-service nova_mongodb your-plan my-db-new
 $ cf bind-service my-awesome-app my-db-new
+</pre>
+
+Replace `your-plan` with large, small or medium. The plan details are at the moment:
+
+<pre class="terminal">
+$ cf marketplace -s nova_mongodb
+Getting service plan information for service nova_mongodb as admin...
+OK
+
+service plan   description                                                      free or paid
+large          Maximum 400 concurrent connections, 16 GB storage, 4 GB memory   paid
+small          Maximum 100 concurrent connections, 4 GB storage, 1 GB memory    paid
+medium         Maximum 200 concurrent connections, 8 GB storage, 2 GB memory    paid
 </pre>
 
 Next, stop your app:
@@ -26,7 +44,7 @@ Next, stop your app:
 $ cf stop my-awesome-app
 </pre>
 
-As a next step, we'll have to install the MongoDB server (which contains `mongodump` and `mongorestore`)
+As a next step, we'll have to install the MongoDB package (which contains `mongodump`, `mongo` Shell and `mongorestore`).
 
 On macOS, you can use [Homebrew](https://brew.sh/). For other systems, please refer to your package manager.
 
@@ -65,29 +83,66 @@ We'll use these credentials in the following steps, so remember how to get them.
 Next, create an SSH tunnel to your old DB through the proxy app (or any other app you intend to use).
 
 <pre class="terminal">
-cf ssh proy-app -L 13000:&lt;old-db-host&gt;:&lt;old-db-port&gt;
+cf ssh proxy-app -L 13000:&lt;old-db-host&gt;:&lt;old-db-port&gt;
 </pre>
 
 Now that we're connected, we can dump the old database using `mongodump`. Open a new terminal and run the following command:
 
 <pre class="terminal">
-$ mongodump -h localhost --port 13000 -u &lt;old-db-username&gt; -p --archive=/tmp/my-db-dump.archive -vvvvv &lt;old-db-database&gt;
+$ mongodump --host localhost:13000 --authenticationDatabase &lt;old-db-database&gt; -u &lt;old-db-username&gt; -d &lt;old-db-database&gt;
 Enter password: &lt;old-db-password&gt;
 </pre>
 
-Next, create an SSH tunnel to the new MongoDB container service. You need to connect to the current primary (not secondary). Open the terminal where you have the SSH connection open, press `ctrl+c` and run the following command:
+The last line in terminal output is something like `2017-10-18T14:11:53.340+0200    done dumping database-name.collection-name (1769759 documents)`.
+
+The tool `mongodump` creates in current directory this tree
 
 <pre class="terminal">
-$ cf ssh proy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
+$ tree dump
+dump
+└── database-name
+    ├── collection-name.bson
+    └── collection-name.metadata.json
+
+1 directory, 2 files
 </pre>
 
-Now we'll use the `mongorestore` CLI to restore the dump we created in the new MariaDB:
+Next, create an SSH tunnel to the new MongoDB container service. You need to connect to the current primary (not secondary).
+
+Open the terminal where you have the SSH connection open, press `ctrl+c` and run the following command:
 
 <pre class="terminal">
-mongorestore --host localhost --port 13000--username &lt;new-db-username&gt; --drop --writeConcern 2 --archive=/tmp/my-db-dump.archive --gzip
+$ cf ssh proxy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
+</pre>
+
+where `new-db-host` is one random host from connection string (example from `cf service-key my-db-new migration` output `mongodb://{ ... }@kubernetes-service-node.service.consul:41374,kubernetes-service-node.service.consul:47464,kubernetes-service-node.service.consul:42759/632913f0?replicaSet=rs_632913f0-bea7-4124-8ec7-eb4cefc02a0a`)
+
+Now use a `mongo` shell to see the current primary node:
+
+<pre class="terminal">
+$ mongo --quiet -u &lt;new-db-username&gt; localhost:13000/&lt;new-db-database&gt; --eval "rs.status().members.find(r=>r.state===1).name" -p
 Enter password: &lt;new-db-password&gt;
 </pre>
-Maybe you see errors or warnings. For example:
+
+Exit the previous `cf ssh`session and use `cf ssh` with the correct primary node port.
+
+<pre class="terminal">
+$ cf ssh proxy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
+</pre>
+
+Now we'll use the `mongorestore` CLI to restore the dump we created:
+
+<pre class="terminal">
+$ cd dump/database-name/
+$ mongorestore --host localhost:13000 --authenticationDatabase &lt;new-db-name&gt; -u &lt;new-db-username&gt; --writeConcern 2 -d &lt;new-db-name&gt; .
+Enter password: &lt;new-db-password&gt;
+</pre>
+
+You see something like `2017-10-18T15:16:31.129+0200    finished restoring 632913f0.collection-name (1769759 documents)` on your screen. After that the database server will build your indexes.
+
+The old database is a single node `mongod`. In new container service you need to care about [write concern](https://docs.mongodb.com/manual/core/replica-set-write-concern/) and [read concern](https://docs.mongodb.com/manual/reference/read-concern/). We recommend `majority` for data consistency reasons.
+
+The old MongoDB offer provides MongoDB 3.2 and some customers even using MongoDB 3.0 docker images. Please check [Release Notes for MongoDB 3.4](https://docs.mongodb.com/manual/release-notes/3.4/) and use the new features where it makes sense for your app.
 
 If you need support, please ask on [Stack Overflow #swisscomdev] (https://docs.developer.swisscom.com/devguide-sc/support.html).
 
@@ -99,9 +154,9 @@ $ cf rename-service my-db my-db-old
 $ cf rename-service my-db-new my-db
 </pre>
 
-*Important*: The new service will be under `mariadbent` instead of `mariadb` in the `VCAP_SERVICES` environment variable. If your app code uses these names in the JSON structure to bind to the app, please change it accordingly.
+*Important*: The new service will be under `nova_mongodb` instead of `nova` in the `VCAP_SERVICES` environment variable. If your app code uses these names in the JSON structure to bind to the app, please change it accordingly.
 
-Now it's time to start your app again with the new MariaDB
+Now it's time to start your app again with the new MongoDB container replica set:
 
 <pre class="terminal">
 $ cf start my-awesome-app
@@ -122,4 +177,4 @@ $ cf delete-service-key my-db-old migration
 $ cf delete-service my-db-old
 </pre>
 
-You have now migrated your app to the new MariaDB service. Congrats! Please repeat for all apps using the old one.
+You have now migrated your app to the new MongoDB container service. Congrats! Please repeat for all apps using the old one.
