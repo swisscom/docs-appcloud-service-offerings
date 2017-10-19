@@ -14,18 +14,7 @@ mongodbent     small3rs*, medium3rs*, large3rs*   MongoDB Enterprise HA v3.2.6
 nova_mongodb   large*, small*, medium*            MongoDB cluster (nova)
 </pre>
 
-*Note*: The offer `mongodbent` is not container based, it uses on VMs for large deployments.
-
-*Important*: Please make sure that you have the latest [cf CLI](https://github.com/cloudfoundry/cli) installed before you follow this migration guide.
-
-First, create a new MongoDB Container instance and bind it to your app using the old MongoDB Container service:
-
-<pre class="terminal">
-$ cf create-service nova_mongodb your-plan my-db-new
-$ cf bind-service my-awesome-app my-db-new
-</pre>
-
-Replace `your-plan` with large, small or medium. The plan details are at the moment:
+The different plans of Kubernetes based MongoDB offering are at the moment:
 
 <pre class="terminal">
 $ cf marketplace -s nova_mongodb
@@ -37,6 +26,19 @@ large          Maximum 400 concurrent connections, 16 GB storage, 4 GB memory   
 small          Maximum 100 concurrent connections, 4 GB storage, 1 GB memory    paid
 medium         Maximum 200 concurrent connections, 8 GB storage, 2 GB memory    paid
 </pre>
+
+*Note*: The offer `mongodbent` is not container based, it uses several VMs for large deployments.
+
+*Important*: Please make sure that you have the latest [cf CLI](https://github.com/cloudfoundry/cli) installed before you follow this migration guide.
+
+First, create a new MongoDB Container instance and bind it to your app using the old MongoDB Container service:
+
+<pre class="terminal">
+$ cf create-service nova_mongodb your-plan my-db-new
+$ cf bind-service my-awesome-app my-db-new
+</pre>
+
+Replace `your-plan` with large, small or medium.
 
 Next, stop your app:
 
@@ -50,7 +52,7 @@ On macOS, you can use [Homebrew](https://brew.sh/). For other systems, please re
 
 <pre class="terminal">
 # macOS only
-$ brew install mongodb
+$ brew install mongodb tree
 </pre>
 
 Next, we'll use [`cf ssh`](https://docs.developer.swisscom.com/devguide/deploy-apps/ssh-services.html) to access our services. As the proxy, you can either use an existing running app (Don't use an app which is bound to your MongoDB container service. These need to remain stopped for data consistency reasons.) in the same space or just push a dummy app if you don't have one. This app will only be used to SSH into so we get access to our service instances.
@@ -115,7 +117,7 @@ Open the terminal where you have the SSH connection open, press `ctrl+c` and run
 $ cf ssh proxy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
 </pre>
 
-where `new-db-host` is one random host from connection string (example from `cf service-key my-db-new migration` output `mongodb://{ ... }@kubernetes-service-node.service.consul:41374,kubernetes-service-node.service.consul:47464,kubernetes-service-node.service.consul:42759/632913f0?replicaSet=rs_632913f0-bea7-4124-8ec7-eb4cefc02a0a`)
+where `new-db-host` is the first port from connection string (example from `cf service-key my-db-new migration` output `mongodb://{ ... }@kubernetes-service-node.service.consul:41374,kubernetes-service-node.service.consul:47464,kubernetes-service-node.service.consul:42759/632913f0?replicaSet=rs_632913f0-bea7-4124-8ec7-eb4cefc02a0a`)
 
 Now use a `mongo` shell to see the current primary node:
 
