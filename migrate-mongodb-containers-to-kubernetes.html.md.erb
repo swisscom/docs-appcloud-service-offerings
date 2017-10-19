@@ -52,7 +52,7 @@ On macOS, you can use [Homebrew](https://brew.sh/). For other systems, please re
 
 <pre class="terminal">
 # macOS only
-$ brew install mongodb tree
+$ brew install mongodb
 </pre>
 
 Next, we'll use [`cf ssh`](https://docs.developer.swisscom.com/devguide/deploy-apps/ssh-services.html) to access our services. As the proxy, you can either use an existing running app (Don't use an app which is bound to your MongoDB container service. These need to remain stopped for data consistency reasons.) in the same space or just push a dummy app if you don't have one. This app will only be used to SSH into so we get access to our service instances.
@@ -97,6 +97,11 @@ Enter password: &lt;old-db-password&gt;
 
 The last line in the terminal output is something like `2017-10-18T14:11:53.340+0200    done dumping database-name.collection-name (1769759 documents)`.
 
+<pre class="terminal">
+# optional
+$ brew install tree
+</pre>
+
 The tool `mongodump` creates the following tree in the current directory:
 
 <pre class="terminal">
@@ -119,7 +124,7 @@ $ cf ssh proxy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
 
 where `new-db-host` is the first port from connection string (example from `cf service-key my-db-new migration` output `mongodb://{ ... }@kubernetes-service-node.service.consul:41374,kubernetes-service-node.service.consul:47464,kubernetes-service-node.service.consul:42759/632913f0?replicaSet=rs_632913f0-bea7-4124-8ec7-eb4cefc02a0a`)
 
-Now use a `mongo` shell to see the current primary node:
+Now use the `mongo` client in new terminal window to see the current primary node:
 
 <pre class="terminal">
 $ mongo --quiet -u &lt;new-db-username&gt; localhost:13000/&lt;new-db-database&gt; --eval "rs.status().members.find(r=>r.state===1).name" -p
