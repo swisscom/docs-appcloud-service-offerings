@@ -5,7 +5,7 @@ owner: Services
 
 <strong><%= modified_date %></strong>
 
-We have a completely new MongoDB container service (managed by [Kubernetes Container Orchestration)](https://kubernetes.io) in store for you. It comes with many improvements (MongoDB version 3.4.9 and high availability with replica set) and we recommend to test as soon as possible.
+We have a completely new MongoDB container service (managed by [Kubernetes Container Orchestration)](https://kubernetes.io) in store for you. It comes with many improvements (MongoDB version 3.4.9 and high availability with replica set) and we recommend to test it as soon as possible.
 
 <pre class="terminal">
 $ cf marketplace | grep mongodb
@@ -95,9 +95,9 @@ $ mongodump --host localhost:13000 --authenticationDatabase &lt;old-db-database&
 Enter password: &lt;old-db-password&gt;
 </pre>
 
-The last line in terminal output is something like `2017-10-18T14:11:53.340+0200    done dumping database-name.collection-name (1769759 documents)`.
+The last line in the terminal output is something like `2017-10-18T14:11:53.340+0200    done dumping database-name.collection-name (1769759 documents)`.
 
-The tool `mongodump` creates in current directory this tree
+The tool `mongodump` creates the following tree in the current directory:
 
 <pre class="terminal">
 $ tree dump
@@ -136,15 +136,15 @@ Now we'll use the `mongorestore` CLI to restore the dump we created:
 
 <pre class="terminal">
 $ cd dump/database-name/
-$ mongorestore --host localhost:13000 --authenticationDatabase &lt;new-db-name&gt; -u &lt;new-db-username&gt; --writeConcern 2 -d &lt;new-db-name&gt; .
+$ mongorestore --host localhost:13000 --authenticationDatabase &lt;new-db-database&gt; -u &lt;new-db-username&gt; --writeConcern 2 -d &lt;new-db-database&gt; .
 Enter password: &lt;new-db-password&gt;
 </pre>
 
 You see something like `2017-10-18T15:16:31.129+0200    finished restoring 632913f0.collection-name (1769759 documents)` on your screen. After that the database server will build your indexes.
 
-The old database is a single node `mongod`. In new container service you need to care about [write concern](https://docs.mongodb.com/manual/core/replica-set-write-concern/) and [read concern](https://docs.mongodb.com/manual/reference/read-concern/). We recommend `majority` for data consistency reasons.
+The old database is a single node `mongod`. In the new container service you need to care about [write concern](https://docs.mongodb.com/manual/core/replica-set-write-concern/) and [read concern](https://docs.mongodb.com/manual/reference/read-concern/). We recommend `majority` for data consistency reasons.
 
-The old MongoDB offer provides MongoDB 3.2 and some customers even using MongoDB 3.0 docker images. Please check [Release Notes for MongoDB 3.4](https://docs.mongodb.com/manual/release-notes/3.4/) and use the new features where it makes sense for your app.
+The old MongoDB offer provides MongoDB 3.2 and some customers are even using MongoDB 3.0 docker images. Please check [Release Notes for MongoDB 3.4](https://docs.mongodb.com/manual/release-notes/3.4/) and use the new features where it makes sense for your app.
 
 If you need support, please ask on [Stack Overflow #swisscomdev] (https://docs.developer.swisscom.com/devguide-sc/support.html).
 
