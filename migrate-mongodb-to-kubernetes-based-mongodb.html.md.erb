@@ -1,0 +1,188 @@
+---
+title: Migrate from legacy MongoDB to new MongoDB based on Kubernetes
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+We have a completely new MongoDB service (managed by [Kubernetes Container Orchestration)](https://kubernetes.io) in store for you. It comes with many improvements (MongoDB version 3.4.9 and high availability with replica set) and we recommend to migrate as soon as possible.
+
+<pre class="terminal">
+$ cf marketplace | grep mongodb
+mongodb        small*, medium*, large*            MongoDB NoSQL Database v3.2.9
+mongodbent     small3rs*, medium3rs*, large3rs*   MongoDB Enterprise HA v3.2.6
+nova_mongodb   large*, small*, medium*            MongoDB cluster (nova)
+</pre>
+
+The different plans of our Kubernetes based MongoDB offering are at the moment:
+
+<pre class="terminal">
+$ cf marketplace -s nova_mongodb
+Getting service plan information for service nova_mongodb as admin...
+OK
+
+service plan   description                                                      free or paid
+large          Maximum 400 concurrent connections, 16 GB storage, 4 GB memory   paid
+small          Maximum 100 concurrent connections, 4 GB storage, 1 GB memory    paid
+medium         Maximum 200 concurrent connections, 8 GB storage, 2 GB memory    paid
+</pre>
+
+*Note*: The offer `mongodbent` uses several VMs and is intended for large deployments. It is not affected by this migration guide.
+
+*Important*: Please make sure that you have the latest [cf CLI](https://github.com/cloudfoundry/cli) installed before you follow this migration guide.
+
+First, create a new MongoDB instance and bind it to your app using the old MongoDB service:
+
+<pre class="terminal">
+$ cf create-service nova_mongodb your-plan my-db-new
+$ cf bind-service my-awesome-app my-db-new
+</pre>
+
+Replace `your-plan` with `large`, `small` or `medium`.
+
+Next, stop your app:
+
+<pre class="terminal">
+$ cf stop my-awesome-app
+</pre>
+
+As a next step, we'll have to install the MongoDB package (which contains `mongodump`, `mongo` Shell and `mongorestore`) on our local machine.
+
+On macOS, you can use [Homebrew](https://brew.sh/). For other systems, please refer to your package manager.
+
+<pre class="terminal">
+# macOS only
+$ brew install mongodb
+</pre>
+
+Next, we'll use [`cf ssh`](https://docs.developer.swisscom.com/devguide/deploy-apps/ssh-services.html) to access our services. As the proxy, you can either use an existing running app (Don't use an app which is bound to your MongoDB service. These need to remain stopped for data consistency reasons.) in the same space or just push a dummy app if you don't have one. This app will only be used to SSH into so we get access to our service instances.
+
+*Important*: Please make sure that the app you are using has been pushed or restarted within the last week since it needs to use the latest [security groups](https://docs.cloudfoundry.org/concepts/asg.html) to be able to connect to the new MongoDB service.
+
+<pre class="terminal">
+# Only needed if you don't have a running app in your space
+$ git clone https://github.com/cloudfoundry-community/cf-env.git
+$ cd cf-env
+$ cf push proxy-app --no-route
+</pre>
+
+Now, we'll need to create [serivce keys](https://docs.developer.swisscom.com/devguide/services/service-keys.html) for our service instances to get access credentials for them. To get these, run the following commands:
+
+<pre class="terminal">
+# Old database
+$ cf create-service-key my-db migration
+$ cf service-key my-db migration
+{ ... }
+
+# New database
+$ cf create-service-key my-db-new migration
+$ cf service-key my-db-new migration
+{ ... }
+</pre>
+
+We'll use these credentials in the following steps, so remember how to get them. Please replace the terms in `<...>` with the respective value from these service keys.
+
+Next, create an SSH tunnel to your old DB through the proxy app (or any other app you intend to use).
+
+<pre class="terminal">
+cf ssh proxy-app -L 13000:&lt;old-db-host&gt;:&lt;old-db-port&gt;
+</pre>
+
+Now that we're connected, we can dump the old database using `mongodump`. Open a new terminal and run the following command:
+
+<pre class="terminal">
+$ mongodump --host localhost:13000 --authenticationDatabase &lt;old-db-database&gt; -u &lt;old-db-username&gt; -d &lt;old-db-database&gt;
+Enter password: &lt;old-db-password&gt;
+</pre>
+
+The last line in the terminal output is something like `2017-10-18T14:11:53.340+0200    done dumping database-name.collection-name (1769759 documents)`.
+
+<pre class="terminal">
+# optional
+$ brew install tree
+</pre>
+
+The tool `mongodump` creates the following tree in the current directory:
+
+<pre class="terminal">
+$ tree dump
+dump
+└── database-name
+    ├── collection-name.bson
+    └── collection-name.metadata.json
+
+1 directory, 2 files
+</pre>
+
+Next, create an SSH tunnel to the new MongoDB service. You need to connect to the current primary because it's the only writable node.
+
+Open the terminal where you have the SSH connection open, press `ctrl+c` and run the following command:
+
+<pre class="terminal">
+$ cf ssh proxy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
+</pre>
+
+where `new-db-port` is the first port from the connection string (example from `cf service-key my-db-new migration` output `mongodb://{ ... }@kubernetes-service-node.service.consul:41374,kubernetes-service-node.service.consul:47464,kubernetes-service-node.service.consul:42759/632913f0?replicaSet=rs_632913f0-bea7-4124-8ec7-eb4cefc02a0a`)
+
+Now use the `mongo` client in a new terminal window to see which node is the current primary:
+
+<pre class="terminal">
+$ mongo --quiet -u &lt;new-db-username&gt; localhost:13000/&lt;new-db-database&gt; --eval "rs.status().members.find(r=>r.state===1).name" -p
+Enter password: &lt;new-db-password&gt;
+</pre>
+
+Exit the previous `cf ssh` session and use `cf ssh` with the correct primary node port.
+
+<pre class="terminal">
+$ cf ssh proxy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
+</pre>
+
+Now we'll use the `mongorestore` CLI to restore the dump we created:
+
+<pre class="terminal">
+$ cd dump/&lt;old-db-database&gt;/
+# don't forget the "." at the end of the command
+$ mongorestore --host localhost:13000 --authenticationDatabase &lt;new-db-database&gt; -u &lt;new-db-username&gt; --writeConcern 2 -d &lt;new-db-database&gt; .
+Enter password: &lt;new-db-password&gt;
+</pre>
+
+You should see something like `2017-10-18T15:16:31.129+0200    finished restoring 632913f0.collection-name (1769759 documents)` on your screen. Afterwards, that the database server will build your indexes (may take some time).
+
+The old database is a single node MongoDB. In the new service, you need to take [write concern](https://docs.mongodb.com/manual/core/replica-set-write-concern/) and [read concern](https://docs.mongodb.com/manual/reference/read-concern/) into account. We recommend `majority` for data consistency reasons.
+
+The old MongoDB offer provides MongoDB 3.2 and some customers are even using MongoDB 3.0 docker images. Please check [Release Notes for MongoDB 3.4](https://docs.mongodb.com/manual/release-notes/3.4/) and use the new features where it makes sense for your app.
+
+If you need any support, please ask on [Stack Overflow #swisscomdev] (https://docs.developer.swisscom.com/devguide-sc/support.html).
+
+Now, we can unbind the old MongoDB service and rename the new database to use the real name:
+
+<pre class="terminal">
+$ cf unbind-service my-awesome-app my-db
+$ cf rename-service my-db my-db-old
+$ cf rename-service my-db-new my-db
+</pre>
+
+*Important*: The new service will be available under `nova_mongodb` instead of `mongodb` in the `VCAP_SERVICES` environment variable. If your app code uses these names in the JSON structure to bind to the app, please change it accordingly.
+
+Now it's time to start your app again with the new MongoDB service:
+
+<pre class="terminal">
+$ cf start my-awesome-app
+</pre>
+
+For some apps, you'll also need to do a restage so they can pick up all environment variables properly:
+
+<pre class="terminal">
+# Optional
+$ cf restage my-awesome-app
+</pre>
+
+As soon as everything is working properly, you can remove the service keys and the old database:
+
+<pre class="terminal">
+$ cf delete-service-key my-old migration
+$ cf delete-service-key my-db-old migration
+$ cf delete-service my-db-old
+</pre>
+
+You have now migrated your app to the new MongoDB service. Congrats! Please repeat for all apps using the old one.
