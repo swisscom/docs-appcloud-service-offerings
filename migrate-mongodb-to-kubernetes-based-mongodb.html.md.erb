@@ -66,7 +66,7 @@ $ cd cf-env
 $ cf push proxy-app --no-route
 </pre>
 
-Now, we'll need to create [serivce keys](https://docs.developer.swisscom.com/devguide/services/service-keys.html) for our service instances to get access credentials for them. To get these, run the following commands:
+Now, we'll need to create [service keys](https://docs.developer.swisscom.com/devguide/services/service-keys.html) for our service instances to get access credentials for them. To get these, run the following commands:
 
 <pre class="terminal">
 # Old database
@@ -146,7 +146,7 @@ $ mongorestore --host localhost:13000 --authenticationDatabase &lt;new-db-databa
 Enter password: &lt;new-db-password&gt;
 </pre>
 
-You should see something like `2017-10-18T15:16:31.129+0200    finished restoring 632913f0.collection-name (1769759 documents)` on your screen. Afterwards, that the database server will build your indexes (may take some time).
+You should see something like `2017-10-18T15:16:31.129+0200    finished restoring 632913f0.collection-name (1769759 documents)` on your screen. Afterwards, the database server will build your indexes (may take some time).
 
 The old database is a single node MongoDB. In the new service, you need to take [write concern](https://docs.mongodb.com/manual/core/replica-set-write-concern/) and [read concern](https://docs.mongodb.com/manual/reference/read-concern/) into account. We recommend `majority` for data consistency reasons.
 
@@ -185,4 +185,4 @@ $ cf delete-service-key my-db-old migration
 $ cf delete-service my-db-old
 </pre>
 
-You have now migrated your app to the new MongoDB service. Congrats! Please repeat for all apps using the old one.
+You have now migrated your app to the new MongoDB service. Congratulations! Please repeat for all apps using the old one.
