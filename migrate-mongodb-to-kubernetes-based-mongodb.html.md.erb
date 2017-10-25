@@ -116,7 +116,7 @@ dump
 
 Next, create an SSH tunnel to the new MongoDB service. You need to connect to the current primary because it's the only writable node.
 
-Open the terminal where you have the SSH connection open, press `ctrl+c` and run the following command:
+Open the terminal where you have the SSH connection open, press `ctrl+d` and run the following command:
 
 <pre class="terminal">
 $ cf ssh proxy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
