@@ -148,7 +148,7 @@ Enter password: &lt;new-db-password&gt;
 
 You should see something like `2017-10-18T15:16:31.129+0200    finished restoring 632913f0.collection-name (1769759 documents)` on your screen. Afterwards, that the database server will build your indexes (may take some time).
 
-The old database is a single node MongoDB. In the new service, you need to take [write concern](https://docs.mongodb.com/manual/core/replica-set-write-concern/) and [read concern](https://docs.mongodb.com/manual/reference/read-concern/) into account. We recommend `majority` for data consistency reasons.
+The old database is a single node MongoDB. In the new service, you need to take [write concern](https://docs.mongodb.com/manual/core/replica-set-write-concern/) and [read concern](https://docs.mongodb.com/manual/reference/read-concern/) into account. We recommend using a write concern of `2` in order to ensure data consistency at all times.
 
 The old MongoDB offer provides MongoDB 3.2 and some customers are even using MongoDB 3.0 docker images. Please check [Release Notes for MongoDB 3.4](https://docs.mongodb.com/manual/release-notes/3.4/) and use the new features where it makes sense for your app.
 
