@@ -40,3 +40,29 @@ To connect to a running MongoDB instance with your local development tools, you 
 ## <a id='sample-application'></a> Sample Application
 
 Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
+
+## <a id='specifications'></a> Specifications
+
+Our [MongoDB](https://www.mongodb.com/community) offering consists of 3 Kubernetes containers configured as a replica set.
+
+## <a id='roles'></a> Roles
+
+You will receive the role `clusterMonitor` on admin db , `readWrite` and `dbAdmin` roles on your DB.
+
+## <a id='bestpractices'></a> Best Practices for Developers
+
+- Write concern 2
+
+  Please read [Replica Set Read and Write Semantics](https://docs.mongodb.com/manual/applications/replication). We recommend a "Write Concern" of `2` in order to ensure data consistency at all times.
+
+- Use an application driver maintained by the MongoDB team
+
+  It’s critical to find a driver that [is well-maintained](https://docs.mongodb.com/ecosystem/drivers/) and stays up to date with the latest MongoDB features.
+
+- Index early and often
+
+  Without question, the most common database performance issue is improper indexing (or a complete lack thereof). Have a look at [Indexes docs](https://docs.mongodb.com/manual/indexes/).
+
+- Consider a query timeout
+
+  MongoDB targets operations for termination if the associated cursor exceeds its allotted time limit. See [cursor.maxTimeMS()](https://docs.mongodb.com/manual/reference/method/cursor.maxTimeMS/) for more details.
