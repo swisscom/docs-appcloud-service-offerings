@@ -5,20 +5,19 @@ owner: Services
 
 <strong><%= modified_date %></strong>
 
-We have a completely new MongoDB service (managed by [Kubernetes Container Orchestration)](https://kubernetes.io) in store for you. It comes with many improvements (MongoDB version 3.4.9 and high availability with replica set) and we recommend to migrate as soon as possible.
+We have a completely new MongoDB service (managed by [Kubernetes Container Orchestration)](https://kubernetes.io) in store for you. It comes with many improvements (MongoDB version 3.4.10 and high availability with replica set) and we recommend to migrate as soon as possible.
 
 <pre class="terminal">
 $ cf marketplace | grep mongodb
-mongodb        small*, medium*, large*            MongoDB NoSQL Database v3.2.9
-mongodbent     small3rs*, medium3rs*, large3rs*   MongoDB Enterprise HA v3.2.6
-nova_mongodb   large*, small*, medium*            MongoDB cluster (nova)
+mongodb              large*, small*, medium*            MongoDB Replica Set v3.4.10
+mongodbent           small3rs*, medium3rs*, large3rs*   MongoDB Enterprise HA v3.2.6
 </pre>
 
 The different plans of our Kubernetes based MongoDB offering are at the moment:
 
 <pre class="terminal">
-$ cf marketplace -s nova_mongodb
-Getting service plan information for service nova_mongodb as admin...
+$ cf marketplace -s mongodb
+Getting service plan information for service mongodb as admin...
 OK
 
 service plan   description                                                      free or paid
@@ -34,7 +33,7 @@ medium         Maximum 200 concurrent connections, 8 GB storage, 2 GB memory    
 First, create a new MongoDB instance and bind it to your app using the old MongoDB service:
 
 <pre class="terminal">
-$ cf create-service nova_mongodb your-plan my-db-new
+$ cf create-service mongodb your-plan my-db-new
 $ cf bind-service my-awesome-app my-db-new
 </pre>
 
@@ -161,8 +160,6 @@ $ cf unbind-service my-awesome-app my-db
 $ cf rename-service my-db my-db-old
 $ cf rename-service my-db-new my-db
 </pre>
-
-*Important*: The new service will be available under `nova_mongodb` instead of `mongodb` in the `VCAP_SERVICES` environment variable. If your app code uses these names in the JSON structure to bind to the app, please change it accordingly.
 
 Now it's time to start your app again with the new MongoDB service:
 
