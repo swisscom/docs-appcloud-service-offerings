@@ -77,6 +77,8 @@ $ mysqldump --protocol TCP --port 13000 --user &lt;old-db-username&gt; --passwor
 Enter password: &lt;old-db-password&gt;
 </pre>
 
+If you have an error like `bash: mysqldump: command not found`, please run the `mysqldump` local on your desktop (new Terminal window). On Cloud Foundry proxy app this tool is not installed.
+
 After the dump has successfully been created, please make sure the last line is something like `-- Dump completed on 2017-08-15 11:06:17` by running the following command:
 
 <pre class="terminal">
