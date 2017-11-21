@@ -77,6 +77,8 @@ $ mysqldump --protocol TCP --port 13000 --user &lt;old-db-username&gt; --passwor
 Enter password: &lt;old-db-password&gt;
 </pre>
 
+If you run into an error like `bash: mysqldump: command not found`, please be aware that you have to run the `mysqldump` command on your local machine in a new terminal window.
+
 After the dump has successfully been created, please make sure the last line is something like `-- Dump completed on 2017-08-15 11:06:17` by running the following command:
 
 <pre class="terminal">
