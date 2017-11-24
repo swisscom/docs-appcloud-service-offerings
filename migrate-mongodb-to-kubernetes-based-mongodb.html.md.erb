@@ -9,21 +9,21 @@ We have a completely new MongoDB service (managed by [Kubernetes Container Orche
 
 <pre class="terminal">
 $ cf marketplace | grep mongodb
-mongodb              large*, small*, medium*            MongoDB Replica Set v3.4.10
+mongodb-2            small*, medium*, large*            MongoDB Replica Set v3.4.10
 mongodbent           small3rs*, medium3rs*, large3rs*   MongoDB Enterprise HA v3.2.6
 </pre>
 
 The different plans of our Kubernetes based MongoDB offering are at the moment:
 
 <pre class="terminal">
-$ cf marketplace -s mongodb
-Getting service plan information for service mongodb as admin...
+$ cf marketplace -s mongodb-2
+Getting service plan information for service mongodb-2 as admin...
 OK
 
 service plan   description                                                      free or paid
-large          Maximum 400 concurrent connections, 16 GB storage, 4 GB memory   paid
 small          Maximum 100 concurrent connections, 4 GB storage, 1 GB memory    paid
 medium         Maximum 200 concurrent connections, 8 GB storage, 2 GB memory    paid
+large          Maximum 400 concurrent connections, 16 GB storage, 4 GB memory   paid
 </pre>
 
 *Note*: The offer `mongodbent` uses several VMs and is intended for large deployments. It is not affected by this migration guide.
@@ -33,7 +33,7 @@ medium         Maximum 200 concurrent connections, 8 GB storage, 2 GB memory    
 First, create a new MongoDB instance and bind it to your app using the old MongoDB service:
 
 <pre class="terminal">
-$ cf create-service mongodb your-plan my-db-new
+$ cf create-service mongodb-2 your-plan my-db-new
 $ cf bind-service my-awesome-app my-db-new
 </pre>
 
