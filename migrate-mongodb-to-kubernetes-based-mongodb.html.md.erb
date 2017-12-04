@@ -84,7 +84,7 @@ We'll use these credentials in the following steps, so remember how to get them.
 Next, create an SSH tunnel to your old DB through the proxy app (or any other app you intend to use).
 
 <pre class="terminal">
-cf ssh proxy-app -L 13000:&lt;old-db-host&gt;:&lt;old-db-port&gt;
+$ cf ssh proxy-app -L 13000:&lt;old-db-host&gt;:&lt;old-db-port&gt;
 </pre>
 
 Now that we're connected, we can dump the old database using `mongodump`. Open a new terminal and run the following command:
@@ -92,6 +92,11 @@ Now that we're connected, we can dump the old database using `mongodump`. Open a
 <pre class="terminal">
 $ mongodump --host localhost:13000 --authenticationDatabase &lt;old-db-database&gt; -u &lt;old-db-username&gt; -d &lt;old-db-database&gt;
 Enter password: &lt;old-db-password&gt;
+</pre>
+    
+*Note*: if there's an issue connecting to the database, try restaging the app you're using as a proxy (and then recreate the SSH tunnel):
+<pre class="terminal">
+$ cf restage proxy-app
 </pre>
 
 The last line in the terminal output is something like `2017-10-18T14:11:53.340+0200    done dumping database-name.collection-name (1769759 documents)`.
@@ -128,6 +133,11 @@ Now use the `mongo` client in a new terminal window to see which node is the cur
 <pre class="terminal">
 $ mongo --quiet -u &lt;new-db-username&gt; localhost:13000/&lt;new-db-database&gt; --eval "rs.status().members.find(r=>r.state===1).name" -p
 Enter password: &lt;new-db-password&gt;
+</pre>
+
+*Note*: if there's an issue connecting to the database, try restaging the app you're using as a proxy (and then recreate the SSH tunnel):
+<pre class="terminal">
+$ cf restage proxy-app
 </pre>
 
 Exit the previous `cf ssh` session and use `cf ssh` with the correct primary node port.
@@ -173,6 +183,8 @@ For some apps, you'll also need to do a restage so they can pick up all environm
 # Optional
 $ cf restage my-awesome-app
 </pre>
+    
+Also, depending on how your app gets the credentials, you might have to adjust it accordingly. For example the key for the credentials in the `VCAP_SERVICES` environment variable changed from `mongodb` to `mongodb-2`.
 
 As soon as everything is working properly, you can remove the service keys and the old database:
 
