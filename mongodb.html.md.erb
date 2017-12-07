@@ -61,7 +61,7 @@ You will receive the role `clusterMonitor` on the admin DB, and the roles `readW
 
 - Index early and often
 
-  Without question, the most common database performance issue is improper indexing (or a complete lack thereof). Have a look at [Indexes manual](https://docs.mongodb.com/manual/indexes/).
+  Without question, the most common database performance issue is improper indexing (or a complete lack thereof). Have a look at the [Indexes manual](https://docs.mongodb.com/manual/indexes/).
 
 - Consider a query timeout
 
@@ -73,7 +73,7 @@ In accordance with the service plan you choose from the marketplace, resource li
 
 - Memory
 
-  If a replica set member of your MongoDB service instance exhausts the available memory, its `mongod` process will be killed and restarted. Luckily, the MongoDB replica set and MongoDB driver will mitigate this efficiently and without any noticeable downtime by default. However your experience might degrade if the load isn't reduced and this keeps happening repeatedly within a short time frame.
+  If a replica set member of your MongoDB service instance exhausts the available memory, its `mongod` process will be killed and restarted. Luckily, the MongoDB replica set and MongoDB driver will mitigate this efficiently and without any noticeable downtime by default. However, your experience might degrade if the load isn't reduced and this keeps happening repeatedly within a short time frame.
 
 - Storage
 
@@ -81,4 +81,4 @@ In accordance with the service plan you choose from the marketplace, resource li
 
 - Connections
 
-  If you reach the maximum number of connections, you won't be able to open additional connections before closing old ones. Furthermore, it will prevent self-maintenance of the MongoDB service which can lead to a service outage until resolved.
+  If you reach the maximum number of connections, you won't be able to open additional connections before closing existing ones. Furthermore, it will prevent self-maintenance of the MongoDB service which can lead to a service outage until resolved.
