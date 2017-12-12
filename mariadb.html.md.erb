@@ -36,7 +36,7 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 ```
 
 <p class="note">
-Please be aware that the number of concurrent connections to MariaDB is limited depending on the service plan you chose. You can manage this by using connection pooling.
+Please be aware that the number of concurrent connections (max_connections) to MariaDB is limited. You can manage this by using connection pooling.
 </p>
 
 ## <a id='administrating'></a> Administrating Your MariaDB Instances
@@ -44,6 +44,8 @@ Please be aware that the number of concurrent connections to MariaDB is limited 
 To connect to a running MariaDB instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
 
 You can deploy [PivotalMySQLWeb](https://github.com/pivotal-cf/PivotalMySQLWeb) for MariaDB management on the Swisscom Application Cloud. It's not the most feature rich GUI client for MariaDB, but a nice cloud native app with a simple deployment process.
+
+You can use the [cf-mysql-plugin](https://github.com/andreasf/cf-mysql-plugin) for the [Cloud Foundry CLI](https://github.com/cloudfoundry/cli). This plugin installs the `mysql`and `mysqldump` clients and integrates them into the Cloud Foundry ecosystem.
 
 ## <a id='usecases'></a> Use Cases
 
@@ -59,7 +61,7 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 Our HA MariaDB offering is based on Galera, which brings some [known limitations (from mariadb.com)](https://mariadb.com/kb/en/mariadb/mariadb-galera-cluster-known-limitations/) with it. Please read this article carefully.
 
-A summary of Galera limitations is on [Galera Caveats](http://mysql.rjweb.org/doc.php/galera) (blockquote modified for our offering):
+A summary of Galera limitations is on [Tips on Converting to Galera](https://mariadb.com/kb/en/library/tips-on-converting-to-galera/) (blockquote modified for our offering):
 
 > Dear Schema Designer:
 
@@ -70,7 +72,6 @@ A summary of Galera limitations is on [Galera Caveats](http://mysql.rjweb.org/do
 > - Check for errors, even after `COMMIT`.
 > - Moderate sized transactions.
 > - Don't make assumptions about `AUTO_INCREMENT` values other than uniqueness. Not monotonicity, not gapless. (This applies for non-Galera, but probably happens more often here.)
-> - Handling of "critical reads" is quite different (arguably better).
 
 > Dear DBA:
 
