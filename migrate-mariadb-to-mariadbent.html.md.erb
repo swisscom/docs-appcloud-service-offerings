@@ -108,11 +108,16 @@ If you do get errors, jump to the respective line number and investigate. One si
 
 If you need support, please ask on [Stack Overflow #swisscomdev] (https://docs.developer.swisscom.com/devguide-sc/support.html).
 
-Now, we can unbind the old MariaDB service and rename the new database to use the real name:
+Now, we can unbind the old MariaDB service and delete the old database:
 
 <pre class="terminal">
 $ cf unbind-service my-awesome-app my-db
-$ cf rename-service my-db my-db-old
+$ cf delete-service my-db
+</pre>
+
+After this you can rename the migrated DB instance to your old instance name:
+
+<pre class="terminal">
 $ cf rename-service my-db-new my-db
 </pre>
 
