@@ -60,8 +60,8 @@ Next, we'll use [`cf ssh`](https://docs.developer.swisscom.com/devguide/deploy-a
 
 <pre class="terminal">
 # Only needed if you don't have a running app in your space
-$ git clone https://github.com/cloudfoundry-community/cf-env.git
-$ cd cf-env
+$ git clone https://github.com/swisscom/cf-default-app-staticfile.git
+$ cd cf-default-app-staticfile
 $ cf push proxy-app --no-route
 </pre>
 
@@ -93,7 +93,7 @@ Now that we're connected, we can dump the old database using `mongodump`. Open a
 $ mongodump --host localhost:13000 --authenticationDatabase &lt;old-db-database&gt; -u &lt;old-db-username&gt; -d &lt;old-db-database&gt;
 Enter password: &lt;old-db-password&gt;
 </pre>
-    
+
 *Note*: if there's an issue connecting to the database, try restaging the app you're using as a proxy (and then recreate the SSH tunnel):
 <pre class="terminal">
 $ cf restage proxy-app
@@ -183,7 +183,7 @@ For some apps, you'll also need to do a restage so they can pick up all environm
 # Optional
 $ cf restage my-awesome-app
 </pre>
-    
+
 Also, depending on how your app gets the credentials, you might have to adjust it accordingly. For example the key for the credentials in the `VCAP_SERVICES` environment variable changed from `mongodb` to `mongodb-2`.
 
 As soon as everything is working properly, you can remove the service keys and the old database:
