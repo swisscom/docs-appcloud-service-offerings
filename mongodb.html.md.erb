@@ -53,7 +53,7 @@ You will receive the role `clusterMonitor` on the admin DB, and the roles `readW
 
 - Write concern 2
 
-  Please read [Replica Set Read and Write Semantics](https://docs.mongodb.com/manual/applications/replication). We recommend a "Write Concern" of `2` in order to ensure data consistency at all times.
+  Please read [Replica Set Read and Write Semantics](https://docs.mongodb.com/manual/applications/replication). We recommend a "Write Concern" of `2` in order to ensure data consistency at all times, even if the replica set temporarily consists of just 2 nodes e.g. during system maintenance.
 
 - Use an application driver maintained by the MongoDB team
 
@@ -61,8 +61,24 @@ You will receive the role `clusterMonitor` on the admin DB, and the roles `readW
 
 - Index early and often
 
-  Without question, the most common database performance issue is improper indexing (or a complete lack thereof). Have a look at [Indexes manual](https://docs.mongodb.com/manual/indexes/).
+  Without question, the most common database performance issue is improper indexing (or a complete lack thereof). Have a look at the [Indexes manual](https://docs.mongodb.com/manual/indexes/).
 
 - Consider a query timeout
 
   MongoDB targets operations for termination if the associated cursor exceeds its allotted time limit. See [cursor.maxTimeMS()](https://docs.mongodb.com/manual/reference/method/cursor.maxTimeMS/) for more details.
+
+## <a id='warnings'></a> Warnings
+
+In accordance with the service plan you choose from the marketplace, resource limitations are enforced. Please note that exhausting those limitations comes with certain risks, and MongoDB itself only has very limited means of preventing overload / overuse.
+
+- Memory
+
+  If a replica set member of your MongoDB service instance exhausts the available memory, its `mongod` process will be killed and restarted. Luckily, the MongoDB replica set and MongoDB driver will mitigate this efficiently and without any noticeable downtime by default. However, your experience might degrade if the load isn't reduced and this keeps happening repeatedly within a short time frame.
+
+- Storage
+
+  If a replica set member of your MongoDB service instance runs out of disk space, its `mongod` process will crash and likely not be able to recover automatically. Additionally, there's an increased risk of data corruption if this happens.
+
+- Connections
+
+  If you reach the maximum number of connections, you won't be able to open additional connections before closing existing ones. Furthermore, it will prevent self-maintenance of the MongoDB service which can lead to a service outage until resolved.
