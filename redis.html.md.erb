@@ -12,16 +12,23 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 ```json
 {
   "redis-2": [
-   {
+    {
       "credentials": {
-        "host": "v47n9xwgdgq1cejy.service.consul",
-        "password": "okX21RG85anPfDJa",
-        "port": 35719
+        "host": "kubernetes-service-node.service.consul",
+        "master_port": 53574,
+        "password": "Qo31B0f5FWTXywJX7ZMG3OOZNLCVg9",
+        "port": 53574,
+        "slave_ports": [
+          42613,
+          35581
+        ]
       },
-      "label": "redis",
+      "label": "redis-2",
       "name": "redis-example",
       "plan": "small",
-      "tags": []
+      "tags": [
+       "redis"
+      ]
     }
   ]
 }

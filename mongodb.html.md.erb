@@ -11,19 +11,24 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 
 ```json
 {
-  "mongodb": [
+  "mongodb-2": [
     {
       "credentials": {
-        "database": "B4aoTv0R5jLZ0ert",
-        "database_uri": "mongodb://GUoTS9oD4zwCib:mZCefFh@56nf9pbtprvzu.service.consul:57890/B4aoTv0R5jLZ0ert",
-        "host": "56nf9pbtprvzu.service.consul",
-        "password": "mZCefFh",
-        "uri": "mongodb://GUoTS9oD4zwCib:mZCefFh@56nf9pbtprvzu.service.consul:57890/B4aoTv0R5jLZ0ert",
-        "username": "GUoTS9oD4zwCib"
+        "host": "kubernetes-service-node.service.consul",
+        "ports": "52181,34278,31026",
+        "username": "QkHWHmwkale0D90p",
+        "password": "l9uGWEC6xZmiL7KG",
+        "database": "c052a0cq",
+        "database_uri": "mongodb://QkHWHmwkale0D90p:l9uGWEC6xZmiL7KG@kubernetes-service-node.service.consul:52181,kubernetes-service-node.service.consul:34278,kubernetes-service-node.service.consul:31026/c052a0cq?replicaSet=rs_ca5200la-6v2f-12ch-ab72-c8d8g79630bc",
+        "uri": "mongodb://QkHWHmwkale0D90p:l9uGWEC6xZmiL7KG@kubernetes-service-node.service.consul:52181,kubernetes-service-node.service.consul:34278,kubernetes-service-node.service.consul:31026/c052a0cq?replicaSet=rs_ca5200la-6v2f-12ch-ab72-c8d8g79630bc",
+        "replica_set": "rs_ca5200la-6v2f-12ch-ab72-c8d8g79630bc"
       },
-      "label": "mongodb",
+      "label": "mongodb-2",
+      "name": "mongodb-example",
       "plan": "small",
-      "tags": []
+      "tags": [
+        "mongodb"
+      ]
     }
   ]
 }
