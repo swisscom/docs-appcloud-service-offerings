@@ -1,0 +1,79 @@
+---
+title: Elasticsearch
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+## <a id='overview'></a> Overview
+
+Elasticsearch is a powerful open-source search engine for full text search.
+
+## <a id='integrating-your-service'></a> Integrating the Service With Your App
+
+After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+
+```json
+{
+ "VCAP_SERVICES": {
+  "elasticsearch": [
+   {
+    "binding_name": null,
+    "credentials": {
+     "full_access_password": "sBBpCWY8aSNZ53R0",
+     "full_access_username": "eslB7cbcoW68wM7orP",
+     "host": "https://d15c5caa5a3147ed9b9e3e4694162b3f.elasticsearch.lyra-836.appcloud.swisscom.com",
+     "kibana_read_only_password": "v1ZNnxh1kkUqyxkR",
+     "kibana_read_only_username": "kro7V1B1FS0Hw3gJPeT",
+     "kibana_system_password": "I5Uwt7M2IHdQo8mP",
+     "kibana_system_username": "ksrh817DjDmHCkiFnX",
+     "logstash_system_password": "cfvVs0Vto2wt9V9L",
+     "logstash_system_username": "lsE9steNcerSqJNQ38"
+    },
+    "instance_name": "elasticsearch-service",
+    "label": "elasticsearch",
+    "name": "elasticsearch-service",
+    "plan": "xxsmall",
+    "provider": null,
+    "syslog_drain_url": null,
+    "tags": [
+     "elasticsearch"
+    ],
+    "volume_mounts": []
+   }
+  ]
+ }
+}
+
+```
+
+## <a id='privileges'></a> User Privileges
+
+Each [binding](../devguide/services/application-binding.html#bind) comes with a set of for users with different privileges.
+
+- `kibana_read_only_username`: a user which has read access to Kibana. This user should be used when giving access to you Kibana.
+- `full_access_username`: a user which has read and write access to all indices. This user is optimal for integration with your appication.
+- `kibana_system_username`: a system user for the Kibana application.
+- `logstash_system_username`: a system user for the Logstash application
+
+## <a id='x-pack'></a> X-Pack
+
+Our Elasticsearch service comes with X-Pack preinstalled and activated. The X-Pack license fee is included in the price.
+
+## <a id='kibana'></a> Kibana
+
+Starting a Kibana for your service is very simple just push an App with the [Kibana buildpack](https://github.com/swisscom/kibana-buildpack)
+A guide on how to set-up your Kibana is here: [Elasticsearch Buildpacks](./elasticsearch-buildpacks.html)
+
+## <a id='logstash'></a> Logstash
+
+Starting a Logstash for your service is very simple just push an App with the [Logstash buildpack](https://github.com/swisscom/logstash-buildpack)
+A guide on how to set-up your Logstash is here: [Elasticsearch Buildpacks](./elasticsearch-buildpacks.html)
+
+## <a id='curator'></a> Curator
+
+Curator is integrated into the [Logstash buildpack](https://github.com/swisscom/logstash-buildpack)
+
+## <a id='highavailablility'></a> High Availability
+
+The Elasticsearch cluster consists of 3 nodes in 3 different availability zones. By default, each index in Elasticsearch is allocated 5 primary shards and 1 replica. Make sure you configure the number of shards & replicas accordingly in the index templates if you don't want to use the default settings. Swisscom cannot guarantee the availability of your data unless you cinfugure at least one replica.
