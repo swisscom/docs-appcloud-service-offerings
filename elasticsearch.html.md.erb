@@ -49,7 +49,7 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 
 ## <a id='privileges'></a> User Privileges
 
-Each [binding](../devguide/services/application-binding.html#bind) comes with a set of for users with different privileges.
+Each [binding](../devguide/services/application-binding.html#bind) comes with a set of four users with different privileges.
 
 - `kibana_read_only_username`: a user which has read access to Kibana. This user should be used when giving access to you Kibana.
 - `full_access_username`: a user which has read and write access to all indices. This user is optimal for integration with your appication.
@@ -62,18 +62,18 @@ Our Elasticsearch service comes with X-Pack preinstalled and activated. The X-Pa
 
 ## <a id='kibana'></a> Kibana
 
-Starting a Kibana for your service is very simple just push an App with the [Kibana buildpack](https://github.com/swisscom/kibana-buildpack)
-A guide on how to set-up your Kibana is here: [Elasticsearch Buildpacks](./elasticsearch-buildpacks.html)
+Starting a Kibana for your service is very simple. Just push an App with the [Kibana buildpack](https://github.com/swisscom/kibana-buildpack).
+A guide on how to set up your Kibana: [Elasticsearch Buildpacks](./elasticsearch-buildpacks.html)
 
 ## <a id='logstash'></a> Logstash
 
-Starting a Logstash for your service is very simple just push an App with the [Logstash buildpack](https://github.com/swisscom/logstash-buildpack)
-A guide on how to set-up your Logstash is here: [Elasticsearch Buildpacks](./elasticsearch-buildpacks.html)
+Starting a Logstash for your service is very simple. Just push an app with the [Logstash buildpack](https://github.com/swisscom/logstash-buildpack).
+A guide on how to set-up your Logstash: [Elasticsearch Buildpacks](./elasticsearch-buildpacks.html)
 
 ## <a id='curator'></a> Curator
 
-Curator is integrated into the [Logstash buildpack](https://github.com/swisscom/logstash-buildpack)
+Curator is integrated into the [Logstash buildpack](https://github.com/swisscom/logstash-buildpack).
 
 ## <a id='highavailablility'></a> High Availability
 
-The Elasticsearch cluster consists of 3 nodes in 3 different availability zones. By default, each index in Elasticsearch is allocated 5 primary shards and 1 replica. Make sure you configure the number of shards & replicas accordingly in the index templates if you don't want to use the default settings. Swisscom cannot guarantee the availability of your data unless you cinfugure at least one replica.
+The Elasticsearch cluster consists of 3 nodes in 3 different availability zones. By default, each index in Elasticsearch has 5 primary shards and 1 replica allocated to it. If you don’t want to use the default settings, make sure to configure the number of shards & replicas accordingly in the index templates. Swisscom cannot guarantee the availability of your data unless you configure at least one replica.
