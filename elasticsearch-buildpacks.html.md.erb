@@ -7,30 +7,30 @@ owner: Services
 
 ## <a id='overview'></a> Overview
 
-The Elasticsearch cluster consists of 3 nodes in 3 different availability zones. By default, each index in Elasticsearch is allocated 5 primary shards and 1 replica. Make sure you configure the number of shards & replicas accordingly in the index templates if you don't want to use the default settings.
+The Elasticsearch cluster consists of 3 nodes in 3 different availability zones. By default, each index in Elasticsearch has 5 primary shards and 1 replica allocated to it. If you don't want to use the default settings, make sure to configure the number of shards & replicas accordingly in the index templates.
 
 ## <a id='Quick-Tutorial'></a> Quick Tutorial
 
 1. Create the service
-2. Configure and push logstash buildpack
-3. Configure and push kibana buildpack
-4. Create user provided service
+2. Configure and push [Logstash buildpack](https://github.com/swisscom/logstash-buildpack)
+3. Configure and push [Kibana buildpack](https://github.com/swisscom/kibana-buildpack)
+4. Create a user provided service
 5. Bind your app the the user provided service
 6. See and search through your logs
 
-## <a id='step-by-step-guide'></a> Step by step guide
+## <a id='step-by-step-guide'></a> Step by Step Guide
 
-This section describes how you can use the elasticsearch service with the least effort as a logging service to store your application logs in the elasticsearch using logstash & kibana.
+This section describes how to store your application logs in the elasticsearch using logstash & kibana with the least effort.
 
-## <a id='push-logstash-buildpack'></a> Push a Logstash app in the same org / space
-Create the following folder structure locally:
+### <a id='push-logstash-buildpack'></a> Push a Logstash App
+To push a Logstash app in the same org / space, create the following folder structure locally:
 ```
 .
 ├── Logstash
-└── manifest.ym
+└── manifest.yml
 ```
 
-Logstash
+Logstash:
 For a minimal setup you can leave this file empty.
 
 manifest.yml
@@ -44,10 +44,8 @@ services:
 
 Push the app: `cf push -b https://github.com/Swisscom/logstash-buildpack.git`
 
-
-
-## <a id='push-kibana-buildpack'></a> Push a Kibana app in the same org / space
-Create the following folder structure locally:
+### <a id='push-kibana-buildpack'></a> Push a Kibana App
+To push a Kibana app in the same org / space, create the following folder structure locally:
 ```
 .
 ├── Kibana
@@ -55,10 +53,10 @@ Create the following folder structure locally:
 ```
 
 Kibana:
-You need to add x-pack as plugin in order to communicate with the elasticsearch service:
+You need to add X-Pack as a plugin in order to communicate with the Elasticsearch service:
 ```
 plugins:
-- x-pack
+- X-Pack
 ```
 
 manifest.yml:
@@ -73,34 +71,31 @@ services:
 
 Push the app: `cf push -b https://github.com/Swisscom/kibana-buildpack.git`
 
-**Note:** X-Pack needs currently a lot of resources to be installed as it perfoms some optimisation steps. You can scale down your Kibanas memory using `cf scale my-kibana -m 2G`
+**Note:** Currently, X-Pack needs a lot of resources to be installed as it perfoms some optimisation steps. You can scale down your Kibana memory using `cf scale my-kibana -m 2G`
 
-
-## <a id='verify-bindings'></a> Verify that both apps are bound to the newly created elasticsearch service.
-`cf services`
-
-The output should look similar to this:
+### <a id='verify-bindings'></a> Verify Apps
+To verify if both apps are bound to the newly created Elasticsearch service run `cf services`. The output should look similar to this:
 ```
 name               service         plan      bound apps               last operation
 my-elasticsearch   elasticsearch   xxsmall   my-kibana, my-logstash   create succeeded
 ```
 
-## <a id='cf-cups'></a> Create user provided service
+### <a id='cf-cups'></a> Create a User Provided Service
 `cf cups my-logstash-drain -l https://URL-OF-LOGSTASH-INSTANCE`
 URL-OF-LOGSTASH-INSTANCE: This is the URL of the pushed logstash app in step 2: `cf apps`
 
 
-## <a id='bind-app-to-ups'></a> Bind your own app to the user provided service
-Bind your app of which you want to have the logs in elasticsearch to the user provided service which was created in the previous step and restage the app
+### <a id='bind-app-to-ups'></a> Bind Your App
+Bind your app of which you want to have the logs in Elasticsearch to the user provided service created in the previous step. Then restage the app.
 ```
 cf bs my-app my-logstash-drain
 cf restage my-app
 ```
 
-## <a id='verify'></a> Verify
+### <a id='verify'></a> Verify Kibana
 Login to Kibana and verify that you see the logs of your apps.
 
-## <a id='customization'></a> Customization
-[Kibana](https://github.com/swisscom/kibana-buildpack) and [Logstash](https://github.com/swisscom/logstash-buildpack) buildpacks are designed to be customizable so they fit your needs. Please have a look at the appropriate build pack documentation:
+### <a id='customization'></a> Customization
+[Kibana](https://github.com/swisscom/kibana-buildpack) and [Logstash](https://github.com/swisscom/logstash-buildpack) buildpacks are designed to be customizable, so that they fit your needs. Please have a look at the appropriate buildpack documentation:
 - [Kibana buildpack](https://github.com/swisscom/kibana-buildpack)
 - [Logstash buildpack](https://github.com/swisscom/logstash-buildpack)
