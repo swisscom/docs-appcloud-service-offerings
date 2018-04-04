@@ -15,15 +15,15 @@ The Elasticsearch cluster consists of 3 nodes in 3 different availability zones.
 2. Configure and push [Logstash buildpack](https://github.com/swisscom/logstash-buildpack)
 3. Configure and push [Kibana buildpack](https://github.com/swisscom/kibana-buildpack)
 4. Create a user provided service
-5. Bind your app the the user provided service
+5. Bind your app to the user provided service
 6. See and search through your logs
 
 ## <a id='step-by-step-guide'></a> Step by Step Guide
 
-This section describes how to store your application logs in the Elasticsearch using Logstash & Kibana with the least effort.
+This section describes how to store your application logs in Elasticsearch using Logstash & Kibana with the least effort.
 
 ### <a id='push-logstash-buildpack'></a> Push a Logstash App
-To push a Logstash app in the same org / space, create the following files in an empty folder:
+To push a Logstash app in the same org / space, create the following files in an otherwise empty folder:
 
 ```txt
 .
@@ -32,7 +32,8 @@ To push a Logstash app in the same org / space, create the following files in an
 ```
 
 
-We recommend enabling authentication for your Logstash. Provide a username and password in your Logstash file as in the following example. Authentication will be disabled when no username is provided.
+We recommend enabling authentication for your Logstash. Provide a username and password in your Logstash file as in the following example. Authentication will be disabled if no username is provided.
+
 Logstash:
 
 ```txt
@@ -53,10 +54,12 @@ services:
 ```
 
 
-Push the app: `cf push -b https://github.com/Swisscom/logstash-buildpack.git`
+To push the app run the following command: 
+
+`cf push -b https://github.com/Swisscom/logstash-buildpack.git`
 
 ### <a id='push-kibana-buildpack'></a> Push a Kibana App
-To push a Kibana app in the same org / space, create the following files in an empty folder:
+To push a Kibana app in the same org / space, create the following files in an otherwise empty folder:
 
 ```txt
 .
@@ -65,8 +68,9 @@ To push a Kibana app in the same org / space, create the following files in an e
 ```
 
 
+You need to add X-Pack as a plugin to the Kibana file in order for it to communicate with the Elasticsearch service:
+
 Kibana:
-You need to add X-Pack as a plugin in order to communicate with the Elasticsearch service:
 
 ```txt
 plugins:
@@ -86,12 +90,16 @@ services:
 ```
 
 
-Push the app: `cf push -b https://github.com/Swisscom/kibana-buildpack.git`
+To push the app run the following command: 
 
-**Note:** Currently, X-Pack needs a lot of resources to be installed as it perfoms some optimisation steps. You can scale down your Kibana memory using `cf scale my-kibana -m 2G`
+`cf push -b https://github.com/Swisscom/kibana-buildpack.git`
+
+**Note:** Currently, X-Pack needs a lot of resources to be installed as it perfoms some optimisation steps. You can scale down your Kibana memory using 
+
+`cf scale my-kibana -m 2G`
 
 ### <a id='verify-bindings'></a> Verify Apps
-To verify if both apps are bound to the newly created Elasticsearch service run `cf services`. The output should look similar to this:
+To verify that both apps are bound to the newly created Elasticsearch service run `cf services`. The output should look similar to this:
 
 ```txt
 name               service         plan      bound apps               last operation
@@ -113,9 +121,6 @@ cf bs my-app my-logstash-drain
 cf restage my-app
 ```
 
-
-### <a id='verify'></a> Verify Kibana
-Log into Kibana and verify that you see the logs of your apps.
 
 ### <a id='customization'></a> Customization
 Kibana and Logstash buildpacks are designed to be customizable, so that they fit your needs. Please have a look at the appropriate buildpack documentation on Github:
