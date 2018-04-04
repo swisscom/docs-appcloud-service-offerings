@@ -1,5 +1,5 @@
 ---
-title: Elasticsearch
+title: Elasticsearch Buildpacks
 owner: Services
 ---
 
@@ -30,8 +30,13 @@ To push a Logstash app in the same org / space, create the following folder stru
 └── manifest.yml
 ```
 
+We recommend enabling authentication for your logstash. Provide a username and password in your Logstash file as in the following example. Authentication will be disabled when no username is provided.
 Logstash:
-For a minimal setup you can leave this file empty.
+```
+logstash-credentials:
+  username: myuser
+  password: mypassword
+```
 
 manifest.yml
 ```
@@ -81,7 +86,8 @@ my-elasticsearch   elasticsearch   xxsmall   my-kibana, my-logstash   create suc
 ```
 
 ### <a id='cf-cups'></a> Create a User Provided Service
-`cf cups my-logstash-drain -l https://URL-OF-LOGSTASH-INSTANCE`
+`cf cups my-logstash-drain -l https://USERNAME:PASSWORD@URL-OF-LOGSTASH-INSTANCE`
+USERNAME & PASSWORD: This is the username and passwort you configured in the `Logstash` file.
 URL-OF-LOGSTASH-INSTANCE: This is the URL of the pushed logstash app in step 2: `cf apps`
 
 
