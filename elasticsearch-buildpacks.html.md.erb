@@ -20,26 +20,26 @@ The Elasticsearch cluster consists of 3 nodes in 3 different availability zones.
 
 ## <a id='step-by-step-guide'></a> Step by Step Guide
 
-This section describes how to store your application logs in the elasticsearch using logstash & kibana with the least effort.
+This section describes how to store your application logs in the Elasticsearch using Logstash & Kibana with the least effort.
 
 ### <a id='push-logstash-buildpack'></a> Push a Logstash App
-To push a Logstash app in the same org / space, create the following folder structure locally:
-```
+To push a Logstash app in the same org / space, create the following files in an empty folder:
+```bash
 .
 ├── Logstash
 └── manifest.yml
 ```
 
-We recommend enabling authentication for your logstash. Provide a username and password in your Logstash file as in the following example. Authentication will be disabled when no username is provided.
+We recommend enabling authentication for your Logstash. Provide a username and password in your Logstash file as in the following example. Authentication will be disabled when no username is provided.
 Logstash:
-```
+```yaml
 logstash-credentials:
   username: myuser
   password: mypassword
 ```
 
 manifest.yml
-```
+```yaml
 applications:
 - name: my-logstash
   memory: 2G
@@ -50,8 +50,8 @@ services:
 Push the app: `cf push -b https://github.com/Swisscom/logstash-buildpack.git`
 
 ### <a id='push-kibana-buildpack'></a> Push a Kibana App
-To push a Kibana app in the same org / space, create the following folder structure locally:
-```
+To push a Kibana app in the same org / space, create the following files in an empty folder:
+```bash
 .
 ├── Kibana
 └── manifest.yml
@@ -59,13 +59,13 @@ To push a Kibana app in the same org / space, create the following folder struct
 
 Kibana:
 You need to add X-Pack as a plugin in order to communicate with the Elasticsearch service:
-```
+```yaml
 plugins:
 - X-Pack
 ```
 
 manifest.yml:
-```
+```yaml
 applications:
 - name: my-kibana
   memory: 3G
@@ -80,7 +80,7 @@ Push the app: `cf push -b https://github.com/Swisscom/kibana-buildpack.git`
 
 ### <a id='verify-bindings'></a> Verify Apps
 To verify if both apps are bound to the newly created Elasticsearch service run `cf services`. The output should look similar to this:
-```
+```bash
 name               service         plan      bound apps               last operation
 my-elasticsearch   elasticsearch   xxsmall   my-kibana, my-logstash   create succeeded
 ```
@@ -93,13 +93,13 @@ URL-OF-LOGSTASH-INSTANCE: This is the URL of the pushed logstash app in step 2: 
 
 ### <a id='bind-app-to-ups'></a> Bind Your App
 Bind your app of which you want to have the logs in Elasticsearch to the user provided service created in the previous step. Then restage the app.
-```
+```bash
 cf bs my-app my-logstash-drain
 cf restage my-app
 ```
 
 ### <a id='verify'></a> Verify Kibana
-Login to Kibana and verify that you see the logs of your apps.
+Log into Kibana and verify that you see the logs of your apps.
 
 ### <a id='customization'></a> Customization
 Kibana and Logstash buildpacks are designed to be customizable, so that they fit your needs. Please have a look at the appropriate buildpack documentation on Github:
