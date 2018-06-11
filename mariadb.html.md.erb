@@ -89,6 +89,8 @@ CREATE DATABSE CF_DATABASE_NAME
 GRANT ALL ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
 REVOKE LOCK TABLES ON `CF_DATABASE_NAME`.* FROM 'USER'@'SUBNET'
 ```
+## <a id='framework'></a> Database Frameworks Integration tips
+- Liquibase is not fully Galera compatible. See bug report [primary key on DATABASECHANGELOG, PK_DATABASECHANGELOG, is no longer created](https://liquibase.jira.com/plugins/servlet/mobile#issue/CORE-1909) for solutions.
 
 ## <a id='definer'></a> Definer and bind-service (Change Credentials)
 
