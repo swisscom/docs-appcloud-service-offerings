@@ -18,7 +18,7 @@ The Amazon S3 API is:
 * Very well known in the market
 * State of the art, de facto standard
 * Providing a big community
-* Has Hundreds of scripts and tools available
+* Has hundreds of scripts and tools available
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
 
@@ -30,6 +30,7 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
     {
       "credentials": {
         "accessHost": "ds11s3.swisscom.com",
+        "namespaceHost": "<Namespace-ID>.ds11s3ns.swisscom.com",
         "accessKeyID": "<Namespace-AccountName>",
         "secretAccessKey": "40-Characters"
       },
@@ -82,7 +83,7 @@ In case you don't have any credentials for your Dynamic Storage instance, you ca
 
 ### Bucket name
 
-Please follow these conventions when naming of S3 buckets in ECS:
+Please follow these conventions when naming S3 buckets in ECS:
 
 * Names must be between 3 and 63 characters long.
 * Names must be DNS compliant: lowercase alphanumeric characters (`[a-z0-9]`) and hyphens (`-`).
@@ -295,3 +296,41 @@ Using a S3 compatible URL, Dynamic Storage can easily be used as a backend.
 * Use ECS Object Client if you want to take advantage of ECS features
   * Currently available for Java only
 * Use AWS SDK if you want to maintain compatibility with AWS
+          
+          
+### CORS
+In order to access your bucket objects directly from an SPA (without having your backend in between), you can specify CORS policies per bucket by using the S3 API, for example https://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html.
+There are also S3 GUI clients that support setting CORS.
+          
+<strong>Be aware that any access and secret keys that are included in the SPA end up in the user's browser where it can be easily read by any end user.</strong>
+          
+After having configured CORS on your bucket, you need to access it using the `namespaceAccessHost`
+ endpoint found in the service binding credentials (see example above). Also, you need to use path-style in your S3 library.
+
+Example with the AWS S3 JS SDK:
+          
+```javascript
+AWS.config.update({
+  accessKeyId: '1bbd085e69c44879b4aea5cedeadf00d-bucketowner',
+  secretAccessKey: '<redacted>',
+  s3ForcePathStyle: true
+});
+var s3Endpoint = new AWS.Endpoint('https://1bbd085e69c44879b4aea5cedeadf00d.ds11s3ns.swisscom.com');
+var s3Client = new AWS.S3({endpoint: s3Endpoint});
+
+// Create params for S3.createBucket
+var readParams = {
+  Bucket : 'cors-bucket',
+};
+
+// call S3 to list the bucket contents
+s3Client.listObjects(readParams, function(err, data) {
+  if (err) {
+    console.log("Error", err);
+  } else {
+    console.log("Success", data);
+  }
+});
+```
+          
+Be aware that listing buckets in a browser (which needs CORS) is not supported - also not by AWS s3 - since CORS is always set on bucket level.
