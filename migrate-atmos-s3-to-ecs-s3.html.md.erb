@@ -13,7 +13,7 @@ $ cf services
 Getting services in org INI-DOS-DPS-TCL_user / space playground as USER03...
 
 name                   service     plan    bound apps   last operation
-holiday-pictures       dynstrg     usage   my-awesome-app  create succeeded
+holiday-pictures       dynstrg     usage                create succeeded
 </pre>
 
 Checking the marketplace shows that there is a new S3 service:
@@ -96,7 +96,7 @@ Now we are finally able to migrate the whole buckets from the old to the new ser
 
 <pre class="terminal">
 mc mirror holiday/tickets holiday-dynstrg2/tickets
-...bucket/file3.jpg:  18 B / 18 B
+...bucket/ticket_japan.jpg:  18 B / 18 B
 </pre>
 
 To verify that everything succeeded list the new bucket:
