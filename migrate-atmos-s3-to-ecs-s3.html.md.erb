@@ -23,9 +23,9 @@ dynstrg         usage*                       Dynamic Object Storage with S3 Inte
 dynstrg-2       usage*                       Dynamic Object Storage with S3 API based on EMC ECS 3.0
 </pre>
 
-<strong>Let's migrate our Buckets to the new service:</strong>
+<strong>Migrate your Buckets to the new service:</strong>
 
-*Important*: Please make sure that you have the latest [cf CLI](https://github.com/cloudfoundry/cli) installed before you follow this migration guide.
+*Important*: Please, make sure that you have the latest [cf CLI](https://github.com/cloudfoundry/cli) installed before you follow this migration guide.
 
 First, create a new dynstrg-2 service in the same space, let's call it "new-holiday-pictures":
 
@@ -40,17 +40,17 @@ Next, stop all your apps which use dynstrg so that no new objects are stored dur
 $ cf stop my-awesome-app
 </pre>
 
-As a next step, we'll have to download the minio S3 client. We are going to use it to copy one bucket after another recursively from the old service to the new one.
+As a next step, you'll have to download the minio S3 client. You will need it to copy one bucket after another recursively from the old service to the new one.
 
 For all operating systems, visit the minio website [minio](https://www.minio.io/downloads.html#download-client)
 
-To enable access to both services for our minio client, we get the credentials by generating a service key on each service:
+To enable access to both services for your minio client, get the credentials by generating a service key on each service:
 <pre class="terminal">
 cf create-service-key holiday-pictures mys3servicekey
 cf create-service-key new-holiday-pictures mys3servicekey
 </pre>
 
-This will get us the credentials:
+Run this command to get the credentials:
 <pre class="terminal">
 cf service-key holiday-pictures mys3servicekey
 {
@@ -84,7 +84,7 @@ Open the minio config (.mc/config-json) and enter the credentials in the followi
 }
 </pre>
 
-Before we can use the mc command (minio) to mirror a bucket, we need to create an empty bucket on the new service. In this example we have two buckets in our old service, "pictures" and "tickets":
+Before you can use the mc command (minio) to mirror a bucket, you need to create an empty bucket on the new service. In this example you have two buckets in your old service, "pictures" and "tickets":
 <pre class="terminal">
 mc mb holiday-dynstrg2/tickets
 Bucket created successfully `holiday-dynstrg2/tickets`.
@@ -92,14 +92,14 @@ mc mb holiday-dynstrg2/pictures
 Bucket created successfully `holiday-dynstrg2/pictures`.
 </pre>
  
-Now we are finally able to migrate the whole buckets from the old to the new service:
+Finally, you are able to migrate all the buckets from the old to the new service:
 
 <pre class="terminal">
 mc mirror holiday/tickets holiday-dynstrg2/tickets
 ...bucket/ticket_japan.jpg:  18 B / 18 B
 </pre>
 
-To verify that everything succeeded list the new bucket:
+To verify that everything succeeded, list the new bucket:
 
 <pre class="terminal">
 mc ls holiday-dynstrg2/tickets
@@ -118,4 +118,4 @@ $ cf delete-service-key new-holiday-pictures mys3servicekey
 $ cf delete-service holiday-pictures 
 </pre>
 
-You now migrated your buckets to our new S3 service. Congrats! You can now bind your apps to the new service and start them again.
+You now migrated your buckets to the new S3 service. Congrats! You can now bind your apps to the new service and start them again.
