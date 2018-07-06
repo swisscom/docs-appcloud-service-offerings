@@ -1,0 +1,121 @@
+---
+title: Migrate from legacy ATMOS S3 to EMC ECS S3
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+This guide teaches you how to migrate from the soon-to-be-deprecated ATMOS S3 (dynstrg) to the new EMC ECS (dynstrg-2).
+
+In my space I have an instance of the old Atmos S3 Service (dynstrg):
+<pre class="terminal">
+$ cf services
+Getting services in org INI-DOS-DPS-TCL_user / space playground as USER03...
+
+name                   service     plan    bound apps   last operation
+holiday-pictures       dynstrg     usage   my-awesome-app  create succeeded
+</pre>
+
+Checking the marketplace shows that there is a new S3 service:
+<pre class="terminal">
+$ cf marketplace | grep dynstrg
+dynstrg         usage*                       Dynamic Object Storage with S3 Interface based on ATMOS v2.2.3
+dynstrg-2       usage*                       Dynamic Object Storage with S3 API based on EMC ECS 3.0
+</pre>
+
+<strong>Let's migrate our Buckets to the new service:</strong>
+
+*Important*: Please make sure that you have the latest [cf CLI](https://github.com/cloudfoundry/cli) installed before you follow this migration guide.
+
+First, create a new dynstrg-2 service in the same space, let's call it "new-holiday-pictures":
+
+<pre class="terminal">
+$ cf create-service dynstrg-2 usage new-holiday-pictures
+Creating service instance new-holiday-pictures in org INI-DOS-DPS-TCL / space playgroung
+</pre>
+
+Next, stop your app:
+
+<pre class="terminal">
+$ cf stop my-awesome-app
+</pre>
+
+As a next step, we'll have to download the minio S3 client. We are going to use it to copy one bucket after another recursively from the old service to the new one.
+
+For all operating systems, visit the minio website [minio](https://www.minio.io/downloads.html#download-client)
+
+To enable access to both services for our minio client, we get the credentials by generating a service key on each service:
+<pre class="terminal">
+cf create-service-key holiday-pictures mys3servicekey
+cf create-service-key new-holiday-pictures mys3servicekey
+</pre>
+
+This will get us the credentials:
+<pre class="terminal">
+cf service-key holiday-pictures mys3servicekey
+{
+ "accessHost": "ds11s3-scs.swisscom.com",
+ "accessKey": "5484335407854a4c9dc88e01206fc148/CF_P8_7AAA80F2_98A1_46F2_9414_A54633972566",
+ "sharedSecret": "7PwzDzLbXOWZiYBoM22C3kp7XgM="
+}
+</pre>
+
+Open the minio config (.mc/config-json) and enter the credentials in the following way:
+
+<strong>*Important*: Please make sure that you have https and the right api version!</strong>
+<pre class="terminal">
+{
+        "version": "9",
+        "hosts": {
+                "holiday": {
+                        "url": "https://ds11s3-scs.swisscom.com",
+                        "accessKey": "5484335407854a4c9dc88e0b206fc148/CF_P8_7AAA80F2_98A1_46F2_9414_A54633972566",
+                        "secretKey": "7PwzDzLbXOWZiYBoM22C3kp7XgM=",
+                        "api": "S3v2",
+                        "lookup": "auto"
+                },
+                "holiday-dynstrg2": {
+                        "url": "https://ds11s3-scs.swisscom.com",
+                        "accessKey": "85d9b397330add64920a1409f4732119-6683",
+                        "secretKey": "NXuYGhJnilomgZ9PpMbajTD85sn8s+twCBL5KvDq",
+                        "api": "S3v4",
+                        "lookup": "auto"
+                }
+}
+</pre>
+
+Before we can use the mc command (minio) to mirror a bucket, we need to create an empty bucket on the new service. In this example we have two buckets in our old service, "pictures" and "tickets":
+<pre class="terminal">
+mc mb holiday-dynstrg2/tickets
+Bucket created successfully `holiday-dynstrg2/tickets`.
+mc mb holiday-dynstrg2/pictures
+Bucket created successfully `holiday-dynstrg2/pictures`.
+</pre>
+ 
+Now we are finally able to migrate the whole buckets from the old to the new service:
+
+<pre class="terminal">
+mc mirror holiday/tickets holiday-dynstrg2/tickets
+...bucket/file3.jpg:  18 B / 18 B
+</pre>
+
+To verify that everything succeeded list the new bucket:
+
+<pre class="terminal">
+mc ls holiday-dynstrg2/tickets
+[2018-07-05 16:22:57 UTC]     6B ticket_malaysia.jpg
+[2018-07-05 16:22:57 UTC]     6B ticket_japan.jpg
+[2018-07-05 16:22:57 UTC]     6B ticket_china.jpg
+</pre>
+
+<strong>Repeat this procedure for every S3 service and bucket you own!</strong>
+
+As soon as everything is working properly, you can remove the service keys and the old service:
+
+<pre class="terminal">
+$ cf delete-service-key holiday-pictures mys3servicekey
+$ cf delete-service-key new-holiday-pictures mys3servicekey
+$ cf delete-service holiday-pictures 
+</pre>
+
+You now migrated your buckets to our new S3 service. Congrats!
