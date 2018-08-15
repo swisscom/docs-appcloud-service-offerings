@@ -63,22 +63,23 @@ Our HA MariaDB offering is based on Galera, which brings some [known limitations
 
 A summary of Galera limitations is on [Tips on Converting to Galera](https://mariadb.com/kb/en/library/tips-on-converting-to-galera/) (blockquote modified for our offering):
 
-> Dear Schema Designer:
+> Schema Design:
 
-> - InnoDB only, always have PK.
+> - InnoDB storage engine only, every table must have a Primary Key. The legacy storage engine MyISAM is disabled with `enforce_storage_engine=InnoDB` in our offering.
+> - Please use indexes according to your query pattern.
 
-> Dear Developer:
+> Application Development:
 
 > - Check for errors, even after `COMMIT`.
 > - Moderate sized transactions.
 > - Don't make assumptions about `AUTO_INCREMENT` values other than uniqueness. Not monotonicity, not gapless. (This applies for non-Galera, but probably happens more often here.)
 
-> Dear DBA:
+> Administration and Schema Migrations:
 
-> - `ALTER`s are handled differently. See [SCHEMA UPGRADES](http://galeracluster.com/documentation-webpages/schemaupgrades.html)
+> - `ALTER`s are handled differently. See [SCHEMA UPGRADES](http://galeracluster.com/documentation-webpages/schemaupgrades.html) for more details. Please be careful and test schema migrations.
 > - `TRIGGER`s and `EVENT`s may need checking. By default, with row-based replication, triggers run on the master, and the effects of their executions are replicated to the slaves.
 
-Please add a **primary key** to every table you create. This is because of *Row Based Replication*.
+Please add a **primary key** to every table you create. This is because of *Row Based Replication*. Tables without primary key may cause a downtime of the Galera Cluster (depending on the number of records).
 
 Please contact Swisscom Application Cloud support when you need to issue **long running DDL changes** (for example `ALTER TABLE` with thousends of records). Long running DDL causes an outage for all customers on the cluster.
 
@@ -122,3 +123,11 @@ Some of our users also created apps for a regular/scheduled backup. An example b
 ## <a id='more'></a> More info from upstream open source project
 
 Our MariaDB Enterprise offering is based on the the open source [Cloud Foundry MySQL Service](https://github.com/cloudfoundry/cf-mysql-release).
+
+## <a id='more'></a> Compatibility to MySQL
+
+Please be aware that MariaDB and MySQL are not fully compatible and have a few different features for developers (and administrators).
+
+We deploy MariaDB 10.1.x series.
+
+See [MariaDB versus MySQL - Compatibility](https://mariadb.com/kb/en/library/server-client-software/mariadb-releases/compatibility-differences/mariadb-vs-mysql-compatibility/) and [MariaDB versus MySQL - Features](https://mariadb.com/kb/en/library/server-client-software/mariadb-releases/compatibility-differences/mariadb-vs-mysql-features/) for furhter infos.
