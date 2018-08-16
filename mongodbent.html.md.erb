@@ -46,11 +46,33 @@ To connect to a running MongoDB Enterprise instance with your local development 
 
 Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
 
+## <a id=''></a> Version Upgrade and Feature Compatibility
+
+New versions of MongoDB Enterprise will be announced in the newsletter as soon as they are available.
+
+The upgrade to the new version is done trough the CF CLI by running the update service command. This command will always upgrade the binaries to the lastest available version. To ensure the compatibility with your application MongoDB provides a feature flag for breaking changes which is called "featureCompatibilityVersion".
+
+`cf update-service <service-name> -c '{"featureCompatibilityVersion":"X.Y"}'`
+
+You can either upgrade to the new version without changing the feature compatibility or upgrade both.
+
+Example:
+
+Assume you have a MongoDB Enterprise with version 3.4.x called my-mongodb-enterprise
+
+To upgrade to the MongoDB Enterprise 3.6.x binaries without enabling the new features (keep featureCompatibility at 3.4) you must run the following command:
+
+`cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"3.4"}'`
+ 
+To upgrade both, the MongoDB Enteprise binaries (if not already done) and the feature set to version 3.6, you must run the following command:
+
+`cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"3.6"}'`
+
 ## <a id='opsmanager'></a> MongoDB Ops Manager
 
 As a MongoDB Enterprise customer, you receive access to the [Ops Manager](https://docs.opsmanager.mongodb.com/current/) to see detailed performance metrics and health state.
 
-To connect to the Ops Manager to get insights of your MongoDB, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
+To connect to the Ops Manager to get insights into your MongoDB, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
 
 ## <a id='specifications'></a> Specifications
 
@@ -58,7 +80,7 @@ Our [MongoDB Enterprise](https://www.mongodb.com/products/mongodb-enterprise-adv
 
 ## <a id='hostmappings'></a> Ops Manager Host Mappings
 
-There is a known bug with host mappings. When the deployment overview shows incorrect information, you need to delete the host mappings on `http://opsmanager.service.consul:8080/v2/$GROUP_ID#deployment/hostMappingTab`. Please replace `$GROUP_ID` with your actual group ID.
+There is a known bug regarding host mappings. When the deployment overview shows incorrect information, you need to delete the host mappings on `http://opsmanager.service.consul:8080/v2/$GROUP_ID#deployment/hostMappingTab`. Please replace `$GROUP_ID` with your actual group ID.
 
 <%= image_tag("./images/overview_hosts_mappings.png") %>
 <%= image_tag("./images/delete_host_mapping.png") %>
