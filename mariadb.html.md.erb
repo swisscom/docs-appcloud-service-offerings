@@ -112,12 +112,12 @@ See [Migrate from legacy MariaDB to MariaDB Ent](./migrate-mariadb-to-mariadbent
 
 
 ## <a id='backup'></a> Backup
-Within our MariaDB service you can start a backup and also restore these afterwards. 
-For more information, check the [service backup](../devguide/services/backups.html) guide.
+Within your MariaDB service instance you can start a backup and also restore these afterwards.
+For more information about this Developer Portal feature, check the [service backup](../devguide/services/backups.html) guide.
 
-Some of our users also created apps for a regular/scheduled backup. An example below:
-- https://github.com/theonlyandone/cf-backup-app
+Some of our users also created apps for a regular/scheduled backup. An example [here](https://github.com/theonlyandone/cf-backup-app).
 
+We do twice a day full backup for Disaster recovery, of the hole MariaDB/Galera cluster (not individual databases), with `xtrabackup`. If you accidentally `DROP` a table or other error happens, we won't restore your table. Please make sure you make in Portal a [service backup](../devguide/services/backups.html) before you do changes.
 
 
 ## <a id='more'></a> More info from upstream open source project
