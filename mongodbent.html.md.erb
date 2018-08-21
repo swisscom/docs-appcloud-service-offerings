@@ -54,7 +54,7 @@ The upgrade to the new version is done trough the CF CLI by running the update s
 
 `cf update-service <service-name> -c '{"featureCompatibilityVersion":"X.Y"}'`
 
-You can either upgrade to the new version without changing the feature compatibility or upgrade both.
+You can either upgrade the service to the new version without changing the feature compatibility or upgrade both.
 
 Example:
 
@@ -64,7 +64,7 @@ To upgrade to the MongoDB Enterprise 3.6.x binaries without enabling the new fea
 
 `cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"3.4"}'`
  
-To upgrade both, the MongoDB Enteprise binaries (if not already done) and the feature set to version 3.6, you must run the following command:
+To upgrade both the MongoDB Enteprise binaries (if not already done) and the feature set to version 3.6, you must run the following command:
 
 `cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"3.6"}'`
 
