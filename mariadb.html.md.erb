@@ -117,7 +117,7 @@ For more information about this feature, check the [service backup](../devguide/
 
 Some of our users also created apps for a regular/scheduled backup. An example [here](https://github.com/theonlyandone/cf-backup-app).
 
-We do twice a day full backup for Disaster recovery, of the hole MariaDB/Galera cluster (not individual databases), with `xtrabackup`. If you accidentally `DROP` a table or other error happens, we won't restore your table. Please make sure you make in Portal a [service backup](../devguide/services/backups.html) before you do changes.
+If you accidentally `DROP` a table or other error happens, we can not restore your table. Please make sure you create a [service backup](../devguide/services/backups.html) in Portal or [CLI with the Swisscom Plugin](https://github.com/swisscom/appcloud-cf-cli-plugin) before you do changes.
 
 
 ## <a id='more'></a> More info from upstream open source project
