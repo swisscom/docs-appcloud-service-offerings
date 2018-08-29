@@ -1,0 +1,151 @@
+---
+title: Percona XtraDB Cluster
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+## <a id='create'></a> Create a Database Cluster and a Database on Top of it
+
+First you create a dedicated cluster with `cf create-service small mysqlent`. Choose the plan according your needs. This takes up to 20 minutes. After that you have a cluster, but no database and credentials.
+
+Binding operation will result in this error:
+
+```
+$ cf bs cf-env test-PerconaXtraDB
+Binding service test-PerconaXtraDB to app cf-env in org test / space test as test...
+The service instance doesn't support binding.
+FAILED
+```
+
+We need to create databases `CREATE DATABASE` via service broker. First, get the GUID of your service and keep it secret:
+
+```
+cf service test --guid
+```
+
+Then create as many databases you wish (where `parent_reference` is the GUID of your service instance):
+
+````
+cf cs mysqlentdatabase default test-PerconaXtraDB-db -c '{ "parent_reference": "'780cc39c-5742-465c-a3c0-2513be03b128'" }'
+````
+
+Bind the database `mysqlentdatabase` to your application with `cf bind-service myapp test-PerconaXtraDB-db`.
+
+
+## <a id='integrating-your-service'></a> Integrating the Service With Your App
+
+After the creation of the service and the binding of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+
+```txt
+  "mysqlentdatabase": [
+   {
+    "binding_name": null,
+    "credentials": {
+     "database": "CF_BBFC9089_5F02_48DC_8902_F92DDE608C43",
+     "database_uri": "mysql://8GwLLTRZjeBhOykz:zbRMjItyictbCtuH@780cc39c-5742-465c-a3c0-2513be03b128.service.consul:3306/CF_BBFC9089_5F02_48DC_8902_F92DDE608C43?reconnect=true",
+     "host": "780cc39c-5742-465c-a3c0-2513be03b128.service.consul",
+     "hostname": "780cc39c-5742-465c-a3c0-2513be03b128.service.consul",
+     "jdbcUrl": "jdbc:mysql://780cc39c-5742-465c-a3c0-2513be03b128.service.consul:3306/CF_BBFC9089_5F02_48DC_8902_F92DDE608C43?user=8GwLLTRZjeBhOykz\u0026password=zbRMjItyictbCtuH",
+     "name": "CF_BBFC9089_5F02_48DC_8902_F92DDE608C43",
+     "password": "zbRMjItyictbCtuH",
+     "port": 3306,
+     "uri": "mysql://8GwLLTRZjeBhOykz:zbRMjItyictbCtuH@780cc39c-5742-465c-a3c0-2513be03b128.service.consul:3306/CF_BBFC9089_5F02_48DC_8902_F92DDE608C43?reconnect=true",
+     "username": "8GwLLTRZjeBhOykz"
+    },
+    "instance_name": "test-PerconaXtraDB-db",
+    "label": "mysqlentdatabase",
+    "name": "test-PerconaXtraDB-db",
+    "plan": "default",
+    "provider": null,
+    "syslog_drain_url": null,
+    "tags": [
+     "mysql"
+    ],
+    "volume_mounts": []
+   }
+```
+
+<p class="note">
+Please be aware that the number of concurrent connections (max_connections) to MySQL is limited, depending on your plan. You can manage this by using connection pooling.
+</p>
+
+## <a id='whatis'></a> What is Percona XtraDB Cluster?
+
+Let us quote [Frequently Asked Questions] (https://www.percona.com/software/mysql-database/percona-server/faq) and [Percona XtraDB Cluster](https://www.percona.com/software/mysql-database/percona-xtradb-cluster) from Percona:
+
+> **About**
+> 
+> Percona XtraDB Cluster is a high availability and high scalability open source solution for MySQL clustering. It integrates Percona Server – an enhanced drop-in replacement for MySQL – and Percona XtraBackup with the Codership Galera library of MySQL high availability solutions.
+> 
+> **How is it different from standard MySQL?**
+> 
+> Percona's releases are based upon recent versions of the MySQL server source code. It is fully compatible with standard MySQL.
+
+> **How is it related to other MySQL forks?**
+> 
+> Percona Server with XtraDB is the closest to the official MySQL Enterprise releases from Oracle. It is more conservative than MariaDB, which includes extra storage engines and more far-reaching code changes.
+
+We deploy at the moment MySQL 5.7.x. When MySQL 8.0 is ready we will inform you via newsletter.
+
+## <a id='administrating'></a> Administrating Your MySQL Instances
+
+To connect to a running Percona XtraDB Cluster instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
+
+You can deploy [PivotalMySQLWeb](https://github.com/pivotal-cf/PivotalMySQLWeb) for database management on the Swisscom Application Cloud. It's not the most feature rich GUI client for MySQL, but a nice cloud native app with a simple deployment process.
+
+## <a id='usecases'></a> Use Cases
+
+A typical use case for Percona XtraDB Cluster is a Cloud Foundry hosted web app which needs a relational data store.
+
+Our setup is not suitable for expensive analytics or "Big Data" processing.
+
+## <a id='sample-application'></a> Sample Application
+
+Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
+
+## <a id='limitations'></a> Known Limitations
+
+Our Percona XtraDB Cluster offering is based on Galera, which brings some known limitations with it. Please read those points carefully.
+
+Schema Design:
+
+- InnoDB storage engine only, every table must have a Primary Key. The legacy storage engine MyISAM is disabled with `enforce_storage_engine=InnoDB` in our offering.
+- Please use indexes according to your query pattern.
+
+Application Development:
+
+- Check for errors, even after `COMMIT`.
+- Moderate sized transactions.
+- Don't make assumptions about `AUTO_INCREMENT` values other than uniqueness. Not monotonicity, not gapless. (This applies for non-Galera, but probably happens more often here.)
+
+Administration and Schema Migrations:
+
+- `ALTER`s are handled differently. See [SCHEMA UPGRADES](http://galeracluster.com/documentation-webpages/schemaupgrades.html) for more details. Please be careful and test schema migrations.
+- `TRIGGER`s and `EVENT`s may need checking. By default, with row-based replication, triggers run on the master, and the effects of their executions are replicated to the slaves.
+
+Please add a **primary key** to every table you create. This is because of *Row Based Replication*. Tables without primary key cause an error during DML operations:
+
+```
+ERROR 1105 (HY000): Percona-XtraDB-Cluster prohibits use of DML command on a table (CF_BBFC9089_5F02_48DC_8902_F92DDE608C43.bugtable) without an explicit primary key with pxc_strict_mode = ENFORCING or MASTER
+```
+
+We deploy your cluster with `pxc_strict_mode=MASTER`, so please make sure you read the guide about [PXC Strict Mode](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/features/pxc-strict-mode.html) add-on docs.
+
+**Long running DDL changes** (for example `ALTER TABLE` with thousends of records) may cause an outage for your cluster.
+
+## <a id='migration'></a> Migrate your service instance
+
+See [Migrate from legacy MariaDB Enterprise to Percona XtraDB Cluster](./migrate-mariadbent-to-percona-xtradb-cluster.html) how to migrate your service instance to a new database cluster.
+
+## <a id='security'></a> Security Configuration
+
+- We don't allow `LOAD DATA INFILE`. See [Security Issues with LOAD DATA LOCAL](https://dev.mysql.com/doc/refman/8.0/en/load-data-local.html) for more details.
+
+## <a id='quota'></a> Disk Quota
+
+Sync with @nbari
+
+
+## <a id='more'></a> More info from upstream open source project
+
+Our Percona Xtradb Cluster Enterprise offering is based on the the open source [Percona Xtradb Cluster](https://github.com/cloudfoundry-incubator/pxc-release) from Pivotal.
