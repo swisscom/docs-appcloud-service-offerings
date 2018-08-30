@@ -46,7 +46,7 @@ To connect to a running MongoDB Enterprise instance with your local development 
 
 Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
 
-## <a id=''></a> Version Upgrade and Feature Compatibility
+## <a id='version-upgrade'></a> Version Upgrade and Feature Compatibility
 
 New versions of MongoDB Enterprise will be announced in the newsletter as soon as they are available.
 
@@ -63,7 +63,7 @@ Assume you have a MongoDB Enterprise with version 3.4.x called my-mongodb-enterp
 To upgrade to the MongoDB Enterprise 3.6.x binaries without enabling the new features (keep featureCompatibility at 3.4) you must run the following command:
 
 `cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"3.4"}'`
- 
+
 To upgrade both the MongoDB Enteprise binaries (if not already done) and the feature set to version 3.6, you must run the following command:
 
 `cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"3.6"}'`
