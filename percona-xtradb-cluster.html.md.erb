@@ -139,6 +139,14 @@ We deploy your cluster with `pxc_strict_mode=MASTER`, so please make sure you re
 
 **Long running DDL changes** (for example `ALTER TABLE` with thousends of records) may cause an outage for your cluster.
 
+## <a id='warnings'></a> Warnings
+
+In accordance with the service plan you choose from the marketplace, resource limitations are enforced. Please note that exhausting those limitations comes with certain risks, and MySQL itself only has very limited means of preventing overload / overuse.
+
+**Storage**
+
+If a cluster member of your MySQL service instance runs out of disk space, its `mysqld` process will crash and likely not be able to recover automatically. Additionally, there's a big risk of data corruption if this happens.
+
 ## <a id='migration'></a> Migrate your service instance
 
 See [Migrate from legacy MariaDB Enterprise to Percona XtraDB Cluster](./migrate-mariadbent-to-percona-xtradb-cluster.html) how to migrate your service instance to a new database cluster.
