@@ -105,22 +105,28 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 ## <a id='limitations'></a> Known Limitations
 
-Our Percona XtraDB Cluster offering is based on Galera, which brings some known limitations with it. Please read those points carefully.
+Our Percona XtraDB Cluster offering is based on Galera, which brings some known limitations with it. Vendor summary [Percona XtraDB Cluster Limitations](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/limitation.html). Please read those points carefully.
 
 Schema Design:
 
-- InnoDB storage engine only, every table must have a Primary Key. The legacy storage engine MyISAM is disabled with `enforce_storage_engine=InnoDB` in our offering.
+- InnoDB storage engine only. All other storage engines are disabled.
+````
+ERROR 1105 (HY000): Percona-XtraDB-Cluster prohibits use of $Y command on a table (CF_BBFC9089_5F02_48DC_8902_F92DDE608C43.bugtable) that resides in non-transactional storage engine with pxc_strict_mode = ENFORCING or MASTER
+````
 - Please use indexes according to your query pattern.
+- Every table must have a Primary Key!
 
 Application Development:
 
 - Check for errors, even after `COMMIT`.
 - Moderate sized transactions.
+- Avoid use of explicitly locking `LOCK TABLES` as it is local and replication transaction can’t forcefully abort it.
 - Don't make assumptions about `AUTO_INCREMENT` values other than uniqueness. Not monotonicity, not gapless. (This applies for non-Galera, but probably happens more often here.)
 
 Administration and Schema Migrations:
 
 - `ALTER`s are handled differently. See [SCHEMA UPGRADES](http://galeracluster.com/documentation-webpages/schemaupgrades.html) for more details. Please be careful and test schema migrations.
+- CTAS `CREATE TABLE AS SELECT` is not allowed. See [Why You Should Avoid Using “CREATE TABLE AS SELECT” Statement](https://www.percona.com/blog/2018/01/10/why-avoid-create-table-as-select-statement/).
 - `TRIGGER`s and `EVENT`s may need checking. By default, with row-based replication, triggers run on the master, and the effects of their executions are replicated to the slaves.
 
 Please add a **primary key** to every table you create. This is because of *Row Based Replication*. Tables without primary key cause an error during DML operations:
@@ -140,10 +146,11 @@ See [Migrate from legacy MariaDB Enterprise to Percona XtraDB Cluster](./migrate
 ## <a id='security'></a> Security Configuration
 
 - We don't allow `LOAD DATA INFILE`. See [Security Issues with LOAD DATA LOCAL](https://dev.mysql.com/doc/refman/8.0/en/load-data-local.html) for more details.
+- SSL -> TODO
 
 ## <a id='quota'></a> Disk Quota
 
-Sync with @nbari
+Sync with @nbari -> TODO
 
 
 ## <a id='more'></a> More info from upstream open source project
