@@ -46,6 +46,28 @@ To connect to a running MongoDB instance with your local development tools, you 
 
 Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
 
+## <a id='version-upgrade'></a> Version Upgrade and Feature Compatibility
+
+New versions of MongoDB will be announced in the newsletter as soon as they are available.
+
+The upgrade to the new version is done trough the CF CLI by running the update service command. This command will always upgrade the binaries to the lastest available version. To ensure the compatibility with your application MongoDB provides a feature flag for breaking changes which is called "featureCompatibilityVersion".
+
+`cf update-service <service-name> -c '{"featureCompatibilityVersion":"X.Y"}'`
+
+You can either upgrade the service to the new version without changing the feature compatibility or upgrade both.
+
+Example:
+
+Assume you have a MongoDB with version 3.4.x called my-mongodb
+
+To upgrade to the MongoDB 3.6.x binaries without enabling the new features (keep featureCompatibility at 3.4) you must run the following command:
+
+`cf update-service my-mongodb -c '{"featureCompatibilityVersion":"3.4"}'`
+
+To upgrade both the MongoDB binaries (if not already done) and the feature set to version 3.6, you must run the following command:
+
+`cf update-service my-mongodb -c '{"featureCompatibilityVersion":"3.6"}'`
+
 ## <a id='specifications'></a> Specifications
 
 Our [MongoDB](https://www.mongodb.com/community) offering consists of 3 Kubernetes containers configured as a replica set.
