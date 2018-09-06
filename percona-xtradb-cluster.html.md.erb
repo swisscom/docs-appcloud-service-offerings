@@ -6,7 +6,7 @@ owner: Services
 <strong><%= modified_date %></strong>
 ## <a id='create'></a> Create a Database Cluster and a Database on Top of it
 
-First you create a dedicated cluster with `cf create-service small mysqlent`. Choose the plan according your needs. This takes up to 20 minutes. After that you have a cluster, but no database and credentials.
+First you create a dedicated cluster with `cf create-service small mysqlent`. Choose the plan according your needs. This takes up to 20 minutes, because dedicated VMs are deployed in background. After that you have your own cluster, but no database `CREATE DATABASE` and credentials `CREATE USER` / `GRANT`.
 
 Binding operation will result in this error:
 
@@ -23,11 +23,12 @@ We need to create databases `CREATE DATABASE` via service broker. First, get the
 cf service test --guid
 ```
 
-Then create as many databases you wish (where `parent_reference` is the GUID of your service instance):
+Then create as many databases your plan allows (where `parent_reference` is the GUID of your service instance):
 
 ````
 cf cs mysqlentdatabase default test-PerconaXtraDB-db -c '{ "parent_reference": "'780cc39c-5742-465c-a3c0-2513be03b128'" }'
 ````
+You can create databases in any ORG and SPACE.
 
 Bind the database `mysqlentdatabase` to your application with `cf bind-service myapp test-PerconaXtraDB-db`.
 
@@ -67,7 +68,7 @@ After the creation of the service and the binding of the service to the applicat
 ```
 
 <p class="note">
-Please be aware that the number of concurrent connections (max_connections) to MySQL is limited, depending on your plan. You can manage this by using connection pooling.
+Please be aware that the number of concurrent connections (max_connections) to MySQL is limited, depending on your plan. You must manage this by using connection pooling.
 </p>
 
 ## <a id='whatis'></a> What is Percona XtraDB Cluster?
@@ -98,7 +99,7 @@ You can deploy [PivotalMySQLWeb](https://github.com/pivotal-cf/PivotalMySQLWeb) 
 
 A typical use case for Percona XtraDB Cluster is a Cloud Foundry hosted web app which needs a relational data store.
 
-Our setup is not suitable for expensive analytics or "Big Data" processing.
+Our setup is not suitable for expensive analytics (DWH) or "Big Data" processing.
 
 ## <a id='sample-application'></a> Sample Application
 
@@ -146,7 +147,7 @@ In accordance with the service plan you choose from the marketplace, resource li
 
 **Storage**
 
-If a cluster member of your MySQL service instance runs out of disk space, its `mysqld` process will crash and likely not be able to recover automatically. Additionally, there's a big risk of data corruption if this happens.
+If a cluster member of your MySQL service instance runs out of disk space, its `mysqld` process will crash and most likely not be able to recover automatically. Additionally, there's a big risk of data corruption if this happens.
 
 ## <a id='migration'></a> Migrate your service instance
 
