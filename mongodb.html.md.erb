@@ -50,7 +50,7 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 New versions of MongoDB will be announced in the newsletter as soon as they are available.
 
-The upgrade to the new version is done trough the CF CLI by running the update service command. This command will always upgrade the binaries to the lastest available version. To ensure the compatibility with your application MongoDB provides a feature flag for breaking changes which is called "featureCompatibilityVersion".
+The upgrade to the new version is done through the CF CLI by running the update service command. This command will always upgrade the binaries to the lastest available version. To ensure the compatibility with your application MongoDB provides a feature flag for breaking changes which is called "featureCompatibilityVersion".
 
 `cf update-service <service-name> -c '{"featureCompatibilityVersion":"X.Y"}'`
 
