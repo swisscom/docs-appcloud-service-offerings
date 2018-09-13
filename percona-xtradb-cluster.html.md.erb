@@ -6,9 +6,9 @@ owner: Services
 <strong><%= modified_date %></strong>
 ## <a id='create'></a> Create a Database Cluster and a Database on Top of it
 
-First you create a dedicated cluster with `cf create-service small mysqlent`. Choose the plan according your needs. This takes up to 20 minutes, because dedicated VMs are deployed in background. After that you have your own cluster, but no database `CREATE DATABASE` and credentials `CREATE USER` / `GRANT`.
+To create a dedicated cluster, the following command is used: `cf create-service small mysqlent`. Please choose the plan according to your needs. This may take up to 20 minutes, because dedicated VMs are being deployed in the background. After the command has completed successfully, a dedicated cluster has been created. However, no database (`CREATE DATABASE`) and no credentials (`CREATE USER` / `GRANT`) have been created, yet.
 
-Binding operation will result in this error:
+The binding operation will result in the following error:
 
 ```
 $ cf bs cf-env test-PerconaXtraDB
@@ -17,13 +17,13 @@ The service instance doesn't support binding.
 FAILED
 ```
 
-We need to create databases `CREATE DATABASE` via service broker. First, get the GUID of your service and keep it secret:
+Therefore, we first need to create databases `CREATE DATABASE` via the service broker. First, get the GUID of your service and keep it secret:
 
 ```
 cf service test --guid
 ```
 
-Then create as many databases your plan allows (where `parent_reference` is the GUID of your service instance):
+Then create as many databases as your plan allows (where `parent_reference` is the GUID of your service instance):
 
 ````
 cf cs mysqlentdatabase default test-PerconaXtraDB-db -c '{ "parent_reference": "'780cc39c-5742-465c-a3c0-2513be03b128'" }'
