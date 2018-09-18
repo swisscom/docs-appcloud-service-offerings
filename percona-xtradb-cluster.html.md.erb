@@ -17,13 +17,13 @@ The service instance doesn't support binding.
 FAILED
 ```
 
-Therefore, we first need to create databases `CREATE DATABASE` via the service broker. First, get the GUID of your service and keep it secret:
+Therefore, we first need to create databases `CREATE DATABASE` via the service broker. First, get the GUID of your service and keep it secret. The GUID is used to provision separate MySQL databases in this specific cluster. 
 
 ```
 cf service test --guid
 ```
 
-Then create as many databases as your plan allows (where `parent_reference` is the GUID of your service instance):
+Then, create as many databases as your plan allows (where `parent_reference` is the GUID of your service instance):
 
 ````
 cf cs mysqlentdatabase default test-PerconaXtraDB-db -c '{ "parent_reference": "'780cc39c-5742-465c-a3c0-2513be03b128'" }'
@@ -68,7 +68,7 @@ After the creation of the service and the binding of the service to the applicat
 ```
 
 <p class="note">
-Please be aware that the number of concurrent connections (max_connections) to MySQL is limited, depending on your plan. You must manage this by using connection pooling.
+Please be aware that the number of concurrent connections (max_connections) to MySQL is limited. The number of possible concurrent connections depend on your plan. You must manage this by using connection pooling.
 </p>
 
 ## <a id='whatis'></a> What is Percona XtraDB Cluster?
@@ -87,7 +87,7 @@ Let us quote [Frequently Asked Questions] (https://www.percona.com/software/mysq
 > 
 > Percona Server with XtraDB is the closest to the official MySQL Enterprise releases from Oracle. It is more conservative than MariaDB, which includes extra storage engines and more far-reaching code changes.
 
-We deploy at the moment MySQL 5.7.x. When MySQL 8.0 is ready we will inform you via newsletter.
+At the moment we deploy MySQL 5.7.x. As soon as MySQL 8.0 is available we will inform you via a newsletter.
 
 ## <a id='administrating'></a> Administrating Your MySQL Instances
 
@@ -107,7 +107,7 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 ## <a id='limitations'></a> Known Limitations
 
-Our Percona XtraDB Cluster offering is based on Galera, which brings some known limitations with it. Vendor summary [Percona XtraDB Cluster Limitations](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/limitation.html). Please read those points carefully.
+Our Percona XtraDB Cluster offering is based on Galera, which brings some known limitations with it. Vendor summary [Percona XtraDB Cluster Limitations](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/limitation.html). Please read through these points carefully.
 
 Schema Design:
 
@@ -121,8 +121,8 @@ ERROR 1105 (HY000): Percona-XtraDB-Cluster prohibits use of $Y command on a tabl
 Application Development:
 
 - Check for errors, even after `COMMIT`.
-- Moderate sized transactions.
-- Avoid use of explicitly locking `LOCK TABLES` as it is local and replication transaction can’t forcefully abort it.
+- Moderately sized transactions.
+- Avoid the use of explicitly locking `LOCK TABLES` as it is local and replication transaction can’t forcefully abort it.
 - Don't make assumptions about `AUTO_INCREMENT` values other than uniqueness. Not monotonicity, not gapless. (This applies for non-Galera, but probably happens more often here.)
 
 Administration and Schema Migrations:
