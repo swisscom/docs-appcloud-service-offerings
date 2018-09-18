@@ -160,8 +160,19 @@ In certain cases, high availability is sacrificed to avoid the overhead of repli
 #### Consistent Hash exchange
 For a different approach to scale your queues on the cluster, the [Consistent hash exchange plugin](https://github.com/rabbitmq/rabbitmq-consistent-hash-exchange) is enabled.
 
-## Per-Queue Message TTL of 14 days
+## Limitations
+The RabbitMQ service enforces some limitations to ensure the cluster's performance. 
+
+### Per-Queue Message TTL of 14 days
 To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://www.rabbitmq.com/ttl.html#per-queue-message-ttl) is set to **14 days**. Messages that are in the queue for longer than 14 days are automatically discarded.
+
+### Operator Policies
+The RabbitMQ cluster implements [operator policies](https://www.rabbitmq.com/parameters.html#operator-policies) to set certain limits on queues and messages. The following operator policies are defined:
+- `max-length: 100’000` - If a queue holds 100'000 messages, the most recently published messages will be discarded.
+- `max-length-bytes: 100MB` - If a queue holds more than 100MB of message data, the oldest messages are discarded from the head of the queue. 
+                                                
+### Connection Limits
+To avoid high load caused by too many open connections, a limit on service instance level is implemeted. A single service instance can hold a maximum of 500 connections. Once this limit is reached, all further connections will be terminated.
 
 ## <a id='managing'></a> Managing your RabbitMQ instances
 
