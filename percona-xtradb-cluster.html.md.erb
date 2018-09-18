@@ -17,7 +17,7 @@ The service instance doesn't support binding.
 FAILED
 ```
 
-Therefore, we first need to create databases `CREATE DATABASE` via the service broker. First, get the GUID of your service and keep it secret. The GUID is used to provision separate MySQL databases in this specific cluster. 
+Therefore, we first need to create databases `CREATE DATABASE` via the service broker. First, get the GUID of your service and keep it secret. The GUID is used to provision separate MySQL databases in this specific cluster.
 
 ```
 cf service test --guid
@@ -32,7 +32,7 @@ You can create databases in any ORG and SPACE.
 
 Bind the database `mysqlentdatabase` to your application with `cf bind-service myapp test-PerconaXtraDB-db`.
 
-<%= image_tag("./images/overview-percona.png") %>
+<%= image_tag("./images/overview_percona.png") %>
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
 
@@ -148,10 +148,6 @@ In accordance with the service plan you choose from the marketplace, resource li
 **Storage**
 
 If a cluster member of your MySQL service instance runs out of disk space, its `mysqld` process will crash and most likely not be able to recover automatically. Additionally, there's a big risk of data corruption if this happens.
-
-## <a id='migration'></a> Migrate your service instance
-
-See [Migrate from legacy MariaDB Enterprise to Percona XtraDB Cluster](./migrate-mariadbent-to-percona-xtradb-cluster.html) how to migrate your service instance to a new database cluster.
 
 ## <a id='security'></a> Security Configuration
 
