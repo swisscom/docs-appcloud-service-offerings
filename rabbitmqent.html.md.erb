@@ -168,8 +168,9 @@ To protect the cluster's disk from filling up with old messages that were never 
 
 ### Operator Policies
 The RabbitMQ cluster implements [operator policies](https://www.rabbitmq.com/parameters.html#operator-policies) to set certain limits on queues and messages. The following operator policies are defined:
-- `max-length: 100’000` - If a queue holds 100'000 messages, the most recently published messages will be discarded.
-- `max-length-bytes: 100MB` - If a queue holds more than 100MB of message data, the oldest messages are discarded from the head of the queue. 
+
+- `max-length: 100’000`: If a queue holds 100'000 messages, the most recently published messages will be discarded.
+- `max-length-bytes: 100MB`: If a queue holds more than 100MB of message data, the oldest messages are discarded from the head of the queue. 
                                                 
 ### Connection Limits
 To avoid high load caused by too many open connections, a limit on service instance level is implemeted. A single service instance can hold a maximum of 500 connections. Once this limit is reached, all further connections will be terminated.
