@@ -149,14 +149,46 @@ In accordance with the service plan you choose from the marketplace, resource li
 
 If a cluster member of your MySQL service instance runs out of disk space, its `mysqld` process will crash and most likely not be able to recover automatically. Additionally, there's a big risk of data corruption if this happens.
 
+**Disk Quota**
+
+TODO -> Sync with @nbari
+
 ## <a id='security'></a> Security Configuration
 
 - We don't allow `LOAD DATA INFILE`. See [Security Issues with LOAD DATA LOCAL](https://dev.mysql.com/doc/refman/8.0/en/load-data-local.html) for more details.
-- SSL -> TODO
+- MySQL users are forced to use mutual SSL (password only login doesn't work). We create a user like this `CREATE USER 'test'@'test' IDENTIFIED BY "test" require subject '/CN=test..' AND issuer '/CN=test..';`. The certificate issuer and subject are different for every cluster provisioned.
 
-## <a id='quota'></a> Disk Quota
+Here the instructions how to use SSL enabled connection for your local development tools. First create a [service key](https://docs.developer.swisscom.com/devguide/services/service-keys.html).
 
-Sync with @nbari -> TODO
+Then get the required certificates using a few shell commands. Please execuute `brew install jq` on macOS (for other systems, please refer to your package manager) before that.
+
+```
+DATABASE_NAME="CF_584BDA1C_C647_4F04_9761_A98B1D82D999"
+KEY_NAME="testservicekey"
+LOCAL_PATH="/Users/$USER/Desktop"
+
+echo -e "$(cf service-key "$DATABASE_NAME" "$KEY_NAME" | grep -v 'service instance' | jq '.ca')" |  sed -e 's/^"//' -e 's/"$//' > $LOCAL_PATH/ca.pem
+echo -e "$(cf service-key "$DATABASE_NAME" "$KEY_NAME" | grep -v 'service instance' | jq '.private_key')" |  sed -e 's/^"//' -e 's/"$//' > $LOCAL_PATH/client-key.pem
+echo -e "$(cf service-key "$DATABASE_NAME" "$KEY_NAME" | grep -v 'service instance' | jq '.certificate')" |  sed -e 's/^"//' -e 's/"$//'  > $LOCAL_PATH/client-cert.pem
+```
+Next create a SSH tunnel with `cf ssh <your-app> -L 3306:<db-host>.service.consul:3306`. The `<db-host>` is a UUID (for example `9bd40015-6daa-4fe9-a38e-575f8ad17bb9`) URI for your deployment.
+
+Create a [`.my.cnf`](https://dev.mysql.com/doc/refman/8.0/en/option-files.html) in your home directory.
+
+```
+[client]
+user = <user>
+host = localhost
+password = <password>
+ssl-ca = /Users/<local-user>/Desktop/ca.pem
+ssl-cert = /Users/<local-user>/Desktop/client-cert.pem
+ssl-key = /Users/<local-user>/Desktop/client-key.pem
+protocol = tcp
+```
+
+If you work with graphical MySQL Workbench click on "MysQL Connections" -> SSL -> Use SSL: *Require and Verify CA* and then fill in the paths to your certs. Do not use the SSL Wizard.
+
+<%= image_tag("./images/connect_to_database_Workbench.png") %>
 
 
 ## <a id='more'></a> More Info from Upstream Open Source Project
