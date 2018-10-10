@@ -6,7 +6,7 @@ owner: Services
 <strong><%= modified_date %></strong>
 ## <a id='create'></a> Create a Database Cluster and a Database on Top of it
 
-To create a dedicated cluster, the following command is used: `cf create-service small mysqlent`. Please choose the plan according to your needs. This may take up to 20 minutes, because dedicated VMs are being deployed in the background. After the command has completed successfully, a dedicated cluster has been created. However, no database (`CREATE DATABASE`) and no credentials (`CREATE USER` / `GRANT`) have been created, yet.
+To create a dedicated cluster, the following command is used: `cf create-service small mysqlent`. Please choose a plan according to your needs. This may take up to 20 minutes, because dedicated VMs are being deployed in the background. After successfully completing the command, a dedicated cluster is created. However, no database (`CREATE DATABASE`) and no credentials (`CREATE USER` / `GRANT`) have been created, yet.
 
 The binding operation will result in the following error:
 
@@ -17,7 +17,7 @@ The service instance doesn't support binding.
 FAILED
 ```
 
-Therefore, we first need to create databases `CREATE DATABASE` via the service broker. First, get the GUID of your service and keep it secret. The GUID is used to provision separate MySQL databases in this specific cluster.
+Therefore, we need to create databases `CREATE DATABASE` via the service broker. First, get the GUID of your service and keep it secret. The GUID is used to provision separate MySQL databases in this specific cluster.
 
 ```
 cf service test --guid
@@ -36,7 +36,7 @@ Bind the database `mysqlentdatabase` to your application with `cf bind-service m
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
 
-After the creation of the service and the binding of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+After the creation of the service and the binding of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials is stored in this variable as shown here:
 
 ```txt
   "mysqlentdatabase": [
@@ -68,7 +68,7 @@ After the creation of the service and the binding of the service to the applicat
 ```
 
 <p class="note">
-Please be aware that the number of concurrent connections (max_connections) to MySQL is limited. The number of possible concurrent connections depend on your plan. You must manage this by using connection pooling.
+Please be aware that the number of concurrent connections (max_connections) to MySQL is limited and depends on your plan. You must manage this by using connection pooling.
 </p>
 
 ## <a id='whatis'></a> What is Percona XtraDB Cluster?
@@ -87,7 +87,7 @@ Let us quote [Frequently Asked Questions] (https://www.percona.com/software/mysq
 > 
 > Percona Server with XtraDB is the closest to the official MySQL Enterprise releases from Oracle. It is more conservative than MariaDB, which includes extra storage engines and more far-reaching code changes.
 
-At the moment we deploy MySQL 5.7.x. As soon as MySQL 8.0 is available we will inform you via a newsletter.
+At the moment we deploy MySQL 5.7.x. As soon as MySQL 8.0 is available we will inform you via our newsletter.
 
 ## <a id='administrating'></a> Administrating Your MySQL Instances
 
@@ -107,7 +107,7 @@ Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/sp
 
 ## <a id='limitations'></a> Known Limitations
 
-Our Percona XtraDB Cluster offering is based on Galera, which brings some known limitations with it. Vendor summary [Percona XtraDB Cluster Limitations](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/limitation.html). Please read through these points carefully.
+Our Percona XtraDB Cluster offering is based on Galera, which brings some limitations with it. Vendor summary [Percona XtraDB Cluster Limitations](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/limitation.html). Please read through these points carefully.
 
 Schema Design:
 
@@ -131,7 +131,7 @@ Administration and Schema Migrations:
 - CTAS `CREATE TABLE AS SELECT` is not allowed. See [Why You Should Avoid Using “CREATE TABLE AS SELECT” Statement](https://www.percona.com/blog/2018/01/10/why-avoid-create-table-as-select-statement/).
 - `TRIGGER`s and `EVENT`s may need checking. By default, with row-based replication, triggers run on the master, and the effects of their executions are replicated to the slaves.
 
-Please add a **primary key** to every table you create. This is because of *Row Based Replication*. Tables without primary key cause an error during DML operations:
+Please add a **primary key** to every table you create. This is needed for *Row Based Replication*. Tables without a primary key cause an error during DML operations:
 
 ```
 ERROR 1105 (HY000): Percona-XtraDB-Cluster prohibits use of DML command on a table (CF_BBFC9089_5F02_48DC_8902_F92DDE608C43.bugtable) without an explicit primary key with pxc_strict_mode = ENFORCING or MASTER
@@ -143,20 +143,52 @@ We deploy your cluster with `pxc_strict_mode=MASTER`, so please make sure you re
 
 ## <a id='warnings'></a> Warnings
 
-In accordance with the service plan you choose from the marketplace, resource limitations are enforced. Please note that exhausting those limitations comes with certain risks, and MySQL itself only has very limited means of preventing overload / overuse.
+In accordance with the service plan you choose from the marketplace, resource limitations are enforced. Please note that exhausting those limitations comes with certain risks, and MySQL itself has very limited means of preventing overload / overuse.
 
 **Storage**
 
-If a cluster member of your MySQL service instance runs out of disk space, its `mysqld` process will crash and most likely not be able to recover automatically. Additionally, there's a big risk of data corruption if this happens.
+If a cluster member of your MySQL service instance runs out of disk space, its `mysqld` process will crash and most likely not be able to recover automatically. Additionally, there's a high risk of data corruption if this happens.
+
+**Disk Quota**
+
+TODO -> Sync with @nbari
 
 ## <a id='security'></a> Security Configuration
 
 - We don't allow `LOAD DATA INFILE`. See [Security Issues with LOAD DATA LOCAL](https://dev.mysql.com/doc/refman/8.0/en/load-data-local.html) for more details.
-- SSL -> TODO
+- MySQL users are forced to use mutual SSL (password only login doesn't work). We create a user like this `CREATE USER 'test'@'test' IDENTIFIED BY "test" require subject '/CN=test..' AND issuer '/CN=test..';`. The certificate issuer and the subject are different for every cluster provisioned.
 
-## <a id='quota'></a> Disk Quota
+Please, follow the instructions of how to use SSL enabled connection for your local development tools. First create a [service key](https://docs.developer.swisscom.com/devguide/services/service-keys.html).
 
-Sync with @nbari -> TODO
+Execute `brew install jq` on macOS (for other systems, please refer to your package manager). Then get the required certificates using the following shell commands:
+
+```
+DATABASE_NAME="CF_584BDA1C_C647_4F04_9761_A98B1D82D999"
+KEY_NAME="testservicekey"
+LOCAL_PATH="/Users/$USER/Desktop"
+
+echo -e "$(cf service-key "$DATABASE_NAME" "$KEY_NAME" | grep -v 'service instance' | jq '.ca')" |  sed -e 's/^"//' -e 's/"$//' > $LOCAL_PATH/ca.pem
+echo -e "$(cf service-key "$DATABASE_NAME" "$KEY_NAME" | grep -v 'service instance' | jq '.private_key')" |  sed -e 's/^"//' -e 's/"$//' > $LOCAL_PATH/client-key.pem
+echo -e "$(cf service-key "$DATABASE_NAME" "$KEY_NAME" | grep -v 'service instance' | jq '.certificate')" |  sed -e 's/^"//' -e 's/"$//'  > $LOCAL_PATH/client-cert.pem
+```
+Next create a SSH tunnel with `cf ssh <your-app> -L 3306:<db-host>.service.consul:3306`. The `<db-host>` is a UUID (for example `9bd40015-6daa-4fe9-a38e-575f8ad17bb9`) URI for your deployment.
+
+Create a [`.my.cnf`](https://dev.mysql.com/doc/refman/8.0/en/option-files.html) in your home directory.
+
+```
+[client]
+user = <user>
+host = localhost
+password = <password>
+ssl-ca = /Users/<local-user>/Desktop/ca.pem
+ssl-cert = /Users/<local-user>/Desktop/client-cert.pem
+ssl-key = /Users/<local-user>/Desktop/client-key.pem
+protocol = tcp
+```
+
+If you work with graphical MySQL Workbench click on "MysQL Connections" -> SSL -> Use SSL: *Require and Verify CA* and then fill in the paths to your certs. Do not use the SSL Wizard.
+
+<%= image_tag("./images/connect_to_database_Workbench.png") %>
 
 
 ## <a id='more'></a> More Info from Upstream Open Source Project
@@ -165,7 +197,7 @@ Our Percona Xtradb Cluster Enterprise offering is based on the the open source [
 
 ## <a id='support'></a> Developer Support
 
-If you need support, please ask on [Stack Overflow #swisscomdev] (https://docs.developer.swisscom.com/devguide-sc/support.html). With the joint support of the community, our experts and MySQL users, we are able to provide you with faster and better answers and cover a broader range of expertise.
+If you need support, please ask a question on [Stack Overflow #swisscomdev] (https://docs.developer.swisscom.com/devguide-sc/support.html). With the joint support of the community, our experts and MySQL users, we are able to provide you with faster and better answers and cover a broader range of expertise.
 
 If you get the impression that your database server might be down, please [contact us](https://developer.swisscom.com/support).
 
