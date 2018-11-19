@@ -6,7 +6,7 @@ owner: Services
 <strong><%= modified_date %></strong>
 ## <a id='create'></a> Create a Database Cluster and a Database on Top of it
 
-To create a dedicated cluster, the following command is used: `cf create-service small mysql`. Please choose a plan according to your needs. This may take up to 20 minutes, because dedicated VMs are being deployed in the background. After successfully completing the command, a dedicated cluster is created. However, no database (`CREATE DATABASE`) and no credentials (`CREATE USER` / `GRANT`) have been created, yet.
+To create a dedicated cluster, the following command is used: `cf create-service mysql small`. Please choose a plan according to your needs. This may take up to 20 minutes, because dedicated VMs are being deployed in the background. After successfully completing the command, a dedicated cluster is created. However, no database (`CREATE DATABASE`) and no credentials (`CREATE USER` / `GRANT`) have been created, yet.
 
 The binding operation will result in the following error:
 
