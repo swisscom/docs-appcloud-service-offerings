@@ -7,22 +7,22 @@ owner: Services
 
 ## <a id='overview'></a> Overview
 
-Dynamic Storage, the Cloud Storage of Swisscom, is a pay-per-use object storage optimized for storing large data sets (e.g. for backups, archives, pictures etc.) for your applications. From these, you can access your stored data through a RESTful API.
+Dynamic Storage, the Cloud Storage of Swisscom, is a pay-per-use object storage optimized for storing large data sets for your applications (e.g. backups, archives, pictures etc.). You can access your stored data through a RESTful API.
 
 Swisscom Dynamic Storage supports the S3 API:
 
 * [Amazon S3 API](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html)
 
-The Amazon S3 API is:
+Amazon S3 API:
 
-* Very well known in the market
+* Very well known on the market
 * State of the art, de facto standard
-* Providing a big community
+* Provides a big community
 * Has hundreds of scripts and tools available
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
 
-After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials are stored in this variable as shown here:
+After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to an application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. The information about the credentials is stored in this variable:
 
 ```json
 {
@@ -44,7 +44,7 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 ```
 ## <a id='plan'></a> Usage vs. Usage-encrypted Plan
 
-For Dynamic Storage, the Cloud Storage of Swisscom, are two different plans available:
+For Dynamic Storage, the Cloud Storage of Swisscom, two different plans are available:
 
 ```
 cf marketplace -s dynstrg
@@ -55,9 +55,9 @@ service plan      description                                                   
 usage             Usage based object storage with 1 GB included storage space             paid
 usage-encrypted   Usage based encrypted object storage with 1 GB included storage space   paid
 ```
-Both plans `usage` and `usage-encrypted` are the same in terms of handling from a developer and a user perspective.
+Both plans, `usage` and `usage-encrypted`, from developers' and users' perspective are the same in terms of handling.
 
-With `usage-encrypted` the Service Broker sets a flag on your namespace that when you create a bucket, this bucket and its contents is encrypted at Storage box layer. The encryption is done by auto-generated certificates on storage system and is implemented with software (there is a little performance degradation with every encryption). 
+With `usage-encrypted` plan, the Service Broker sets a flag on your namespace. With that, your created bucket and its content is encrypted in the storage box layer. The encryption is done by auto-generated certificates in the storage system, and is implemented with software (every encryption causes a little performance degradation). 
 
 If someone would be able to steal a physical harddisk of the storage box (very unlikely scenario because of very strict data center security processes), your data would be readable in cleartext without the `usage-encrypted` plan.
 
@@ -67,9 +67,9 @@ Swisscom: [Dynamic Storage How-To](https://github.com/swisscom/dynstrg-howto)
 
 ## <a id='delete'></a> Deleting a Service Instance
 
-Before deleting a Dynamic Storage service instance, you must remove all its buckets and objects. Otherwise the deletion will fail.
+Before deleting a Dynamic Storage service instance, you have to remove all its buckets and objects. Otherwise, the deletion will fail.
 
-To do so, you can use the [S3cmd](http://s3tools.org/s3cmd) tool and run the following command for each bucket:
+To do so, you can use the [S3cmd tool](http://s3tools.org/s3cmd) and run the following command for each bucket:
 
 ```shell
 $ s3cmd del --recursive s3://bucket-name
@@ -99,37 +99,38 @@ In case you don't have any credentials for your Dynamic Storage instance, you ca
 
 ## <a id='Naming'></a> Bucket/Object naming conventions
 
-### Bucket name
+### Bucket Name
 
 Please follow these conventions when naming S3 buckets in ECS:
-
+          
 * Names must be between 3 and 63 characters long.
 * Names must be DNS compliant: lowercase alphanumeric characters (`[a-z0-9]`) and hyphens (`-`).
 
 ### Object Name
 
-* The following rules apply to the naming of ECS S3 objects:
+The following rules apply to the naming of ECS S3 objects:
+          
 * Cannot be null or an empty string
-* Length range is 1-1024 (Unicode char)
+* Length range is 1-1024 (unicode char)
 * No validation on characters!
 
 ## <a id='namespace-style-url'></a> Namespace-style URL
 
-In comparison to Amazon S3, we are using namespaces which allows you to create bucket names which are only unique within your namespace. This means, on the one hand, that your bucket names don't need to be globally unique. On the other hand, you need to use namespace-style URL (e.g. https://8bb3085l69c42879b4aga5ce7016ffff.ds11s3NS.swisscom.com/mybucket/myobject) for to access your content for static webpages.
+In comparison to Amazon S3, we are using namespaces allowing you to create bucket names which are unique only within your namespace. This means, that your bucket names don't have to be globally unique. On the other hand, you need to use namespace-style URL (e.g. https://8bb3085l69c42879b4aga5ce7016ffff.ds11s3NS.swisscom.com/mybucket/myobject) to access your content for static webpages.
 
 ## <a id='using'></a> Using Amazon S3 compatible software on Dynamic Storage
 
-Most of the software that has been developed to use the Amazon S3 API will work with Dynamic Storage.
+Most of the software which has been developed to use Amazon S3 API will work with Dynamic Storage.
 
-The unsupported operations are rarely used and listed below.
+The unsupported operations, rarely used, are listed below.
 
-The challenge is often on the configuration side: Sometimes the Amazon URL and ports have been hard coded, sometimes the software is using path style and sometimes virtual style.
+The challenge arises often on the configuration side. Sometimes the Amazon URL and ports may be hard-coded, the software may use the path style or the virtual style.
 
 ## <a id='authentication'></a> Authentication
 
 <p class='note'>
   <strong>From the <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html">AWS S3 docs</a>:</strong>
-  The Amazon S3 REST API uses a custom HTTP scheme based on a keyed-HMAC (Hash Message Authentication Code) for authentication. To authenticate a request, you first concatenate selected elements of the request to form a string. You then use your AWS secret access key to calculate the HMAC of that string. Informally, we call this process "signing the request," and we call the output of the HMAC algorithm the signature, because it simulates the security properties of a real signature. Finally, you add this signature as a parameter of the request by using the syntax described in this section. When the system receives an authenticated request, it fetches the AWS secret access key that you claim to have and uses it in the same way to compute a signature for the message it received. It then compares the signature it calculated against the signature presented by the requester. If the two signatures match, the system concludes that the requester must have access to the AWS secret access key and therefore acts with the authority of the principal to whom the key was issued. If the two signatures do not match, the request is dropped and the system responds with an error message.
+  The Amazon S3 REST API uses a custom HTTP scheme based on a keyed-HMAC (Hash Message Authentication Code) for authentication. To authenticate a request, first you concatenate selected elements of the request to form a string. You then use your AWS secret access key to calculate the HMAC of that string. Informally, we call this process "signing the request," and the output of the HMAC algorithm "the signature" because it simulates the security properties of a real signature. Finally, you add this signature as a parameter of the request by using the syntax shown in this section. When the system receives an authenticated request, it fetches the AWS secret access key that you claim to have. Then it uses it in the same way to compute a signature for the message it received. Finally, it compares the calculated signature against the signature presented by the requester. If the two signatures match, the system concludes that the requester has access to the AWS secret access key and therefore acts with the authority of the principal to whom the key was issued. If the two signatures do not match, the request is dropped and the system responds with an error message.
 </p>
 
 When using ECS, the <strong>Access Key ID corresponds to <Namespace-Account></strong> and the <strong>Secret Access Key corresponds to the Shared Secret Access Key</strong>.
@@ -201,7 +202,7 @@ To get more information about the underlying EMC ECS product, please consult the
 
 * GET Object torrent
 
-Using a S3 compatible URL, Dynamic Storage can easily be used as a backend.
+Using an S3 compatible URL, Dynamic Storage can easily be used as a backend.
 
 ## Best Practices
 
