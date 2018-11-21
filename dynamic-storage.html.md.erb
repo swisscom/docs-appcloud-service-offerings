@@ -42,6 +42,24 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
   ]
 }
 ```
+## <a id='plan'></a> Usage vs. Usage-encrypted Plan
+
+For Dynamic Storage, the Cloud Storage of Swisscom, are two different plans available:
+
+```
+cf marketplace -s dynstrg
+Getting service plan information for service dynstrg as admin...
+OK
+
+service plan      description                                                             free or paid
+usage             Usage based object storage with 1 GB included storage space             paid
+usage-encrypted   Usage based encrypted object storage with 1 GB included storage space   paid
+```
+Both plans `usage` and `usage-encrypted` are the same in terms of handling from a developer and a user perspective.
+
+With `usage-encrypted` the Service Broker sets a flag on your namespace that when you create a bucket, this bucket and its contents is encrypted at Storage box layer. The encryption is done by auto-generated certificates on storage system and is implemented with software (there is a little performance degradation with every encryption). 
+
+If someone would be able to steal a physical harddisk of the storage box (very unlikely scenario because of very strict data center security processes), your data would be readable in cleartext without the `usage-encrypted` plan.
 
 ## <a id='sample-application'></a> Sample Application
 
