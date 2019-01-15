@@ -52,7 +52,10 @@ After the creation of the service and the binding of the service to the applicat
      "password": "zbRMjItyictbCtuH",
      "port": 3306,
      "uri": "mysql://8GwLLTRZjeBhOykz:zbRMjItyictbCtuH@780cc39c-5742-465c-a3c0-2513be03b128.service.consul:3306/CF_BBFC9089_5F02_48DC_8902_F92DDE608C43?reconnect=true",
-     "username": "8GwLLTRZjeBhOykz"
+     "username": "8GwLLTRZjeBhOykz",
+     "cert": "XXXX",
+     "key": "XXXX",
+     "ca": "XXXX"
     },
     "instance_name": "test-mysql-cluster-db",
     "label": "mysql-database",
@@ -160,7 +163,8 @@ TODO -> Sync with @nbari
 
 Please, follow the instructions of how to use SSL enabled connection for your local development tools. First create a [service key](https://docs.developer.swisscom.com/devguide/services/service-keys.html).
 
-Execute `brew install jq` on macOS (for other systems, please refer to your package manager). Then get the required certificates using the following shell commands:
+Execute `brew install jq` on macOS (jq is a command-line [json-processor](https://stedolan.github.io/jq/) - for other systems, please refer to your package manager). 
+Then get the required certificates using the following shell commands:
 
 ```
 DATABASE_NAME="CF_584BDA1C_C647_4F04_9761_A98B1D82D999"
