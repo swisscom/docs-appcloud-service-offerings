@@ -210,7 +210,7 @@ Connections between client applications and the RabbitMQ cluster are stable for 
 
 ### Channels
 #### General
-Channels share the same as restrictions as channels - they can use up quite a lot of memory if opened and closed frequently. Although less memory is used when creating a channel, it's still recommended that channels are kept open for a long time. 
+Channels share the same as restrictions as connections - they can use up quite a lot of memory if opened and closed frequently. Although less memory is used when creating a channel, it's still recommended that channels are kept open for a long time. 
 
 #### Threads
 Channels are not thread safe and should not be shared between different threads.
