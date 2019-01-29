@@ -42,6 +42,16 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 
 To connect to a running MongoDB instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
 
+## <a id='version-upgrade'></a> Version Upgrade
+
+New versions of MongoDB will be announced in the newsletter as soon as they are available.
+
+The upgrade to the new version is done through the CF CLI by running the update service command. This command will always upgrade the binaries to the lastest available version.
+
+`cf update-service <service-instance-name> -c '{"featureCompatibilityVersion":"3.6"}'`
+
+You can only upgrade the service and change the feature compatibility to the new version.
+
 ## <a id='sample-application'></a> Sample Application
 
 Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
