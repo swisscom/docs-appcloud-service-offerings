@@ -40,7 +40,16 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 
 ## <a id='administrating'></a> Administrating your MongoDB instances
 
-To connect to a running MongoDB instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
+To connect to a running MongoDB instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI:
+
+- Create a local hosts entry
+`127.0.0.1 localhost kubernetes-service-node.service.consul`
+
+- Connect to an app in your mongodb space via cf ssh to forward the ports of all replicaSet slaves
+`cf ssh myapp -L 40613:kubernetes-service-node.service.consul:40613 -L 46584:kubernetes-service-node.service.consul:46584 -L 38656:kubernetes-service-node.service.consul:38656
+
+- Modify connection string (from 'cf env') and connect via mongo cli
+`mongo mongodb://USER:PASSWORD@kubernetes-service-node.service.consul:40613,kubernetes-service-node.service.consul:46584,kubernetes-service-node.service.consul:38656/d55a188e`
 
 ## <a id='version-upgrade'></a> Version Upgrade
 
