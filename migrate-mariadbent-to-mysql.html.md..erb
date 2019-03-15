@@ -1,0 +1,131 @@
+---
+title: Migrate from MariaDBEnt to MySQL
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+We have a completely new [MySQL Service](https://docs.developer.swisscom.com/service-offerings/mysql.html) in store for you. It comes with dedicated clusters and many improvements. We recommend to move on as soon as possible.
+
+*Important*: Please make sure that you have the latest [cf CLI](https://github.com/cloudfoundry/cli) installed before you follow this migration guide.
+
+First, create a the new service instances according to your needs: [MySQL Service](https://docs.developer.swisscom.com/service-offerings/mysql.html#create)
+
+Next, stop your app:
+
+<pre class="terminal">
+$ cf stop my-awesome-app
+</pre>
+
+As a next step, we'll have to install `mysqldump` and `mysql-cli` which are contained in `mysql` package.
+
+On macOS, you can use [Homebrew](https://brew.sh/). For other systems, please refer to your package manager.
+
+<pre class="terminal">
+# macOS only
+$ brew install mysql
+</pre>
+
+Next, we'll use [`cf ssh`](https://docs.developer.swisscom.com/devguide/deploy-apps/ssh-services.html) to access our services. As the proxy, you can either use an existing running app (Don't use an app which is bound to your MariaDBEnt service. These need to remain stopped for data consistency reasons.) in the same space or just push a dummy app if you don't have one. This app will only be used to SSH into so we get access to our service instances.
+
+*Important*: Please make sure that the app you are using has been pushed or restarted within the last month since it needs to use the latest [security groups](https://docs.cloudfoundry.org/concepts/asg.html) to be able to connect to the new MySQL service.
+
+<pre class="terminal">
+# Only needed if you don't have a running app in your space
+$ git clone https://github.com/swisscom/cf-default-app-staticfile.git
+$ cd cf-default-app-staticfile
+$ cf push proxy-app --no-route
+</pre>
+
+Now, we'll need to create [serivce keys](https://docs.developer.swisscom.com/devguide/services/service-keys.html) for our service instances to get access credentials for them. To get these, run the following commands:
+
+<pre class="terminal">
+# Old database
+$ cf create-service-key my-db migration
+$ cf service-key my-db migration
+{ ... }
+
+# New database (make sure to use a database (without mtls) and not a cluster service-instance)
+$ cf create-service-key my-db-new migration
+$ cf service-key my-db-new migration
+{ ... }
+</pre>
+
+We'll use these credentials in the following steps, so remember how to get them. Please replace the terms in `<...>` with the respective value from these service keys.
+
+Next, create an SSH tunnel to your old DB through the proxy app (or any other app you intend to use).
+
+<pre class="terminal">
+cf ssh proxy-app -L 13000:&lt;old-db-host&gt;:&lt;old-db-port&gt;
+</pre>
+
+Now that we're connected, we can dump the old database using `mysqldump`. Open a new terminal and run the following command:
+
+<pre class="terminal">
+$ mysqldump --protocol TCP --port 13000 --user &lt;old-db-username&gt; --password --single-transaction --skip-add-locks &lt;old-db-database&gt; &gt; /tmp/my-db-dump.sql
+Enter password: &lt;old-db-password&gt;
+</pre>
+
+If you run into an error like `bash: mysqldump: command not found`, please be aware that you have to run the `mysqldump` command on your local machine in a new terminal window.
+
+After the dump has successfully been created, please make sure the last line is something like `-- Dump completed on 2017-08-15 11:06:17` by running the following command:
+
+<pre class="terminal">
+$ tail -f /tmp/my-db-dump.sql
+</pre>
+
+Next, create an SSH tunnel to the new MySQL service. Open the terminal where you have the SSH connection open, press `ctrl+d` and run the following command:
+
+<pre class="terminal">
+$ cf ssh proxy-app -L 13000:&lt;new-db-host&gt;:&lt;new-db-port&gt;
+</pre>
+
+Now we'll use the `mysql` CLI to restore the dump we created in the new MySQL service. Switch back to your other terminal and run:
+
+<pre class="terminal">
+mysql --protocol TCP --port 13000 --user &lt;new-db-username&gt; --password --show-warnings &lt;new-db-database&gt; &lt; /tmp/my-db-dump.sql
+Enter password: &lt;new-db-password&gt;
+</pre>
+Maybe you see errors or warnings. For example:
+
+<pre class="terminal">
+ERROR 1044 (42000) at line 660 in file: 'my-db-dump.sql': Access denied for user '&lt;new-db-username&gt;'@'%' to database '&lt;new-db-database&gt;'
+Query OK, 0 rows affected (0.07 sec)
+</pre>
+
+If you do get errors, jump to the respective line number and investigate. One significant difference is that, that `PRIMARY_KEY` is now enforced on each table. Further restrictions you find in [MySQL Service Limitations](https://docs.developer.swisscom.com/service-offerings/mysql.html#limitations)
+
+If you need support, please ask on [Stack Overflow #swisscomdev] (https://docs.developer.swisscom.com/devguide-sc/support.html).
+
+Now, we can unbind the old MariaDBEnt service and rename the new database to use the real name:
+
+<pre class="terminal">
+$ cf unbind-service my-awesome-app my-db
+$ cf rename-service my-db my-db-old
+$ cf rename-service my-db-new my-db
+</pre>
+
+*Important*: The new service will be under `mysql-database` instead of `mariadbent` in the `VCAP_SERVICES` environment variable. If your app code uses these names in the JSON structure to bind to the app, please change it accordingly.
+
+Now it's time to start your app again with the new MySQL database
+
+<pre class="terminal">
+$ cf start my-awesome-app
+</pre>
+
+For some apps, you'll also need to do a restage so they can pick up all environment variables properly:
+
+<pre class="terminal">
+# Optional
+$ cf restage my-awesome-app
+</pre>
+
+As soon as everything is working properly, you can remove the service keys and the old database:
+
+<pre class="terminal">
+$ cf delete-service-key my-db migration
+$ cf delete-service-key my-db-old migration
+$ cf delete-service my-db-old
+</pre>
+
+You have now migrated your app to the new MySQL service. Congrats! Please repeat for all apps using the old one.

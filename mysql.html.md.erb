@@ -53,7 +53,7 @@ cf service my-mysql-cluster --guid
 Then, create as many databases as your plan allows (where `parent_reference` is the GUID of your service instance):
 
 ````
-cf create-service mysql-database default my-mysql-db -c '{ "parent_reference": "'780cc39c-5742-465c-a3c0-2513be03b128'" }'
+cf create-service mysql-database default my-mysql-db -c '{ "parent_reference": "<MYSQLCLUSTER_GUID>" }'
 ````
 
 You can create databases in any ORG and SPACE.
@@ -151,6 +151,10 @@ We deploy your cluster with `pxc_strict_mode=MASTER`, so please make sure you re
 ### <a id='warnings'></a> Warnings
 
 In accordance with the service plan you choose from the marketplace, resource limitations are enforced. Please note that exhausting those limitations comes with certain risks, and MySQL itself has very limited means of preventing overload / overuse.
+
+## <a id='migration'></a> Migrate your service instances
+
+See [Migrate from MariaDBEnt to MySQL](./migrate-mariadbent-to-mysql.html) how to migrate your service instance to this service.
 
 ## <a id='support'></a> Developer Support
 
