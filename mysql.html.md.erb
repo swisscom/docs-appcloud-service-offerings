@@ -4,76 +4,9 @@ owner: Services
 ---
 
 <strong><%= modified_date %></strong>
-## <a id='create'></a> Create a Database Cluster and a Database on Top of it
+## <a id='about'></a> About the MySQL Service
 
-To create a dedicated cluster, the following command is used: `cf create-service mysql small`. Please choose a plan according to your needs. This may take up to 20 minutes, because dedicated VMs are being deployed in the background. After successfully completing the command, a dedicated cluster is created. However, no database (`CREATE DATABASE`) and no credentials (`CREATE USER` / `GRANT`) have been created, yet.
-
-The binding operation will result in the following error:
-
-```
-$ cf bs cf-env test-mysql-cluster
-Binding service test-mysql-cluster to app cf-env in org test / space test as test...
-The service instance doesn't support binding.
-FAILED
-```
-
-Therefore, we need to create databases `CREATE DATABASE` via the service broker. First, get the GUID of your service and keep it secret. The GUID is used to provision separate MySQL databases in this specific cluster.
-
-```
-cf service test --guid
-```
-
-Then, create as many databases as your plan allows (where `parent_reference` is the GUID of your service instance):
-
-````
-cf cs mysql-database default test-mysql-cluster-db -c '{ "parent_reference": "'780cc39c-5742-465c-a3c0-2513be03b128'" }'
-````
-You can create databases in any ORG and SPACE.
-
-Bind the database `mysql-database` to your application with `cf bind-service myapp test-mysql-cluster-db`.
-
-<%= image_tag("./images/overview_percona.png") %>
-
-## <a id='integrating-your-service'></a> Integrating the Service With Your App
-
-After the creation of the service and the binding of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. Information about the credentials is stored in this variable as shown here:
-
-```txt
-  "mysql-database": [
-   {
-    "binding_name": null,
-    "credentials": {
-     "database": "CF_BBFC9089_5F02_48DC_8902_F92DDE608C43",
-     "database_uri": "mysql://8GwLLTRZjeBhOykz:zbRMjItyictbCtuH@780cc39c-5742-465c-a3c0-2513be03b128.service.consul:3306/CF_BBFC9089_5F02_48DC_8902_F92DDE608C43?reconnect=true",
-     "host": "780cc39c-5742-465c-a3c0-2513be03b128.service.consul",
-     "hostname": "780cc39c-5742-465c-a3c0-2513be03b128.service.consul",
-     "jdbcUrl": "jdbc:mysql://780cc39c-5742-465c-a3c0-2513be03b128.service.consul:3306/CF_BBFC9089_5F02_48DC_8902_F92DDE608C43?user=8GwLLTRZjeBhOykz\u0026password=zbRMjItyictbCtuH",
-     "name": "CF_BBFC9089_5F02_48DC_8902_F92DDE608C43",
-     "password": "zbRMjItyictbCtuH",
-     "port": 3306,
-     "uri": "mysql://8GwLLTRZjeBhOykz:zbRMjItyictbCtuH@780cc39c-5742-465c-a3c0-2513be03b128.service.consul:3306/CF_BBFC9089_5F02_48DC_8902_F92DDE608C43?reconnect=true",
-     "username": "8GwLLTRZjeBhOykz"
-    },
-    "instance_name": "test-mysql-cluster-db",
-    "label": "mysql-database",
-    "name": "test-mysql-cluster-db",
-    "plan": "default",
-    "provider": null,
-    "syslog_drain_url": null,
-    "tags": [
-     "mysql"
-    ],
-    "volume_mounts": []
-   }
-```
-
-<p class="note">
-Please be aware that the number of concurrent connections (max_connections) to MySQL is limited and depends on your plan. You must manage this by using connection pooling.
-</p>
-
-## <a id='whatis'></a> What is Percona XtraDB Cluster?
-
-Let us quote [Frequently Asked Questions] (https://www.percona.com/software/mysql-database/percona-server/faq) and [Percona XtraDB Cluster](https://www.percona.com/software/mysql-database/percona-xtradb-cluster) from Percona:
+The MySQL Service is built on top of Percona XtraDB Cluster. Let us quote [Frequently Asked Questions] (https://www.percona.com/software/mysql-database/percona-server/faq) and [Percona XtraDB Cluster](https://www.percona.com/software/mysql-database/percona-xtradb-cluster) from Percona:
 
 > **About**
 > 
@@ -89,78 +22,60 @@ Let us quote [Frequently Asked Questions] (https://www.percona.com/software/mysq
 
 At the moment we deploy MySQL 5.7.x. As soon as MySQL 8.0 is available we will inform you via our newsletter.
 
-## <a id='administrating'></a> Administrating Your MySQL Instances
+## <a id='overview'></a> Overview Dedicated Cluster and multiple Databases/Schema
 
-To connect to a running Percona XtraDB Cluster instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
+<%= image_tag("./images/overview_percona.png") %>
 
-You can deploy [PivotalMySQLWeb](https://github.com/pivotal-cf/PivotalMySQLWeb) for database management on the Swisscom Application Cloud. It's not the most feature rich GUI client for MySQL, but a nice cloud native app with a simple deployment process.
+The new MySQL service requires two steps to provision a bindable database on a dedicated cluster:
 
-## <a id='usecases'></a> Use Cases
+1. First provision the cluster based on different plans.
+1. Second provision _n_ databases/schemas on top of the cluster and use it for binding.
 
-A typical use case for Percona XtraDB Cluster is a Cloud Foundry hosted web app which needs a relational data store.
+## <a id='create'></a> Create a Database Cluster and a Database on Top of it
 
-Our setup is not suitable for expensive analytics (DWH) or "Big Data" processing.
+To create a dedicated cluster, the following command is used: `cf create-service mysql small my-mysql-cluster`. Please choose a plan according to your needs. This may take up to 20 minutes, because dedicated VMs are being deployed in the background. After successfully completing the command, a dedicated cluster is created. However, no database (`CREATE DATABASE`) and no credentials (`CREATE USER` / `GRANT`) have been created, yet.
 
-## <a id='sample-application'></a> Sample Application
+Binding operation will result in the following error:
+
+```
+$ cf bs myapp my-mysql-cluster
+Binding service my-mysql-cluster to app myapp in org test / space test as test...
+The service instance doesn't support binding.
+FAILED
+```
+
+Therefore, we need to create databases `CREATE DATABASE` via the service broker. First, get the GUID of your service and keep it secret. The GUID is used to provision separate MySQL databases in this specific cluster.
+
+```
+cf service my-mysql-cluster --guid
+```
+
+Then, create as many databases as your plan allows (where `parent_reference` is the GUID of your service instance):
+
+````
+cf create-service mysql-database default my-mysql-db -c '{ "parent_reference": "'780cc39c-5742-465c-a3c0-2513be03b128'" }'
+````
+
+You can create databases in any ORG and SPACE.
+
+Bind the database `my-mysql-db` to your application with `cf bind-service myapp my-mysql-db`.
+
+<p class="note">
+Please be aware that the number of concurrent connections (max_connections) to MySQL is limited and depends on your plan. You must manage this by using connection pooling.
+</p>
+
+#### <a id='sample-application-default'></a> Sample Application for default plan
 
 Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
 
-## <a id='limitations'></a> Known Limitations
+### <a id='security'></a> Security Configuration (tls)
 
-Our Percona XtraDB Cluster offering is based on Galera, which brings some limitations with it. Vendor summary [Percona XtraDB Cluster Limitations](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/limitation.html). Please read through these points carefully.
-
-Schema Design:
-
-- InnoDB storage engine only. All other storage engines are disabled.
-````
-ERROR 1105 (HY000): Percona-XtraDB-Cluster prohibits use of $Y command on a table (CF_BBFC9089_5F02_48DC_8902_F92DDE608C43.bugtable) that resides in non-transactional storage engine with pxc_strict_mode = ENFORCING or MASTER
-````
-- Please use indexes according to your query pattern.
-- Every table must have a Primary Key!
-
-Application Development:
-
-- Check for errors, even after `COMMIT`.
-- Moderately sized transactions.
-- Avoid the use of explicitly locking `LOCK TABLES` as it is local and replication transaction can’t forcefully abort it.
-- Don't make assumptions about `AUTO_INCREMENT` values other than uniqueness. Not monotonicity, not gapless. (This applies for non-Galera, but probably happens more often here.)
-
-Administration and Schema Migrations:
-
-- `ALTER`s are handled differently. See [SCHEMA UPGRADES](http://galeracluster.com/documentation-webpages/schemaupgrades.html) for more details. Please be careful and test schema migrations.
-- CTAS `CREATE TABLE AS SELECT` is not allowed. See [Why You Should Avoid Using “CREATE TABLE AS SELECT” Statement](https://www.percona.com/blog/2018/01/10/why-avoid-create-table-as-select-statement/).
-- `TRIGGER`s and `EVENT`s may need checking. By default, with row-based replication, triggers run on the master, and the effects of their executions are replicated to the slaves.
-
-Please add a **primary key** to every table you create. This is needed for *Row Based Replication*. Tables without a primary key cause an error during DML operations:
-
-```
-ERROR 1105 (HY000): Percona-XtraDB-Cluster prohibits use of DML command on a table (CF_BBFC9089_5F02_48DC_8902_F92DDE608C43.bugtable) without an explicit primary key with pxc_strict_mode = ENFORCING or MASTER
-```
-
-We deploy your cluster with `pxc_strict_mode=MASTER`, so please make sure you read the guide about [PXC Strict Mode](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/features/pxc-strict-mode.html) add-on docs.
-
-**Long running DDL changes** (for example `ALTER TABLE` with thousends of records) may cause an outage for your cluster.
-
-## <a id='warnings'></a> Warnings
-
-In accordance with the service plan you choose from the marketplace, resource limitations are enforced. Please note that exhausting those limitations comes with certain risks, and MySQL itself has very limited means of preventing overload / overuse.
-
-**Storage**
-
-If a cluster member of your MySQL service instance runs out of disk space, its `mysqld` process will crash and most likely not be able to recover automatically. Additionally, there's a high risk of data corruption if this happens.
-
-**Disk Quota**
-
-TODO -> Sync with @nbari
-
-## <a id='security'></a> Security Configuration
-
-- We don't allow `LOAD DATA INFILE`. See [Security Issues with LOAD DATA LOCAL](https://dev.mysql.com/doc/refman/8.0/en/load-data-local.html) for more details.
-- MySQL users are forced to use mutual SSL (password only login doesn't work). We create a user like this `CREATE USER 'test'@'test' IDENTIFIED BY "test" require subject '/CN=test..' AND issuer '/CN=test..';`. The certificate issuer and the subject are different for every cluster provisioned.
+The service `mysql-database` has two plan types `default` and `mtls`. Using the `mtls` plan will activate tls-security for the created binding.
 
 Please, follow the instructions of how to use SSL enabled connection for your local development tools. First create a [service key](https://docs.developer.swisscom.com/devguide/services/service-keys.html).
 
-Execute `brew install jq` on macOS (for other systems, please refer to your package manager). Then get the required certificates using the following shell commands:
+Execute `brew install jq` on macOS (jq is a command-line [json-processor](https://stedolan.github.io/jq/) - for other systems, please refer to your package manager). 
+Then get the required certificates using the following shell commands:
 
 ```
 DATABASE_NAME="CF_584BDA1C_C647_4F04_9761_A98B1D82D999"
@@ -190,6 +105,52 @@ If you work with graphical MySQL Workbench click on "MysQL Connections" -> SSL -
 
 <%= image_tag("./images/connect_to_database_Workbench.png") %>
 
+#### <a id='sample-application-mtls'></a> Sample Application for mtls plan
+
+Sample application: [CF Sample App NodeJS with mTLS](https://github.com/swisscom/cf-sample-app-nodejs-mysql)
+
+## <a id='limitations'></a> Known Limitations
+
+Our MySQL offering is based on Percona XtraDB Cluster with Galera Replication, which brings some limitations with it. Vendor summary [Percona XtraDB Cluster Limitations](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/limitation.html). Please read through these points carefully.
+
+Schema Design:
+
+- InnoDB storage engine only. All other storage engines are disabled.
+
+````
+ERROR 1105 (HY000): Percona-XtraDB-Cluster prohibits use of $Y command on a table (CF_BBFC9089_5F02_48DC_8902_F92DDE608C43.bugtable) that resides in non-transactional storage engine with pxc_strict_mode = ENFORCING or MASTER
+````
+
+- Please use indexes according to your query pattern.
+- Every table must have a Primary Key!
+
+Application Development:
+
+- Check for errors, even after `COMMIT`.
+- Moderately sized transactions.
+- Avoid the use of explicitly locking `LOCK TABLES` as it is local and replication transaction can’t forcefully abort it.
+- Don't make assumptions about `AUTO_INCREMENT` values other than uniqueness. Not monotonicity, not gapless. (This applies for non-Galera, but probably happens more often here.)
+
+Administration and Schema Migrations:
+
+- `LOAD DATA INFILE` is disabled. See [Security Issues with LOAD DATA LOCAL](https://dev.mysql.com/doc/refman/8.0/en/load-data-local.html) for more details.
+- `ALTER`s are handled differently. See [SCHEMA UPGRADES](http://galeracluster.com/documentation-webpages/schemaupgrades.html) for more details. Please be careful and test schema migrations.
+- CTAS `CREATE TABLE AS SELECT` is not allowed. See [Why You Should Avoid Using “CREATE TABLE AS SELECT” Statement](https://www.percona.com/blog/2018/01/10/why-avoid-create-table-as-select-statement/).
+- `TRIGGER`s and `EVENT`s may need checking. By default, with row-based replication, triggers run on the master, and the effects of their executions are replicated to the slaves.
+
+Please add a **primary key** to every table you create. This is needed for *Row Based Replication*. Tables without a primary key cause an error during DML operations:
+
+```
+ERROR 1105 (HY000): Percona-XtraDB-Cluster prohibits use of DML command on a table (CF_BBFC9089_5F02_48DC_8902_F92DDE608C43.bugtable) without an explicit primary key with pxc_strict_mode = ENFORCING or MASTER
+```
+
+We deploy your cluster with `pxc_strict_mode=MASTER`, so please make sure you read the guide about [PXC Strict Mode](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/features/pxc-strict-mode.html) add-on docs.
+
+**Long running DDL changes** (for example `ALTER TABLE` with thousends of records) may cause an outage for your cluster.
+
+### <a id='warnings'></a> Warnings
+
+In accordance with the service plan you choose from the marketplace, resource limitations are enforced. Please note that exhausting those limitations comes with certain risks, and MySQL itself has very limited means of preventing overload / overuse.
 
 ## <a id='more'></a> More Info from Upstream Open Source Project
 
@@ -200,7 +161,3 @@ Our Percona Xtradb Cluster Enterprise offering is based on the the open source [
 If you need support, please ask a question on [Stack Overflow #swisscomdev] (https://docs.developer.swisscom.com/devguide-sc/support.html). With the joint support of the community, our experts and MySQL users, we are able to provide you with faster and better answers and cover a broader range of expertise.
 
 If you get the impression that your database server might be down, please [contact us](https://developer.swisscom.com/support).
-
-<%= image_tag("./images/techsupport.png") %>
-
-Thanks [@RaphComic](https://twitter.com/RaphComic) and [@prolificpencomics](https://www.instagram.com/prolificpencomics/) for the artwork.

@@ -40,7 +40,26 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 
 ## <a id='administrating'></a> Administrating your MongoDB instances
 
-To connect to a running MongoDB instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
+To connect to a running MongoDB instance with your local development tools, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI:
+
+- Create a local hosts entry
+`127.0.0.1 localhost kubernetes-service-node.service.consul`
+
+- Connect to an app in your mongodb space via cf ssh to forward the ports of all replica set slaves (get the cluster ports from database_uri in 'cf env myapp')
+`cf ssh myapp -L 40613:kubernetes-service-node.service.consul:40613 -L 46584:kubernetes-service-node.service.consul:46584 -L 38656:kubernetes-service-node.service.consul:38656
+
+- Modify connection string and connect via mongo cli (remove ?replicaSet parameter from the database_uri)
+`mongo mongodb://USER:PASSWORD@kubernetes-service-node.service.consul:40613,kubernetes-service-node.service.consul:46584,kubernetes-service-node.service.consul:38656/d55a188e`
+
+## <a id='version-upgrade'></a> Version Upgrade
+
+New versions of MongoDB will be announced in the newsletter as soon as they are available.
+
+The upgrade to the new version is done through the CF CLI by running the update service command. This command will always upgrade the binaries to the lastest available version.
+
+`cf update-service <service-instance-name> -c '{"featureCompatibilityVersion":"3.6"}'`
+
+You can only upgrade the service and change the feature compatibility to the new version.
 
 ## <a id='sample-application'></a> Sample Application
 
