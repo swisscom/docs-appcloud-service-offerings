@@ -189,3 +189,42 @@ To get access to the RabbitMQ management console, you can use the [`cf ssh` comm
 ## <a id='sample-application'></a> Sample Application
 
 Cloud Foundry: [RabbitMQ Example](https://github.com/cloudfoundry-samples/rabbitmq-cloudfoundry-samples)
+
+## <a id='best-pracitces'></a> Best Practices
+### Queues
+#### Keep queues short
+RabbitMQ queues work fast and reliably when the they're empty / have only a few messages queued up. RabbitMQ is not designed to hold message over a long period of time and it should always be the goal to keep the queues empty. Not only does this minimise the risk of message loss, it also increases the overall stability of the cluster and its performance.
+
+#### Know when to use lazy queues
+Lazy queues are queues that save their messages to disk to achieve some persistency. This has a negative impact on the performance of the specific queue but more predictable performance overall when as it minimises memory usage. Small and fast queues should (in general) not be declared as lazy queues. For large queues that don't require a fast throughput, lazy queues are advised. Lazy queues are enabled by default on the Application Cloud RabbitMQ service offering. 
+
+#### Auto-delete queues
+Queues will remain forever on the cluster by default (even when they're not active). This will put unnecessary strain on the cluster. To free up resources and don't run into limits, queues should be declared with the auto-delete flag set to true. With this, the queues will be deleted as soon as there are no more active connections using them. 
+
+### Connections
+#### General
+Connections in RabbitMQ use up a lot of memory. In order to keep the cluster healthy and fast, it is important that there are as few open connections as possible. This can be achieved by keeping connections open for client applications. A good practise is to keep the connection open throughout the lifetime of the client application.
+
+#### Auto reconnect
+Connections between client applications and the RabbitMQ cluster are stable for the most part. However, it's possible that a network outage can occur or the cluster has an unexpected downtime. In such a case, the client application usually needs to reconnect to the cluster and reopen connections and channels. To automate this process, most RabbitMQ Client APIs support the auto-reconnect feature (see the Java Client API for an example). It is advised to enable the auto-reconnect feature on the client applications.
+
+### Channels
+#### General
+Channels share the same as restrictions as connections - they can use up quite a lot of memory if opened and closed frequently. Although less memory is used when creating a channel, it's still recommended that channels are kept open for a long time. 
+
+#### Threads
+Channels are not thread safe and should not be shared between different threads.
+
+#### Prefetch
+RabbitMQ allows the for the control over how many messages are sent to the consumer at the same time. Per default, the prefetch value is sent to unlimited, meaning the server tries to send as many messages as possible at the same time. Setting a proper prefetch value can help to achieve the desired performance of the service. If the prefetch count is set too low, the server while idle and wait for more the client to send more message. On the other hand, if the prefetch count is too high the client might take a long time to consume the messages. 
+
+Setting the correct prefetch value depends on the setup of the client application. As such, there is not one prefetch value that is best for all cases. As a general rule the prefetch count should be higher if there is only one / few consumers that consume messages quickly. If the client application feature many consumers, a lower prefetch value should be set. More information can be found here: https://www.rabbitmq.com/consumer-prefetch.html.
+
+### Messages
+#### Message size
+Large messages can take up a lot of resources and should generally be avoided. RabbitMQ is designed for high message throughput and as such it is better to keep the messages sent over RabbitMQ small. Splitting up large payloads into smaller message should be considered when designing the client application.
+
+#### Message ack's and confirms
+RabbitMQ features acknowledgments (ack's) for receiving message and publisher confirms (confirms) for sending messages. These mechanisms can be used to ensure that a message has been send / received correctly. Ack's and confirms are generally a good idea to implement as they increase the reliability and consistency of the message flow.
+
+Note: Ack's and confirms have a small performance impact.
