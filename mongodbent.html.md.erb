@@ -72,7 +72,11 @@ To upgrade both the MongoDB Enteprise binaries (if not already done) and the fea
 
 As a MongoDB Enterprise customer, you receive access to the [Ops Manager](https://docs.opsmanager.mongodb.com/current/) to see detailed performance metrics and health state.
 
-To connect to the Ops Manager to get insights into your MongoDB, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI.
+To connect to the Ops Manager to get insights into your MongoDB, you can use the [`cf ssh`](../devguide/deploy-apps/ssh-services.html) feature of the cf CLI:
+
+`cf ssh -L 8080:opsmanager.service.consul:8080 myapp`
+
+After forwarding the port you can access Ops Manager under http://localhost:8080 in your browser and login with the Ops Manager user exposed to your application.
 
 ## <a id='specifications'></a> Specifications
 
