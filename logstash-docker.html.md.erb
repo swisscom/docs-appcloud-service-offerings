@@ -1,0 +1,80 @@
+---
+title: Logstash Docker
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+## <a id='overview'></a> Overview
+
+1. Create the manifest.yml
+2. Push Logstash Docker image
+3. Configure logstash pipeline in ElasticSearch
+4. Alternative: Create your own Logstash Docker image
+5. Bind your app to the user provided service
+6. See and search through your logs
+
+## <a id='step-by-step-guide'></a> Step by Step Guide
+
+This section describes how to store your application logs in Elasticsearch using Logstash & Kibana in Cloud Foundry using the official Docker images. 
+
+### <a id='push-logstash-buildpack'></a> Push a Logstash App
+Create the following manifest.yml to configure your Logstash to use the configuration pipeline named "logstash_pipeline_1", which is stored in your ElasticSearch cluster (instead of the usual filesystem pipeline configuration).
+
+```txt
+---
+applications:
+  - name: mylogstash
+    health-check-type: process
+    memory: 2G
+    instances: 1
+    routes:
+      - route: mylogstash.scapp.io
+    docker:
+      image: docker.elastic.co/logstash/logstash:6.1.4
+    env:
+      XPACK_MANAGEMENT_ELASTICSEARCH_URL: https://abc.elasticsearch.lyra-836.appcloud.swisscom.com
+      XPACK_MANAGEMENT_ENABLED: true
+      XPACK_MANAGEMENT_PIPELINE_ID: "[\"logstash_pipeline_1\"]"
+      XPACK_MANAGEMENT_ELASTICSEARCH_USERNAME: lsWU23dnsrVHMDMHSb
+      XPACK_MANAGEMENT_ELASTICSEARCH_PASSWORD: epIfkIDZYgq6fCG1
+      XPACK_MONITORING_ENABLED: true
+      XPACK_MONITORING_ELASTICSEARCH_URL: https://abc.elasticsearch.lyra-836.appcloud.swisscom.com
+      XPACK_MONITORING_ELASTICSEARCH_USERNAME: lsWU23dnsrVHMDMHSb
+      XPACK_MONITORING_ELASTICSEARCH_PASSWORD: epIfkIDZYgq6fCG1
+      PATH_CONFIG:
+```
+
+Push the Docker container as usual with `cf push`.
+
+### Create the centralized Logstash pipeline
+
+To be able to use the upstream Logstash Docker images, we will configure our Logstash pipeline via ElasticSearch, instead of using the default filesystem configuration in /usr/share/config (see https://www.elastic.co/guide/en/logstash/current/docker-config.html). 
+
+Copy your input {} filter {} and output {} sections from your current Logstash configuration and insert them into ElasticSearch. If you are using separate Grok pattern files, those must be included in your pipelines filter section instead of separate files.
+
+The easiest way of creating the pipeline in ElasticSearch is via Kibana as outlined in https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html.
+
+Alternatively the pipeline can also be easily created using the ElasticSearch REST API:
+https://www.elastic.co/guide/en/kibana/master/logstash-configuration-management-api-create.html
+
+As soon as you save/update your configuration you should see an event in the Logstash logs:
+```txt
+[INFO ][logstash.pipelineaction.reload] Reloading pipeline {"pipelin
+e.id"=>:logstash_pipeline_1}
+```
+
+### Alternative: Create your own Docker image
+If you wish to use configuration files instead, you can fork the official Docker image and ADD your configuration in your own Dockerfile.
+
+### <a id='cf-cups'></a> Create a User Provided Service
+`cf cups my-logstash-drain -l https://mylogstash.scapp.io`
+
+### <a id='bind-app-to-ups'></a> Bind Your App
+Bind and restage the app which should forward logs to Logstash via logstash drain. 
+
+```txt
+cf bs my-app my-logstash-drain
+cf restage my-app
+```
+You should start seeing logs in your ElasticSearch index as soon as your app receives any traffic.
