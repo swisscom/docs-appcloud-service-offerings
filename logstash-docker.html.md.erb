@@ -8,18 +8,17 @@ owner: Services
 ## <a id='overview'></a> Overview
 
 1. Create the manifest.yml
-2. Push Logstash Docker image
-3. Configure logstash pipeline in ElasticSearch
-4. Alternative: Create your own Logstash Docker image
-5. Bind your app to the user provided service
-6. See and search through your logs
+2. Create logstash pipeline in ElasticSearch
+3. Alternative: Create your own Logstash Docker image
+4. Bind your app to the user provided service
+5. See and search through your logs
 
 ## <a id='step-by-step-guide'></a> Step by Step Guide
 
 This section describes how to store your application logs in Elasticsearch using Logstash & Kibana in Cloud Foundry using the official Docker images. 
 
-### <a id='push-logstash-buildpack'></a> Push a Logstash App
-Create the following manifest.yml to configure your Logstash to use the configuration pipeline named "logstash_pipeline_1", which is stored in your ElasticSearch cluster (instead of the usual filesystem pipeline configuration).
+### <a id='push-logstash-buildpack'></a> Push Logstash with Docker 
+Create the following manifest.yml to configure your Logstash to use the configuration pipeline, which is stored in your ElasticSearch cluster (instead of the usual filesystem pipeline configuration).
 
 ```txt
 ---
@@ -46,12 +45,12 @@ applications:
 
 Please follow the next section to configure Logstash before pushing it.
 
-### Create the centralized Logstash pipeline
+### Create the centralized Logstash pipeline in ElasticSearch
 
 To be able to use the upstream Logstash Docker images, we will configure our Logstash pipeline via ElasticSearch, instead of using the default filesystem configuration. 
 The easiest way of creating the pipeline in ElasticSearch is via Kibana as outlined in https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html.
 
-Copy your input {} filter {} and output {} sections from your current Logstash configuration and insert them into ElasticSearch (Kibana/Management/Logstash/Pipelines). If you are using separate Grok pattern files, those must be included in your pipelines filter section instead of separate files. Also note that the http input port is 5044, as the upstream Docker image exposes the default Beats port.
+Copy the pipeline sections from your current Logstash configuration and insert them into ElasticSearch (Kibana/Management/Logstash/Pipelines). If you have been using separate Grok pattern files, those must be included in your pipelines filter section instead of separate files. Also note that the http input port is 5044, as the upstream Docker image exposes the default Beats port.
 
 Example pipeline to parse logs from Cloud Foundry:
 
