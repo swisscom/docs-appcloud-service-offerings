@@ -7,14 +7,15 @@ owner: Services
 
 ## <a id='overview'></a> Overview
 
-With Docker you can easily push Kibana as an App to manage your ElasticSearch cluster.
+With Docker you can easily push Kibana as an App to manage your ElasticSearch instance.
 
 ## <a id='step-by-step-guide'></a> Kibana in Cloud Foundry with Docker
 
 This describes how to deploy your Kibana instance as a Docker container in Cloud Foundry.
 
 ### <a id='push-logstash-buildpack'></a> Create the manifest.yml
-As the official Docker image does not support Cloud Foundry environment variables, you have to manually set them in the expected format (see https://www.elastic.co/guide/en/kibana/current/settings.html). Those variables get parsed at startup and written to kibana.yml in the container.
+As the official Docker image does not support Cloud Foundry environment variables, you have to manually set them in the expected format (see https://www.elastic.co/guide/en/kibana/current/settings.html). 
+These variables get parsed at startup and written to kibana.yml in the Docker container.
 
 You can get the credentials for your ElasticSearch service instance via service-key:
 
@@ -33,9 +34,9 @@ applications:
     docker:
       image: docker.elastic.co/kibana/kibana:6.1.4
     env:
-      ELASTICSEARCH_URL: https://ac9537fc848c589bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
-      ELASTICSEARCH_USERNAME: ksTxVNyLU4JWiQOE6V
-      ELASTICSEARCH_PASSWORD: KvOpMVrXGCJ4PJht
+      ELASTICSEARCH_URL: https://ac9537fc444c589bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
+      ELASTICSEARCH_USERNAME: myuser 
+      ELASTICSEARCH_PASSWORD: mypassword 
 ```
 
-Push the Docker container as usual with `cf push` and access it via https://mykibana.scapp.io. 
+Push the Docker container as usual with `cf push` and access it via https://mykibana.scapp.io using the "full_access_user". 
