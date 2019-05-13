@@ -40,7 +40,7 @@ applications:
       XPACK_MONITORING_ELASTICSEARCH_URL: https://ac9537fc444c489bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
       XPACK_MONITORING_ELASTICSEARCH_USERNAME: myuser 
       XPACK_MONITORING_ELASTICSEARCH_PASSWORD: mypassword 
-      PATH_CONFIG:
+      PATH_CONFIG: ""
 ```
 
 Please follow the next section to configure Logstash before pushing it.
@@ -58,6 +58,8 @@ Example pipeline to parse logs from Cloud Foundry:
 input {
   http {
     port => "5044"
+    user => "inputuser"
+    password => "inputpassword"
   }
 }
 
