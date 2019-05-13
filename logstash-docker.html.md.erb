@@ -127,14 +127,15 @@ output {
 Alternatively the configuration pipeline can also be created using the ElasticSearch REST API:
 https://www.elastic.co/guide/en/kibana/master/logstash-configuration-management-api-create.html
 
-Push your Logstash as usual using
+Push your Logstash as usual using:
+
 ```txt
 cf push
 ```
 
 Following lines in the Logstash startup log indicate that the pipeline has been configured successfully:
-```txt
 
+```txt
    2019-05-13T08:47:54.60+0000 [APP/PROC/WEB/0] OUT [2019-05-13T08:47:54,599][INFO ][logstash.outputs.elasticsearch] New Elasticsearch output {:class=>"LogStash::Outputs::ElasticSearch", :hosts=>["https://ac9537fc444c489bb63ac44064c54519.el
 asticsearch.lyra-836.appcloud.swisscom.com"]}
    2019-05-13T08:47:54.78+0000 [APP/PROC/WEB/0] OUT [2019-05-13T08:47:54,784][INFO ][logstash.pipeline        ] Starting pipeline {:pipeline_id=>"logstash_pipeline_1", "pipeline.workers"=>8, "pipeline.batch.size"=>125, "pipeline.batch.delay
