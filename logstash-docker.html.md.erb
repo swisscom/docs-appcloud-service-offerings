@@ -149,7 +149,7 @@ asticsearch.lyra-836.appcloud.swisscom.com"]}
 If you wish to use configuration files instead, you can fork the official Docker image and ADD your configuration files in your own Dockerfile. You will have to host your personal Docker image in a Docker Repository like Dockerhub or Artifactory.
 
 ### <a id='cf-cups'></a> Create a User Provided Service to forward the Logs from your App
-`cf cups my-logstash-drain -l https://mylogstash.scapp.io`
+`cf cups my-logstash-drain -l https://inputuser:inputpassword@mylogstash.scapp.io`
 
 ### <a id='bind-app-to-ups'></a> Bind Your App
 Bind and restage the app which should forward logs to Logstash via logstash drain. 
