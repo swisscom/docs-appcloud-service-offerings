@@ -40,12 +40,12 @@ applications:
       XPACK_MONITORING_ELASTICSEARCH_URL: https://ac9537fc444c489bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
       XPACK_MONITORING_ELASTICSEARCH_USERNAME: myuser 
       XPACK_MONITORING_ELASTICSEARCH_PASSWORD: mypassword 
-      PATH_CONFIG:
+      PATH_CONFIG: ""
 ```
 
 Please follow the next section to configure Logstash before pushing it.
 
-### Create the centralized Logstash pipeline in ElasticSearch
+### <a id='create-centralized-pipeline'></a> Create the centralized Logstash pipeline in ElasticSearch
 
 To be able to use the upstream Logstash Docker images, we will configure our Logstash pipeline via ElasticSearch, instead of using the default filesystem configuration. 
 The easiest way of creating the pipeline in ElasticSearch is via Kibana as outlined in https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html.
@@ -58,6 +58,8 @@ Example pipeline to parse logs from Cloud Foundry:
 input {
   http {
     port => "5044"
+    user => "inputuser"
+    password => "inputpassword"
   }
 }
 
@@ -143,11 +145,11 @@ asticsearch.lyra-836.appcloud.swisscom.com"]}
    2019-05-13T08:47:54.91+0000 [APP/PROC/WEB/0] OUT [2019-05-13T08:47:54,916][INFO ][logstash.agent           ] Pipelines running {:count=>2, :pipelines=>[".monitoring-logstash", "logstash_pipeline_1"]}
 ```
 
-### Alternative: Create your own Docker image
+### <a id='create-own-docker-image'></a> Alternative: Create your own Docker image
 If you wish to use configuration files instead, you can fork the official Docker image and ADD your configuration files in your own Dockerfile. You will have to host your personal Docker image in a Docker Repository like Dockerhub or Artifactory.
 
 ### <a id='cf-cups'></a> Create a User Provided Service to forward the Logs from your App
-`cf cups my-logstash-drain -l https://mylogstash.scapp.io`
+`cf cups my-logstash-drain -l https://inputuser:inputpassword@mylogstash.scapp.io`
 
 ### <a id='bind-app-to-ups'></a> Bind Your App
 Bind and restage the app which should forward logs to Logstash via logstash drain. 
