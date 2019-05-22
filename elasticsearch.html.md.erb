@@ -74,7 +74,11 @@ You can find a guide on how to set up Logstash with Docker here: [Logstash Docke
 
 ## <a id='curator'></a> Curator
 
-Curator is integrated into the [Logstash buildpack](https://github.com/swisscom/logstash-buildpack).
+Deprecated: Curator is integrated into the [Logstash buildpack](https://github.com/swisscom/logstash-buildpack).
+
+Current versions of ElasticSearch (6.7+) offer Index Lifecycle Management (https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html).
+
+For older versions, use the workaround under https://github.com/swisscom/cf-curator-cron to periodically clean up your Indices.
 
 ## <a id='highavailablility'></a> High Availability
 
