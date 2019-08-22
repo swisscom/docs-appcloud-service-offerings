@@ -90,6 +90,16 @@ CREATE DATABSE CF_DATABASE_NAME
 GRANT ALL ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
 REVOKE LOCK TABLES ON `CF_DATABASE_NAME`.* FROM 'USER'@'SUBNET'
 ```
+
+## <a id='migrations'></a> Minimize Downtime for Schema Migrations
+
+Lots of customers complained that when doing an `ALTER TABLE` statement in Galera, the whole cluster is read-locked for the duration of the statement. On big tables (millions of records) this can result in many hours of "outage". Here are some tips to minimize that behavior.
+
+- Add `ALGORITHM=INPLACE, LOCK=NONE` for Online DDL Operations in your `ALTER TABLE` statements. For example, to add a new index, write `ALTER TABLE test ADD INDEX idx_test (test), ALGORITHM=INPLACE, LOCK=NONE`. Be warned Online DDL is not always online and may incur locks.
+- `ALGORITHM=INPLACE, LOCK=NONE` has some limitations and not supported operations. If you it doesn't work for your case, use [pt-online-schema-change](https://www.percona.com/doc/percona-toolkit/LATEST/pt-online-schema-change.html). The tool `pt-online-schema-change` alters a table’s structure without blocking reads or writes. Please do not use this tool before reading its linked documentation and checking your [service backups](../devguide-sc/services/backups.html) carefully. In our current offering you don't have the necessary permissions for `pt-online-schema-change`. Please ask our support to `GRANT PROCESS, REPLICATION SLAVE ON *.* TO` for your `serice-key`. We can't grant that on shared cluster, it means you must have your own dedicated Galera/MariaDB cluster.
+- Don't use `TRUNCATE` with huge tables. Please `DROP` the table and recreate.
+
+
 ## <a id='framework'></a> Database Frameworks Integration tips
 - Liquibase is not fully Galera compatible. See bug report [primary key on DATABASECHANGELOG, PK_DATABASECHANGELOG, is no longer created](https://liquibase.jira.com/plugins/servlet/mobile#issue/CORE-1909) for solutions.
 
