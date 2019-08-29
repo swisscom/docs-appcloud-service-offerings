@@ -1,0 +1,63 @@
+---
+title: Task-Scheduler
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+## <a id='overview'></a> Overview
+
+The Task-Scheduler is a marketplace service that allows you to schedule and automatically run tasks for your applications.
+You can use it to schedule periodical execution of any tasks on the Application Cloud, including database migrations, emails, batch jobs, etc..
+
+## <a id='usage'></a> Usage
+
+### <a id='create-service'></a> Create Service Instance
+
+To create an instance of the Task-Scheduler, run `cf create-service task-scheduler free SERVICE-INSTANCE-NAME`, replacing _SERVICE-INSTANCE-NAME_ with a name of your choice. After you create the service instance, this instance name appears under name in the output of the `cf services` command.
+
+```
+$ cf create-service task-scheduler free my-scheduler
+Creating service instance my-scheduler in org swisscom / space PROD as admin...
+OK
+
+$ cf services
+Getting services in org my-org / my-space PROD as user@example.ch...
+
+name                         service          plan    bound apps                          last operation       broker                upgrade available
+my-scheduler                 task-scheduler   free                                        create succeeded     task-scheduler
+```
+
+### <a id='bind-service'></a> Bind Service Instance
+
+For an app to use the service, you must first bind it to the service instance.
+
+To bind an app to a Task-Scheduler instance, run `cf bind-service APP-NAME SERVICE-INSTANCE-NAME -c '{"schedule":"CRONTAB-SCHEDULE", "task":"COMMAND-TO-EXECUTE"}'`, replacing _APP-NAME_ with the name of the app you want to use the scheduling service for, _SERVICE-INSTANCE-NAME_ with the service instance name, _CRONTAB-SCHEDULE_ with a valid cron schedule entry (see for [https://en.wikipedia.org/wiki/Cron](https://en.wikipedia.org/wiki/Cron)) and _COMMAND-TO-EXECUTE_ with the task command you want to execute on your app.
+
+Nonstandard schedule keywords like _@daily_ or _@weekly_ are not supported!
+
+```
+$ cf bind-service my-app my-scheduler -c '{"schedule":"0 2 * * *", "task":"rake cleanup-database"}'
+
+Binding service my-scheduler to my-app in org my-org / space my-space as user@example.ch...
+OK
+
+TIP: Use 'cf push' to ensure your env variable changes take effect
+```
+
+After binding a Task-Scheduler instance to your app, the configured task will be executed automatically according to the provided cron schedule.
+
+### <a id='view-tasks'></a> View Tasks
+
+To view running and finished tasks, run `cf tasks`.
+
+```
+$ cf tasks my-app
+Getting tasks for app my-app in org my-org / my-space PROD as user@example.ch...
+OK
+
+id  name                                   state       start time                      command
+3   2f458b3f-c383-4422-866f-31bd7fda9ac3   SUCCEEDED   Thu, 29 Aug 2019 00:02:05 UTC   rake cleanup-database
+2   2f458b3f-c383-4422-866f-31bd7fda9ac3   SUCCEEDED   Wed, 28 Aug 2019 00:02:09 UTC   rake cleanup-database
+1   2f458b3f-c383-4422-866f-31bd7fda9ac3   SUCCEEDED   Tue, 27 Aug 2019 00:02:03 UTC   rake cleanup-database
+```
