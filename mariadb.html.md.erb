@@ -125,9 +125,10 @@ See [Migrate from legacy MariaDB to MariaDB Ent](./migrate-mariadb-to-mariadbent
 Within your MariaDB service instance, you can start a backup and also restore it afterwards.
 For more information about this feature, check the [service backup guide](../devguide-sc/services/backups.html).
 
-Some of our users also created apps for a regular/scheduled backup. See example of the [automatic backups app.](https://github.com/theonlyandone/cf-backup-app).
+If you need more fine-grained control over your backups there is also an app available that allows for automatic scheduled backups: [backman - the appcloud backup manager](https://github.com/swisscom/backman).
+Any MariaDB service instance bound to this app will be automatically backed up, can be downloaded and also restored on-demand.
 
-If you accidentally `DROP` a table or other error happens, we can not restore your table. Please make sure you create a [service backup](../devguide-sc/services/backups.html) in Portal or [CLI with the Swisscom Plugin](https://github.com/swisscom/appcloud-cf-cli-plugin) before you do changes.
+If you accidentally `DROP` a table or other error happens, we can not restore your table unfortunately. Please make sure you create a [service backup](../devguide-sc/services/backups.html) in the Portal, via the [CLI with the Swisscom Plugin](https://github.com/swisscom/appcloud-cf-cli-plugin) or with [backman](https://github.com/swisscom/backman) before you do changes.
 
 
 ## <a id='more'></a> More info from upstream open source project
