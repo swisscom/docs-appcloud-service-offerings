@@ -55,8 +55,8 @@ Run this command to get the credentials:
 cf service-key holiday-pictures mys3servicekey
 {
  "accessHost": "ds11s3.swisscom.com",
- "accessKey": "5484335407854a4c9dc88e01206fc148/CF_P8_7AAA80F2_98A1_46F2_9414_A54633972566",
- "sharedSecret": "7PwzDzLbXOWZiYBoM22C3kp7XgM="
+ "accessKey": "5484335407854yolo7dc88e01206fc148/I-AM-JUST-AN-EXAMPLE-KEY",
+ "sharedSecret": "<redacted>"
 }
 </pre>
 
@@ -69,15 +69,15 @@ Open the minio config (.mc/config-json) and enter the credentials in the followi
         "hosts": {
                 "holiday": {
                         "url": "https://ds11s3.swisscom.com",
-                        "accessKey": "5484335407854a4c9dc88e0b206fc148/CF_P8_7AAA80F2_98A1_46F2_9414_A54633972566",
-                        "secretKey": "7PwzDzLbXOWZiYBoM22C3kp7XgM=",
+                        "accessKey": "5484335407854yolo7dc88e01206fc148/OF-COURSE-I-STILL-LOVE-YOU",
+                        "secretKey": "<redacted>",
                         "api": "S3v2",
                         "lookup": "auto"
                 },
                 "holiday-dynstrg2": {
                         "url": "https://ds11s3.swisscom.com",
-                        "accessKey": "85d9b397330add64920a1409f4732119-6683",
-                        "secretKey": "NXuYGhJnilomgZ9PpMbajTD85sn8s+twCBL5KvDq",
+                        "accessKey": "85d9b397330add64920a1409f4732119-JUST-READ-THE-INSTRUCTIONS",
+                        "secretKey": "<redacted>",
                         "api": "S3v4",
                         "lookup": "auto"
                 }
@@ -91,7 +91,7 @@ Bucket created successfully `holiday-dynstrg2/tickets`.
 mc mb holiday-dynstrg2/pictures
 Bucket created successfully `holiday-dynstrg2/pictures`.
 </pre>
- 
+
 Finally, you are able to migrate all the buckets from the old to the new service:
 
 <pre class="terminal">
@@ -115,7 +115,7 @@ As soon as everything is working properly, you can remove the service keys and t
 <pre class="terminal">
 $ cf delete-service-key holiday-pictures mys3servicekey
 $ cf delete-service-key new-holiday-pictures mys3servicekey
-$ cf delete-service holiday-pictures 
+$ cf delete-service holiday-pictures
 </pre>
 
 You now migrated your buckets to the new S3 service. Congrats! You can now bind your apps to the new service and start them again.
