@@ -62,7 +62,7 @@ Each [binding](../devguide/services/application-binding.html#bind) comes with a 
 ## <a id='versions'></a> Versions
 
 For the Elasticsearch service multiple Elasticsearch versions are available.
-Currently the collowing versions can be used:
+Currently the following versions can be used:
 - 6.8.2
 - 7.0.1
 - 7.1.1
@@ -70,6 +70,10 @@ Currently the collowing versions can be used:
 - 7.3.1 (default)
 
 To create a cluster with a specific version you must provide the version (from the list above) as a parameter. E.g.:
+
+`cf create-service elasticsearch xxsmall <my-elasticsearch> -c '{"version":"X.Y.Z"}'`
+
+Or you can update any existing service by using the update-service command. E.g.:
 
 `cf update-service <service-name> -c '{"version":"X.Y.Z"}'`
 
