@@ -77,7 +77,7 @@ Or you can update any existing service by using the update-service command. E.g.
 
 `cf update-service <service-name> -c '{"version":"X.Y.Z"}'`
 
-*Note*: when using a custom Elasticsearch version you have to specify the version on all `cf update-service` calls.
+*Note*: when using a custom Elasticsearch version you must specify the version on all `cf update-service` calls.
 Otherwise, we will use the default version.
 
 
@@ -91,7 +91,7 @@ The upgrade to the new version is done through the CF CLI by running the update 
 
 ### Upgrade to Elasticsearch version 7.x
 
-Before you can upgrade to the latest major release of Elasticsearch (version 7) you must check of any incompatibilities of your exisitng indices.
+Before you can upgrade to the latest major release of Elasticsearch (version 7) you must check for any incompatibilities of your exisitng indices.
 To do this you can access the <a href=https://www.elastic.co/guide/en/kibana/6.8/upgrade-assistant.html target=blank>upgrade-assistant in Kibana</a>.
 
 ## <a id='plan-upgrade'></a> Plan Upgrade
@@ -102,7 +102,7 @@ The upgrade to a larger plan is done through the CF CLI by running the update se
 
 `cf update-service <service-name> -p <new-plan-name>`
 
-*Note*: if you use a different Elasticsearch version than the default verion you must specify that version as well.
+*Note*: if you use a different Elasticsearch version than the default you must specify that version as well.
 Otherwise, we will use the default version.
 
 `cf update-service <service-name> -p <new-plan-name> -c '{"version":"X.Y.Z"}'`
