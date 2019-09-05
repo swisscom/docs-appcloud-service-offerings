@@ -54,7 +54,7 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 Each [binding](../devguide/services/application-binding.html#bind) comes with a set of four users with different privileges.
 
 - `kibana_read_only_username`: a user which has read access to Kibana. This user should be used when giving access to your Kibana.
-- `ece_kibana_dashboard_only_username`: a user which has the 'kibana_dashboard_only_role' assigned and can only access dashboards in Kibana.
+- `ece_kibana_dashboard_only_username`: a user which has the `kibana_dashboard_only_role` assigned and can only access dashboards in Kibana.
 - `full_access_username`: a user which has read and write access to all indices. This user is optimal for integration with your appication.
 - `kibana_system_username`: a system user for the Kibana application.
 - `logstash_system_username`: a system user for the Logstash application
@@ -63,6 +63,7 @@ Each [binding](../devguide/services/application-binding.html#bind) comes with a 
 
 For the Elasticsearch service multiple versions are available.
 Currently available versions:
+
 - 6.8.2
 - 7.0.1
 - 7.1.1
