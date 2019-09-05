@@ -83,3 +83,8 @@ For older versions, use the workaround under https://github.com/swisscom/cf-cura
 ## <a id='highavailablility'></a> High Availability
 
 The Elasticsearch cluster consists of 3 nodes in 3 different availability zones. By default, each index in Elasticsearch has 5 primary shards and 1 replica allocated to it. If you don’t want to use the default settings, make sure to configure the number of shards & replicas accordingly in the index templates. Swisscom cannot guarantee the availability of your data unless you configure at least one replica.
+
+## <a id='backups'></a> Backups
+
+If you want to create backups there is an app available that allows for automatic scheduled backups: [backman - the appcloud backup manager](https://github.com/swisscom/backman).
+Any Elasticsearch service instance bound to this app will be automatically backed up, can be downloaded and also restored on-demand.
