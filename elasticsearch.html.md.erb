@@ -25,6 +25,8 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
      "host": "https://d15c5caa5a3147ed9b444e4694162b3f.elasticsearch.lyra-836.appcloud.swisscom.com",
      "kibana_read_only_password": "password",
      "kibana_read_only_username": "username",
+     "ece_kibana_dashboard_only_username": "username",
+     "ece_kibana_dashboard_only_password": "password",
      "kibana_system_password": "password",
      "kibana_system_username": "username",
      "logstash_system_password": "password",
@@ -52,9 +54,58 @@ After the [creation](../devguide/services/managing-services.html#create) of the 
 Each [binding](../devguide/services/application-binding.html#bind) comes with a set of four users with different privileges.
 
 - `kibana_read_only_username`: a user which has read access to Kibana. This user should be used when giving access to your Kibana.
+- `ece_kibana_dashboard_only_username`: a user which has the 'kibana_dashboard_only_role' assigned and can only access dashboards in Kibana.
 - `full_access_username`: a user which has read and write access to all indices. This user is optimal for integration with your appication.
 - `kibana_system_username`: a system user for the Kibana application.
 - `logstash_system_username`: a system user for the Logstash application
+
+## <a id='versions'></a> Versions
+
+For the Elasticsearch service multiple versions are available.
+Currently available versions:
+- 6.8.2
+- 7.0.1
+- 7.1.1
+- 7.2.1
+- 7.3.1 (default)
+
+To create a cluster with a specific version you must provide the version (from the list above) as a parameter. E.g.:
+
+`cf create-service elasticsearch xxsmall <my-elasticsearch> -c '{"version":"X.Y.Z"}'`
+
+Or you can update any existing service by using the update-service command. E.g.:
+
+`cf update-service <service-name> -c '{"version":"X.Y.Z"}'`
+
+*Note*: when using a custom Elasticsearch version you must specify the version on all `cf update-service` calls.
+Otherwise, we will use the default version.
+
+
+## <a id='version-upgrade'></a> Version Upgrade
+
+New versions of Elasticsearch will be announced in the newsletter as soon as they are available.
+
+The upgrade to the new version is done through the CF CLI by running the update service command.
+
+`cf update-service <service-name> -c '{"version":"X.Y.Z"}'`
+
+### Upgrade to Elasticsearch version 7.x
+
+Before you can upgrade to the latest major release of Elasticsearch (version 7) you must check for any incompatibilities of your exisitng indices.
+To do this you can access the <a href=https://www.elastic.co/guide/en/kibana/6.8/upgrade-assistant.html target=blank>upgrade-assistant in Kibana</a>.
+
+## <a id='plan-upgrade'></a> Plan Upgrade
+
+Elasticsearch service can be upgraded to larger plans (downgrading to smaller plans is not possible).
+
+The upgrade to a larger plan is done through the CF CLI by running the update service command.
+
+`cf update-service <service-name> -p <new-plan-name>`
+
+*Note*: if you use a different Elasticsearch version than the default you must specify that version as well.
+Otherwise, we will use the default version.
+
+`cf update-service <service-name> -p <new-plan-name> -c '{"version":"X.Y.Z"}'`
 
 ## <a id='x-pack'></a> X-Pack
 
@@ -74,11 +125,9 @@ You can find a guide on how to set up Logstash with Docker here: [Logstash Docke
 
 ## <a id='curator'></a> Curator
 
-Deprecated: Curator is integrated into the Logstash buildpack.
+Current versions of ElasticSearch (6.7+) offer [Index Lifecycle Management](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html) as alternative to Curator.
 
-Current versions of ElasticSearch (6.7+) offer Index Lifecycle Management (https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html).
-
-For older versions, use the workaround under https://github.com/swisscom/cf-curator-cron to periodically clean up your Indices.
+For older versions, use [cf-curator-cron](https://github.com/swisscom/cf-curator-cron) as workaround to periodically clean up your Indices.
 
 ## <a id='highavailablility'></a> High Availability
 
