@@ -36,9 +36,9 @@ applications:
     routes:
       - route: mykibana.scapp.io
     docker:
-      image: docker.elastic.co/kibana/kibana:6.1.4
+      image: docker.elastic.co/kibana/kibana:7.3.1
     env:
-      ELASTICSEARCH_URL: https://ac9537fc444c589bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
+      ELASTICSEARCH_HOSTS: https://ac9537fc444c589bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
       ELASTICSEARCH_USERNAME: {kibana_system_username}
       ELASTICSEARCH_PASSWORD: {kibana_system_password}
 ```
