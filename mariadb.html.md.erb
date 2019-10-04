@@ -90,6 +90,16 @@ CREATE DATABSE CF_DATABASE_NAME
 GRANT ALL ON `CF_DATABASE_NAME`.* TO 'USER'@'SUBNET'
 REVOKE LOCK TABLES ON `CF_DATABASE_NAME`.* FROM 'USER'@'SUBNET'
 ```
+
+## <a id='migrations'></a> Minimize Downtime for Schema Migrations
+
+Lots of customers complained that when doing an `ALTER TABLE` statement in Galera, the whole cluster is read-locked for the duration of the statement. On big tables (millions of records) this can result in many hours of "outage". Here are some tips to minimize that behavior.
+
+- Add `ALGORITHM=INPLACE, LOCK=NONE` for Online DDL Operations in your `ALTER TABLE` statements. For example, to add a new index, write `ALTER TABLE test ADD INDEX idx_test (test), ALGORITHM=INPLACE, LOCK=NONE`. Be warned Online DDL is not always online and may incur locks.
+- `ALGORITHM=INPLACE, LOCK=NONE` has some limitations and not supported operations. If you it doesn't work for your case, use [pt-online-schema-change](https://www.percona.com/doc/percona-toolkit/LATEST/pt-online-schema-change.html). The tool `pt-online-schema-change` alters a table’s structure without blocking reads or writes. Please do not use this tool before reading its linked documentation and checking your [service backups](../devguide-sc/services/backups.html) carefully. In our current offering you don't have the necessary permissions for `pt-online-schema-change`. Please ask our support to `GRANT PROCESS, REPLICATION SLAVE ON *.* TO` for your `serice-key`. We can't grant that on shared cluster, it means you must have your own dedicated Galera/MariaDB cluster.
+- Don't use `TRUNCATE` with huge tables. Please `DROP` the table and recreate.
+
+
 ## <a id='framework'></a> Database Frameworks Integration tips
 - Liquibase is not fully Galera compatible. See bug report [primary key on DATABASECHANGELOG, PK_DATABASECHANGELOG, is no longer created](https://liquibase.jira.com/plugins/servlet/mobile#issue/CORE-1909) for solutions.
 
@@ -115,9 +125,10 @@ See [Migrate from legacy MariaDB to MariaDB Ent](./migrate-mariadb-to-mariadbent
 Within your MariaDB service instance, you can start a backup and also restore it afterwards.
 For more information about this feature, check the [service backup guide](../devguide-sc/services/backups.html).
 
-Some of our users also created apps for a regular/scheduled backup. See example of the [automatic backups app.](https://github.com/theonlyandone/cf-backup-app).
+If you need more fine-grained control over your backups there is also an app available that allows for automatic scheduled backups: [backman - the appcloud backup manager](https://github.com/swisscom/backman).
+Any MariaDB service instance bound to this app will be automatically backed up, can be downloaded and also restored on-demand.
 
-If you accidentally `DROP` a table or other error happens, we can not restore your table. Please make sure you create a [service backup](../devguide-sc/services/backups.html) in Portal or [CLI with the Swisscom Plugin](https://github.com/swisscom/appcloud-cf-cli-plugin) before you do changes.
+If you accidentally `DROP` a table or other error happens, we can not restore your table unfortunately. Please make sure you create a [service backup](../devguide-sc/services/backups.html) in the Portal, via the [CLI with the Swisscom Plugin](https://github.com/swisscom/appcloud-cf-cli-plugin) or with [backman](https://github.com/swisscom/backman) before you do changes.
 
 
 ## <a id='more'></a> More info from upstream open source project

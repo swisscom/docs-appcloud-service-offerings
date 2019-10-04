@@ -9,15 +9,15 @@ owner: Services
 The MySQL Service is built on top of Percona XtraDB Cluster. Following a quote from Percona [Frequently Asked Questions] (https://www.percona.com/software/mysql-database/percona-server/faq) and [Percona XtraDB Cluster](https://www.percona.com/software/mysql-database/percona-xtradb-cluster) to summarize the technical product:
 
 > **About**
-> 
+>
 > Percona XtraDB Cluster is a high availability and high scalability open source solution for MySQL clustering. It integrates Percona Server – an enhanced drop-in replacement for MySQL – and Percona XtraBackup with the Codership Galera library of MySQL high availability solutions.
-> 
+>
 > **How is it different from standard MySQL?**
-> 
+>
 > Percona's releases are based upon recent versions of the MySQL server source code. It is fully compatible with standard MySQL.
 
 > **How is it related to other MySQL forks?**
-> 
+>
 > Percona Server with XtraDB is the closest to the official MySQL Enterprise releases from Oracle. It is more conservative than MariaDB, which includes extra storage engines and more far-reaching code changes.
 
 At the moment we deploy MySQL 5.7.x. As soon as MySQL 8.0 is available we will inform you via our newsletter.
@@ -74,7 +74,7 @@ The service `mysql-database` has two plan types `default` and `mtls`. Using the 
 
 Please, follow the instructions of how to use SSL enabled connection for your local development tools. First create a [service key](https://docs.developer.swisscom.com/devguide/services/service-keys.html).
 
-Execute `brew install jq` on macOS (jq is a command-line [json-processor](https://stedolan.github.io/jq/) - for other systems, please refer to your package manager). 
+Execute `brew install jq` on macOS (jq is a command-line [json-processor](https://stedolan.github.io/jq/) - for other systems, please refer to your package manager).
 Then get the required certificates using the following shell commands:
 
 ```
@@ -155,6 +155,13 @@ In accordance with the service plan you choose from the marketplace, resource li
 ## <a id='migration'></a> Migrate your service instances
 
 See [Migrate from MariaDBEnt to MySQL](./migrate-mariadbent-to-mysql.html) how to migrate your service instance to this service.
+
+## <a id='backup'></a> Backup
+If you want to create backups, and also be able to restore them afterwards, there is an app available that allows for automatic scheduled backups: [backman - the appcloud backup manager](https://github.com/swisscom/backman).
+
+Any MySQL service instance bound to this app will be automatically backed up, can be downloaded and also restored on-demand.
+
+Please make sure you create a backup, either by manually using mysqldump yourself or with [backman](https://github.com/swisscom/backman), before you do major changes to your database.
 
 ## <a id='support'></a> Developer Support
 

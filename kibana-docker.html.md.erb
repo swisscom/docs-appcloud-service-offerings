@@ -39,8 +39,8 @@ applications:
       image: docker.elastic.co/kibana/kibana:7.3.1
     env:
       ELASTICSEARCH_HOSTS: https://ac9537fc444c589bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
-      ELASTICSEARCH_USERNAME: myuser 
-      ELASTICSEARCH_PASSWORD: mypassword 
+      ELASTICSEARCH_USERNAME: {kibana_system_username}
+      ELASTICSEARCH_PASSWORD: {kibana_system_password}
 ```
 
 Use ELASTICSEARCH_URL for version 6.x of Kibana.
