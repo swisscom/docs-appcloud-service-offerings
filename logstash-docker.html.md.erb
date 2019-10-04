@@ -29,19 +29,20 @@ applications:
     routes:
       - route: mylogstash.scapp.io
     docker:
-      image: docker.elastic.co/logstash/logstash:6.1.4
+      image: docker.elastic.co/logstash/logstash:7.3.1
     env:
-      XPACK_MANAGEMENT_ELASTICSEARCH_URL: https://ac9537fc444c489bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
+      XPACK_MANAGEMENT_ELASTICSEARCH_HOSTS: https://ac9537fc444c489bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
       XPACK_MANAGEMENT_ENABLED: true
       XPACK_MANAGEMENT_PIPELINE_ID: "[\"logstash_pipeline_1\"]"
       XPACK_MANAGEMENT_ELASTICSEARCH_USERNAME: myuser
       XPACK_MANAGEMENT_ELASTICSEARCH_PASSWORD: mypassword 
       XPACK_MONITORING_ENABLED: true
-      XPACK_MONITORING_ELASTICSEARCH_URL: https://ac9537fc444c489bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: https://ac9537fc444c489bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
       XPACK_MONITORING_ELASTICSEARCH_USERNAME: myuser 
       XPACK_MONITORING_ELASTICSEARCH_PASSWORD: mypassword 
       PATH_CONFIG: ""
 ```
+Use XPACK_MANAGEMENT_ELASTICSEARCH_URL and XPACK_MONITORING_ELASTICSEARCH_URL for Logstash 6.x.
 
 Please follow the next section to configure Logstash before pushing it.
 
