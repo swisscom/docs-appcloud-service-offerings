@@ -68,47 +68,6 @@ Please be aware that the number of concurrent connections (max_connections) to M
 
 Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
 
-### <a id='security'></a> Security Configuration (tls)
-
-The service `mysql-database` has two plan types `default` and `mtls`. Using the `mtls` plan will activate tls-security for the created binding.
-
-Please, follow the instructions of how to use SSL enabled connection for your local development tools. First create a [service key](https://docs.developer.swisscom.com/devguide/services/service-keys.html).
-
-Execute `brew install jq` on macOS (jq is a command-line [json-processor](https://stedolan.github.io/jq/) - for other systems, please refer to your package manager).
-Then get the required certificates using the following shell commands:
-
-```
-DATABASE_NAME="CF_584BDA1C_C647_4F04_9761_A98B1D82D999"
-KEY_NAME="testservicekey"
-LOCAL_PATH="/Users/$USER/Desktop"
-
-echo -e "$(cf service-key "$DATABASE_NAME" "$KEY_NAME" | grep -v 'service instance' | jq '.ca')" |  sed -e 's/^"//' -e 's/"$//' > $LOCAL_PATH/ca.pem
-echo -e "$(cf service-key "$DATABASE_NAME" "$KEY_NAME" | grep -v 'service instance' | jq '.private_key')" |  sed -e 's/^"//' -e 's/"$//' > $LOCAL_PATH/client-key.pem
-echo -e "$(cf service-key "$DATABASE_NAME" "$KEY_NAME" | grep -v 'service instance' | jq '.certificate')" |  sed -e 's/^"//' -e 's/"$//'  > $LOCAL_PATH/client-cert.pem
-```
-Next create a SSH tunnel with `cf ssh <your-app> -L 3306:<db-host>.service.consul:3306`. The `<db-host>` is a UUID (for example `9bd40015-6daa-4fe9-a38e-575f8ad17bb9`) URI for your deployment.
-
-Create a [`.my.cnf`](https://dev.mysql.com/doc/refman/8.0/en/option-files.html) in your home directory.
-
-```
-[client]
-user = <user>
-host = localhost
-password = <password>
-ssl-ca = /Users/<local-user>/Desktop/ca.pem
-ssl-cert = /Users/<local-user>/Desktop/client-cert.pem
-ssl-key = /Users/<local-user>/Desktop/client-key.pem
-protocol = tcp
-```
-
-If you work with graphical MySQL Workbench click on "MysQL Connections" -> SSL -> Use SSL: *Require and Verify CA* and then fill in the paths to your certs. Do not use the SSL Wizard.
-
-<%= image_tag("./images/connect_to_database_Workbench.png") %>
-
-#### <a id='sample-application-mtls'></a> Sample Application for mtls plan
-
-Sample application: [CF Sample App NodeJS with mTLS](https://github.com/swisscom/cf-sample-app-nodejs-mysql)
-
 ## <a id='limitations'></a> Known Limitations
 
 Our MySQL offering is based on Percona XtraDB Cluster with Galera Replication, which brings some limitations with it. Vendor summary [Percona XtraDB Cluster Limitations](https://www.percona.com/doc/percona-xtradb-cluster/LATEST/limitation.html). Please read through these points carefully.
