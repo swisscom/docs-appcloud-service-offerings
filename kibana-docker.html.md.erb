@@ -32,6 +32,7 @@ Replace name, route, Kibana version, credentials in our example manifest.yml:
 applications:
   - name: mykibana
     memory: 2G
+    disk_quota: 2G
     instances: 1
     routes:
       - route: mykibana.scapp.io
