@@ -19,11 +19,11 @@ To create an instance of the Task-Scheduler, run `cf create-service task-schedul
 
 ```
 $ cf create-service task-scheduler free my-scheduler
-Creating service instance my-scheduler in org swisscom / space PROD as admin...
+Creating service instance my-scheduler in org my-org / space my-space as user@example.ch...
 OK
 
 $ cf services
-Getting services in org my-org / my-space PROD as user@example.ch...
+Getting services in org my-org / space my-space as user@example.ch...
 
 name                         service          plan    bound apps                          last operation       broker                upgrade available
 my-scheduler                 task-scheduler   free                                        create succeeded     task-scheduler
@@ -48,13 +48,22 @@ TIP: Use 'cf push' to ensure your env variable changes take effect
 
 After binding a Task-Scheduler instance to your app, the configured task will be executed automatically according to the provided cron schedule.
 
+It is also possible to overwrite the memory and/or disk limits of a task during binding:
+
+```
+$ cf bind-service my-app my-scheduler -c '{"schedule":"0 2 * * *", "task":"rake cleanup-database", "memory_in_mb":128, "disk_in_mb":512}'
+
+Binding service my-scheduler to my-app in org my-org / space my-space as user@example.ch...
+OK
+```
+
 ### <a id='view-tasks'></a> View Tasks
 
 To view running and finished tasks, run `cf tasks`.
 
 ```
 $ cf tasks my-app
-Getting tasks for app my-app in org my-org / my-space PROD as user@example.ch...
+Getting tasks for app my-app in org my-org / space my-space as user@example.ch...
 OK
 
 id  name                                   state       start time                      command
