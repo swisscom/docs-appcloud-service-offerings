@@ -58,7 +58,7 @@ cf create-service mysql-database default my-mysql-db -c '{ "parent_reference": "
 
 You can create databases in any ORG and SPACE.
 
-Bind the database `my-mysql-db` to your application with `cf bind-service myapp my-mysql-db`.
+Bind the database `my-mysql-db` to your application with `cf bind-service myapp my-mysql-db`. If this is the first time you bind to a database on a specific cluster in a space, you need to restart your app, as a new [Security Group](https://docs.developer.swisscom.com/concepts/asg.html) is being added to the space to allow access to the cluster. Security Groups only take effect after an app restart.
 
 <p class="note">
 Please be aware that the number of concurrent connections (max_connections) to MySQL is limited and depends on your plan. You must manage this by using connection pooling.
