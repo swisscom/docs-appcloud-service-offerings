@@ -7,53 +7,26 @@ owner: Services
 
 ## <a id='overview'></a> Overview
 
-1. Create the manifest.yml
-2. Create logstash pipeline in ElasticSearch
-3. Alternative: Create your own Logstash Docker image
-4. Bind your app to the user provided service
-5. See and search through your logs
+With Logstash you can create pipelines to transform and forward your logs to a log storage e.g. elasticsearch.
 
 ## <a id='step-by-step-guide'></a> Step by Step Guide
 
-This section describes how to store your application logs in Elasticsearch using Logstash & Kibana in Cloud Foundry using the official Docker images. 
+This section describes how to setup your Logstash-instance in Cloud Foundry using the official Docker image.
 
-### <a id='push-logstash-buildpack'></a> Push Logstash with Docker 
-Create the following manifest.yml to configure your Logstash to use the configuration pipeline, which is stored in your ElasticSearch cluster (instead of the usual filesystem pipeline configuration).
+### <a id='prerequisites'></a> Prerequisites
 
-```txt
----
-applications:
-  - name: mylogstash
-    memory: 2G
-    instances: 1
-    routes:
-      - route: mylogstash.scapp.io
-    docker:
-      image: docker.elastic.co/logstash/logstash:7.3.1
-    env:
-      XPACK_MANAGEMENT_ELASTICSEARCH_HOSTS: https://ac9537fc444c489bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
-      XPACK_MANAGEMENT_ENABLED: true
-      XPACK_MANAGEMENT_PIPELINE_ID: "[\"logstash_pipeline_1\"]"
-      XPACK_MANAGEMENT_ELASTICSEARCH_USERNAME: myuser
-      XPACK_MANAGEMENT_ELASTICSEARCH_PASSWORD: mypassword 
-      XPACK_MONITORING_ENABLED: true
-      XPACK_MONITORING_ELASTICSEARCH_HOSTS: https://ac9537fc444c489bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
-      XPACK_MONITORING_ELASTICSEARCH_USERNAME: myuser 
-      XPACK_MONITORING_ELASTICSEARCH_PASSWORD: mypassword 
-      PATH_CONFIG: ""
-```
-Use `XPACK_MANAGEMENT_ELASTICSEARCH_URL` and `XPACK_MONITORING_ELASTICSEARCH_URL` for Logstash 6.x.
-
-Please follow the next section to configure Logstash before pushing it.
+Logstash is the last component to set up in the elk-stack. Therefore you need to have an Elasticsearch-service as well as a running Kibana instance.
+- [ElasticSearch](./elasticsearch.html)
+- [Kibana Docker](./kibana-docker.html)
 
 ### <a id='create-centralized-pipeline'></a> Create the centralized Logstash pipeline in ElasticSearch
 
 To be able to use the upstream Logstash Docker images, we will configure our Logstash pipeline via ElasticSearch, rather than using the default filesystem configuration.
 The easiest way of creating the pipeline in ElasticSearch is via Kibana as outlined in https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html.
 
-Copy the pipeline sections from your current Logstash configuration and insert them into ElasticSearch (Kibana/Management/Logstash/Pipelines). If you have been using separate Grok pattern files, those must be included in your pipelines filter section instead of separate files. Also note that the http input port is 5044, as the upstream Docker image exposes the default Beats port.
+If you already have an existing pipeline, you can insert them into ElasticSearch (Kibana->Management->Logstash->Pipelines). If you have been using separate Grok pattern files, those must be included in your pipelines filter section instead of separate files. Also note that the http input port is 5044, as the upstream Docker image exposes the default Beats port.
 
-Find below an example pipeline to parse logs from apps running in Cloud Foundry:
+If this is your fist pipeline, you may find the example pipeline below helpful, to get you started with parsing logs from apps running in Cloud Foundry:
 
 ```txt
 input {
@@ -114,7 +87,7 @@ output {
       ssl_certificate_verification => true
       codec => "plain"
       workers => 1
-      index => "parsed-%{+YYYY.MM.dd}"
+      index => "parsed-%{+YYYY.MM}"
       manage_template => true
       template_name => "logstash_pipeline_1"
       template_overwrite => true
@@ -128,7 +101,7 @@ output {
       ssl_certificate_verification => true
       codec => "plain"
       workers => 1
-      index => "unparsed-%{+YYYY.MM.dd}"
+      index => "unparsed-%{+YYYY.MM}"
       manage_template => true
       template_name => "logstash_pipeline_1"
       template_overwrite => true
@@ -146,13 +119,44 @@ Make sure you use a strong password for your user in the `http`-section, as this
 Alternatively the configuration pipeline can also be created using the ElasticSearch REST API:
 https://www.elastic.co/guide/en/kibana/master/logstash-configuration-management-api-create.html
 
-Push your Logstash as usual using:
+### <a id='push-logstash-buildpack'></a> Push Logstash with Docker
+Create the following manifest.yml to configure your Logstash to use the configuration pipeline, which is stored in your ElasticSearch cluster (instead of the usual filesystem pipeline configuration).
+
+```txt
+---
+applications:
+  - name: mylogstash
+    memory: 2G
+    instances: 1
+    routes:
+      - route: mylogstash.scapp.io
+    services:
+      - my-elasticsearch
+    docker:
+      image: docker.elastic.co/logstash/logstash:7.3.1
+    command: |
+      export XPACK_MANAGEMENT_ELASTICSEARCH_HOSTS=$(echo $VCAP_SERVICES | grep -Po '"host":\s"\K(.*?)(?=")') &&
+      export XPACK_MANAGEMENT_ELASTICSEARCH_USERNAME=$(echo $VCAP_SERVICES | grep -Po '"full_access_username":\s"\K(.*?)(?=")') &&
+      export XPACK_MANAGEMENT_ELASTICSEARCH_PASSWORD=$(echo $VCAP_SERVICES | grep -Po '"full_access_password":\s"\K(.*?)(?=")') &&
+      export XPACK_MONITORING_ELASTICSEARCH_HOSTS=$(echo $VCAP_SERVICES | grep -Po '"host":\s"\K(.*?)(?=")') &&
+      export XPACK_MONITORING_ELASTICSEARCH_USERNAME=$(echo $VCAP_SERVICES | grep -Po '"full_access_username":\s"\K(.*?)(?=")') &&
+      export XPACK_MONITORING_ELASTICSEARCH_PASSWORD=$(echo $VCAP_SERVICES | grep -Po '"full_access_password":\s"\K(.*?)(?=")') &&
+      /usr/local/bin/docker-entrypoint
+    env:
+      XPACK_MANAGEMENT_ENABLED: true
+      XPACK_MANAGEMENT_PIPELINE_ID: "[\"logstash_pipeline_1\"]"
+      XPACK_MONITORING_ENABLED: true
+      PATH_CONFIG: ""
+```
+Use `XPACK_MANAGEMENT_ELASTICSEARCH_URL` and `XPACK_MONITORING_ELASTICSEARCH_URL` for Logstash 6.x.
+
+Now you may push your Logstash as usual using:
 
 ```txt
 cf push
 ```
 
-Following lines in the Logstash startup log indicate that the pipeline has been configured successfully:
+With `cf logs mylogstash` you can monitor the startup of your Logstash-instance. The following lines indicate that the pipeline has been configured successfully:
 
 ```txt
    2019-05-13T08:47:54.60+0000 [APP/PROC/WEB/0] OUT [2019-05-13T08:47:54,599][INFO ][logstash.outputs.elasticsearch] New Elasticsearch output {:class=>"LogStash::Outputs::ElasticSearch", :hosts=>["https://ac9537fc444c489bb63ac44064c54519.el
