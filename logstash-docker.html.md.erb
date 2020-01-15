@@ -15,18 +15,20 @@ This section describes how to setup your Logstash-instance in Cloud Foundry usin
 
 ### <a id='prerequisites'></a> Prerequisites
 
-Logstash is the last component to set up in the Elastic Stack. Therefore you need to have an Elasticsearch-service as well as a running Kibana instance.
+Logstash is the last component to set up in the Elastic Stack. Therefore you need to have an Elasticsearch-Service as well as a running Kibana instance. It's also required to set up a proper index lifecycle management.
 - [ElasticSearch](./elasticsearch.html)
 - [Kibana Docker](./kibana-docker.html)
+- [Index Lifecycle Management](./elasticsearch-ilm.html)
 
 ### <a id='create-centralized-pipeline'></a> Create the centralized Logstash pipeline in ElasticSearch
 
-To be able to use the upstream Logstash Docker images, we will configure our Logstash pipeline via ElasticSearch, rather than using the default filesystem configuration.
+To be able to use the upstream Logstash Docker images, we will configure our Logstash pipeline via ElasticSearch.
 The easiest way of creating the pipeline in ElasticSearch is via Kibana as outlined in https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html.
 
 If you already have an existing pipeline, you can insert it into ElasticSearch (Kibana->Management->Logstash->Pipelines). If you have been using separate Grok pattern files, those must be included in your pipelines filter section instead of separate files. Also note that the http input port is 5044, as the upstream Docker image exposes the default Beats port.
 
-If this is your fist pipeline, you may find the example pipeline below helpful, to get you started with parsing logs from apps running in Cloud Foundry:
+If this is your fist pipeline, you may find the example pipeline below helpful, to get you started with parsing logs from apps running in Cloud Foundry.
+Go To Kibana->Management->Logstash->Pipelines and create a new pipeline with a distinguishable id and a pipeline according to this example:
 
 ```txt
 input {
@@ -37,82 +39,75 @@ input {
   }
 }
 
-filter {
-  grok {
-    #patterns_dir => "{{ .Env.HOME }}/grok-patterns"
-    match => { "message" => "%{SYSLOG5424PRI}%{NONNEGINT:syslog5424_ver} +(?:%{TIMESTAMP_ISO8601:syslog5424_ts}|-) +(?:%{HOSTNAME:syslog5424_host}|-) +(?:%{NOTSPACE:syslog5424_app}|-) +(?:%{NOTSPACE:syslog5424_proc}|-) +(?:%{WORD:syslog5424_msgid}|-) +(?:%{SYSLOG5424SD:syslog5424_sd}|-|)%{SPACE}%{GREEDYDATA:message}" }
-    add_tag => [ "CF", "CF-%{syslog5424_proc}", "parsed"]
-    add_field => { "format" => "cf" }
-    tag_on_failure => [ ]
-    overwrite => [ "message" ]
-  }
+filter{
   mutate {
-    split => ["syslog5424_host", "."]
-    add_field => { "cf-org" => "%{[syslog5424_host][0]}" }
-    add_field => { "cf-space" => "%{[syslog5424_host][1]}" }
-    add_field => { "cf-app" => "%{[syslog5424_host][2]}" }
+    remove_field => ["headers"]
   }
-  if [syslog5424_proc] =~ /\[(A[pP]{2}.+)/ {
-    mutate { add_tag => ["CF-APP"] }
-    mutate { remove_tag => ["parsed"] }
+  grok {
+    match => { "message" => "%{SYSLOG5424PRI}%{NONNEGINT:syslog5424_ver} +(?:%{TIMESTAMP_ISO8601:syslog5424_ts}|-) +(?:%{HOSTNAME:syslog5424_host}|-) +(?:%{NOTSPACE:syslog5424_app}|-) +(?:%{NOTSPACE:syslog5424_proc}|-) +(?:%{WORD:syslog5424_msgid}|-) +(?:%{SYSLOG5424SD:syslog5424_sd}|-|)%{SPACE}%{GREEDYDATA:message}" }
+    tag_on_failure => []
+    overwrite => ["message"]
+    break_on_match => false
   }
-  if ("CF-APP" in [tags]) or !("CF" in [tags])  {
-    if [message] =~ /^{.*}/ {
-      json {
-        source => "message"
-        add_tag => [ "json", "parsed"]
+  grok {
+    match => { "syslog5424_proc" => "^\[(%{WORD:cf_component})?/.+\]$" }
+    tag_on_failure => []
+    break_on_match => false
+  }
+  if [cf_component] == "RTR" {
+      grok {
+        match => { "message" => "%{HOSTNAME:host} - \[%{TIMESTAMP_ISO8601}\] \"%{WORD:http_method} %{URIPATH:http_uri} HTTP/%{NUMBER:http_version}\" %{POSINT:http_response} %{NONNEGINT:http_request_size} %{NONNEGINT:http_response_size} \"%{DATA:referrer}\" \"%{DATA:user_agent}\" \"%{IPORHOST:ip_source}:%{POSINT:ip_source_port}\" \"%{IPORHOST:ip_destination}:%{POSINT:ip_destination_port}\" x_forwarded_for\:\"%{DATA:x_forwarded_for}\" x_forwarded_proto:\"%{DATA:x_forwarded_proto}\" vcap_request_id:\"%{UUID:vcap_request_id}\" response_time:%{NUMBER:response_time} app_id:\"%{UUID:app_id}\" app_index:\"%{NONNEGINT:app_index}\" x_b3_traceid:\"%{DATA:x_b3_traceid}\" x_b3_spanid:\"%{DATA:x_b3_spanid}\" x_b3_parentspanid:\"%{DATA:x_b3_parentspanid}\" b3:\"%{DATA:b3}\"" }
+        tag_on_failure => []
+        break_on_match => false
       }
-    }
+      mutate {
+        remove_field => ["message"]
+      }
   }
-  if !("CF-APP" in [tags]) {
-    mutate {
-      add_field => { "msg" => "%{[message]}" }
-      add_tag => [ "CF-PAAS"]
-    }
+  if [cf_component] == "APP" {
+    mutate { add_tag => ["CF-APP"] }
+    if [message] =~ /^{.*}/ {
+          json {
+            source => "message"
+            add_tag => [ "json", "parsed"]
+          }
+          mutate {
+            remove_field => ["message"]
+          }
+        }
+  } else {
+    mutate { add_tag => ["CF-PAAS"] }
   }
-  if !("parsed" in [tags]) {
-    mutate{
-      add_tag => [ "unparsed" ]
-    }
+  grok {
+    match => { "syslog5424_proc" => "^\[APP/PROC/WEB/(%{INT:cf_app_instance_index})?\]$" }
+    tag_on_failure => []
+    break_on_match => false
   }
+  grok {
+    match => { "syslog5424_host" => "^%{DATA:cf_org}\.%{DATA:cf_space}\.%{DATA:cf_app}?$" }
+    tag_on_failure => []
+    break_on_match => false
+  }
+  mutate { add_field => { "[@metadata][target_index]" => "index-%{+YYYY.MM}" } }
 }
 
 output {
-  if ("parsed" in [tags]) {
-    elasticsearch {
-      hosts => ["https://<host>.elasticsearch.lyra-836.appcloud.swisscom.com"]
-      user => "logstash-system-<id>"
-      password => "<logstash-system-password>"
-      ssl => true
-      ssl_certificate_verification => true
-      codec => "plain"
-      workers => 1
-      index => "parsed-%{+YYYY.MM}"
-      manage_template => true
-      template_name => "logstash_pipeline"
-      template_overwrite => true
-    }
-  } else {
-    elasticsearch {
-      hosts => ["https://<host>.elasticsearch.lyra-836.appcloud.swisscom.com"]
-      user => "logstash-system-<id>"
-      password => "<logstash-system-password>"
-      ssl => true
-      ssl_certificate_verification => true
-      codec => "plain"
-      workers => 1
-      index => "unparsed-%{+YYYY.MM}"
-      manage_template => true
-      template_name => "logstash_pipeline"
-      template_overwrite => true
-    }
+  elasticsearch {
+    hosts => ["https://<host>.elasticsearch.lyra-836.appcloud.swisscom.com"]
+    user => "logstash-system-<id>"
+    password => "<logstash-system-password>"
+    index => "%{[@metadata][target_index]}"
+    manage_template => true
+    template_name => "logstash-template"
   }
 }
 ```
 
+For the other options, the default values are usually fine.
+
 The above pipeline will parse logs from Cloud Foundry and add common tags like `cf-org`, `cf-space` and `cf-app`.
 Furthermore, it tags platform logs (like those from the Gorouter) as `CF-PAAS` and app logs as `CF-APP` for future filtering.
-If the grok-filter detects that the stripped application log message is formatted as JSON (line 29), it will treat it as such and let ElasticSearch index the fields accordingly.
+If the grok-filter detects that the stripped application log message is formatted as JSON (line 36), it will treat it as such and let ElasticSearch index the fields accordingly.
 If you're a Java developer, the Logstash Logback Encoder project might be of special interest to you: https://github.com/logstash/logstash-logback-encoder
 Make sure you use a strong password for your user in the `http`-section, as this endpoint will be reachable from the Internet.
 
@@ -120,7 +115,7 @@ Alternatively the configuration pipeline can also be created using the ElasticSe
 https://www.elastic.co/guide/en/kibana/master/logstash-configuration-management-api-create.html
 
 ### <a id='push-logstash-buildpack'></a> Push Logstash with Docker
-Create the following manifest.yml to configure your Logstash to use the configuration pipeline, which is stored in your ElasticSearch cluster (instead of the usual filesystem pipeline configuration).
+Create the following manifest.yml in an empty folder, to configure your Logstash to use the configuration pipeline, which is stored in your ElasticSearch cluster.
 
 ```txt
 ---
@@ -148,7 +143,7 @@ applications:
       XPACK_MONITORING_ENABLED: true
       PATH_CONFIG: ""
 ```
-Use `XPACK_MANAGEMENT_ELASTICSEARCH_URL` and `XPACK_MONITORING_ELASTICSEARCH_URL` for Logstash 6.x.
+Use `XPACK_MANAGEMENT_ELASTICSEARCH_URL` instead of `XPACK_MANAGEMENT_ELASTICSEARCH_HOSTS` and `XPACK_MONITORING_ELASTICSEARCH_URL` instead of `XPACK_MONITORING_ELASTICSEARCH_HOSTS` for Logstash 6.x.
 
 Now you may push your Logstash as usual using:
 
@@ -180,3 +175,8 @@ Bind the app which should forward logs to Logstash via logstash drain. Restartin
 cf bind-service my-app my-logstash-drain
 ```
 You should start seeing logs in your ElasticSearch index as soon as your app receives traffic.
+With this step you are now done with this basic Elastic-Stack guide. If you need further information about the Elastic-Stack, please refer to the [official documentation](https://www.elastic.co/guide/index.html).
+
+## <a id='further-reading'></a> Further reading
+
+[Official Logstash Documentation](https://www.elastic.co/guide/en/logstash/current/index.html)
