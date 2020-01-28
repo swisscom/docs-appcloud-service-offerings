@@ -1,5 +1,5 @@
 ---
-title: ElasticSearch Index Lifecycle Management
+title: Elasticsearch Index Lifecycle Management
 owner: Services
 ---
 
@@ -7,7 +7,7 @@ owner: Services
 
 ## <a id='overview'></a> Overview
 
-With the ElasticSearch index lifecycle management, you can create policies to eventually delete your old indexes. This is required, so your elasticsearch-service does not get filled with ancient data and eventually run into memory problems.
+With the Elasticsearch index lifecycle management, you can create policies to eventually delete your old indexes. This is required, so your elasticsearch-service does not get filled with ancient data and eventually run into memory problems.
 
 ## <a id='step-by-step-guide'></a> Step by Step Guide
 
@@ -15,13 +15,13 @@ This section describes how to setup a basic index lifecycle management.
 
 ### <a id='prerequisites'></a> Prerequisites
 
-To set up the index lifecycle management you already need ElasticSearch and Kibana working.
-- [ElasticSearch](./elasticsearch.html)
+To set up the index lifecycle management you already need Elasticsearch and Kibana working.
+- [Elasticsearch](./elasticsearch.html)
 - [Kibana Docker](./kibana-docker.html)
 
 ### <a id='create-index-lifecycle-policy'></a> Create index lifecycle policy
 
-First of all, you need a index lifecycle policy. To create one in Kibana, go to 'Dev Tools'->Console. You may use this example or alter it according to your requirements.
+First of all, you need an index lifecycle policy. To create one in Kibana, go to 'Dev Tools'->Console. You may use this example or alter it according to your requirements.
 
 ```txt
 PUT _ilm/policy/index-lifecycle
@@ -40,6 +40,8 @@ PUT _ilm/policy/index-lifecycle
 ```
 
 When the console acknowledges your request, the policy has been successfully created. This example deletes an index 60 days after it's been created.
+
+If you prefer to use the UI to create the index lifecycle policy, you can do this under Management->'Index Lifecycle Policies'->'Create Policy'
 
 ### <a id='create-index-template'></a> Create index template
 
