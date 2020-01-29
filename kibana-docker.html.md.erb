@@ -7,26 +7,19 @@ owner: Services
 
 ## <a id='overview'></a> Overview
 
-With Docker you can easily push Kibana as an App to manage your ElasticSearch instance.
+With Docker you can easily push Kibana as an App to manage your Elasticsearch instance.
 
-## <a id='step-by-step-guide'></a> Kibana in Cloud Foundry with Docker
+## <a id='step-by-step-guide'></a> Step by Step Guide
 
-This describes how to deploy your Kibana instance as a Docker container in Cloud Foundry.
+This section describes how to setup your Kibana-instance in Cloud Foundry using the official Docker image from [Elastic](https://www.docker.elastic.co/).
+
+### <a id='prerequisites'></a> Prerequisites
+
+Before you can set up Kibana, you need an Elasticsearch-service.
+- [Elasticsearch](./elasticsearch.html)
 
 ### <a id='push-logstash-buildpack'></a> Create the manifest.yml
-As the official Docker image does not support Cloud Foundry environment variables, you have to manually set them in the expected format (see https://www.elastic.co/guide/en/kibana/current/settings.html). 
-These variables get parsed at startup and written to kibana.yml in the Docker container.
-
-You can get the credentials for your ElasticSearch service instance via service-key:
-
-```txt
-
-cf create-service-key myelasticsearch mykey
-
-cf service-key myelasticsearch mykey
-```
-
-Replace name, route, Kibana version, credentials in our example manifest.yml:
+Create a manifest.yml in an empty folder according to the following example to configure your Kibana.
 
 ```txt
 applications:
@@ -36,14 +29,25 @@ applications:
     instances: 1
     routes:
       - route: mykibana.scapp.io
+    services:
+        - my-elasticsearch
     docker:
       image: docker.elastic.co/kibana/kibana:7.3.1
-    env:
-      ELASTICSEARCH_HOSTS: https://ac9537fc444c589bb63ac44064c54519.elasticsearch.lyra-836.appcloud.swisscom.com
-      ELASTICSEARCH_USERNAME: {kibana_system_username}
-      ELASTICSEARCH_PASSWORD: {kibana_system_password}
+    command: |
+      export ELASTICSEARCH_HOSTS=$(echo $VCAP_SERVICES | grep -Po '"host":\s"\K(.*?)(?=")') &&
+      export ELASTICSEARCH_USERNAME=$(echo $VCAP_SERVICES | grep -Po '"full_access_username":\s"\K(.*?)(?=")') &&
+      export ELASTICSEARCH_PASSWORD=$(echo $VCAP_SERVICES | grep -Po '"full_access_password":\s"\K(.*?)(?=")') &&
+      /usr/local/bin/dumb-init -- /usr/local/bin/kibana-docker
 ```
 
-Use ELASTICSEARCH_URL for version 6.x of Kibana.
+Use `ELASTICSEARCH_URL` instead of `ELASTICSEARCH_HOSTS`, if you are using version 6.x of Kibana.
 
-Push the Docker container as usual with `cf push` and access it via https://mykibana.scapp.io using the full-access-user.
+Push the Docker container as usual with `cf push` and access it via the configured route using the full-access-user.
+
+### <a id='next-step'></a> Next Step
+
+If your access works properly, you may continue with setting up your [Index Lifecycle Management](./elasticsearch-ilm.html)
+
+## <a id='further-reading'></a> Further reading
+
+[Official Kibana Documentation](https://www.elastic.co/guide/en/kibana/current/index.html)

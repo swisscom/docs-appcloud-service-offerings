@@ -1,0 +1,72 @@
+---
+title: Elasticsearch Index Lifecycle Management
+owner: Services
+---
+
+<strong><%= modified_date %></strong>
+
+## <a id='overview'></a> Overview
+
+With the Elasticsearch index lifecycle management, you can create policies to eventually delete your old indexes. This is required, so your elasticsearch-service does not get filled with ancient data and eventually run into memory problems.
+
+## <a id='step-by-step-guide'></a> Step by Step Guide
+
+This section describes how to setup a basic index lifecycle management.
+
+### <a id='prerequisites'></a> Prerequisites
+
+To set up the index lifecycle management you already need Elasticsearch and Kibana working.
+- [Elasticsearch](./elasticsearch.html)
+- [Kibana Docker](./kibana-docker.html)
+
+### <a id='create-index-lifecycle-policy'></a> Create index lifecycle policy
+
+First of all, you need an index lifecycle policy. To create one in Kibana, go to 'Dev Tools'->Console. You may use this example or alter it according to your requirements.
+
+```txt
+PUT _ilm/policy/index-lifecycle
+{
+  "policy": {
+    "phases": {
+      "delete": {
+        "min_age": "60d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    }
+  }
+}
+```
+
+When the console acknowledges your request, the policy has been successfully created. This example deletes an index 60 days after it's been created.
+
+If you prefer to use the UI to create the index lifecycle policy, you can do this under Management->'Index Lifecycle Policies'->'Create Policy'
+
+### <a id='create-index-template'></a> Create index template
+
+To create an index template, you can stay on the Console-page, we just used. You can use the following example.
+
+```txt
+PUT _template/logstash-template
+{
+  "index_patterns": ["index-*"],
+  "settings": {
+    "number_of_shards" : "1",
+    "refresh_interval" : "5s",
+    "index.lifecycle.name": "index-lifecycle"
+  }
+}
+```
+
+<p class="note">
+  If you want to use different names e.g. for the template, always make sure that you change it accordingly everywhere it's used.
+</p>
+
+### <a id='next-step'></a> Next Step
+
+After you prepared the index lifecycle management, you are now ready to set up [Logstash](./logstash-docker.html).
+
+## <a id='further-reading'></a> Further reading
+
+[Official Documentation on Index Lifecycle Management](https://www.elastic.co/guide/en/elasticsearch/reference/current/index-lifecycle-management.html)

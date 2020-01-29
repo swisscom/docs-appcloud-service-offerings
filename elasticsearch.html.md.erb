@@ -11,51 +11,32 @@ Elasticsearch is a powerful open-source search engine for full text search.
 
 ## <a id='integrating-your-service'></a> Integrating the Service With Your App
 
-After the [creation](../devguide/services/managing-services.html#create) of the service and the [binding](../devguide/services/application-binding.html#bind) of the service to the application, the environment variable [VCAP_SERVICES](../devguide/deploy-apps/environment-variable.html#VCAP-SERVICES) is created. This variable stores information about the credentials as shown here:
+After the [creation](../devguide/services/managing-services.html#create) of the service and the [service key](../devguide/services/service-keys.html#create), you'll find all required credentials in this service key, as shown here:
 
 ```json
 {
- "VCAP_SERVICES": {
-  "elasticsearch": [
-   {
-    "binding_name": null,
-    "credentials": {
-     "full_access_password": "password",
-     "full_access_username": "username",
-     "host": "https://d15c5caa5a3147ed9b444e4694162b3f.elasticsearch.lyra-836.appcloud.swisscom.com",
-     "kibana_read_only_password": "password",
-     "kibana_read_only_username": "username",
-     "ece_kibana_dashboard_only_username": "username",
-     "ece_kibana_dashboard_only_password": "password",
-     "kibana_system_password": "password",
-     "kibana_system_username": "username",
-     "logstash_system_password": "password",
-     "logstash_system_username": "username"
-    },
-    "instance_name": "elasticsearch-service",
-    "label": "elasticsearch",
-    "name": "elasticsearch-service",
-    "plan": "xxsmall",
-    "provider": null,
-    "syslog_drain_url": null,
-    "tags": [
-     "elasticsearch"
-    ],
-    "volume_mounts": []
-   }
-  ]
- }
+  "host": "https://d15c5caa5a3147ed9b444e4694162b3f.elasticsearch.lyra-836.appcloud.swisscom.com",
+  "kibana_system_username": "username",
+  "kibana_system_password": "password",
+  "logstash_system_username": "username",
+  "logstash_system_password": "password",
+  "kibana_read_only_username": "username",
+  "kibana_read_only_password": "password",
+  "kibana_dashboard_only_username": "username",
+  "kibana_dashboard_only_password": "password",
+  "full_access_username": "username",
+  "full_access_password": "password"
 }
 
 ```
 
 ## <a id='privileges'></a> User Privileges
 
-Each [binding](../devguide/services/application-binding.html#bind) comes with a set of four users with different privileges.
+Each [service key](../devguide/services/service-keys.html) or [binding](../devguide/services/application-binding.html#bind) to the elasticsearch-service comes with multiple users with different privileges.
 
 - `kibana_read_only_username`: a user which has read access to Kibana. This user should be used when giving access to your Kibana.
-- `ece_kibana_dashboard_only_username`: a user which has the `kibana_dashboard_only_role` assigned and can only access dashboards in Kibana.
-- `full_access_username`: a user which has read and write access to all indices. This user is optimal for integration with your appication.
+- `kibana_dashboard_only_username`: a user which has the `kibana_dashboard_only_role` assigned and can only access dashboards in Kibana.
+- `full_access_username`: a user which has read and write access to all indices. This user is optimal for integration with your application.
 - `kibana_system_username`: a system user for the Kibana application.
 - `logstash_system_username`: a system user for the Logstash application
 
@@ -80,7 +61,6 @@ Or you can update any existing service by using the update-service command. E.g.
 *Note*: when using a custom Elasticsearch version you must specify the version on all `cf update-service` calls.
 Otherwise, we will use the default version.
 
-
 ## <a id='version-upgrade'></a> Version Upgrade
 
 New versions of Elasticsearch will be announced in the newsletter as soon as they are available.
@@ -88,6 +68,8 @@ New versions of Elasticsearch will be announced in the newsletter as soon as the
 The upgrade to the new version is done through the CF CLI by running the update service command.
 
 `cf update-service <service-name> -c '{"version":"X.Y.Z"}'`
+
+We recommend creating a backup before evey elasticsearch upgrade, to prevent possible data loss. The preferred method is using [backman](https://github.com/swisscom/backman).
 
 ### Upgrade to Elasticsearch version 7.x
 
@@ -118,6 +100,13 @@ We have deprecated the Kibana buildpack with the release of cflinuxfs3 (Ubuntu 1
 
 You can find a guide on how to set up Kibana with Docker here: [Kibana Docker](./kibana-docker.html)
 
+## <a id='index-lifecycle-management'></a> Index Lifecycle Management
+
+To clean up some old data and free up space in your elasticsearch service, you have to set up index lifecycle policies.
+This is necessary, because otherwise your instance would get overloaded over time and stop working properly.
+
+The corresponding guide can be found here: [Index Lifecycle Management](./elasticsearch-ilm.html)
+
 ## <a id='logstash'></a> Logstash
 
 We have deprecated the Logstash buildpack with the release of cflinuxfs3 (Ubuntu 18).
@@ -126,15 +115,19 @@ You can find a guide on how to set up Logstash with Docker here: [Logstash Docke
 
 ## <a id='curator'></a> Curator
 
-Current versions of ElasticSearch (6.7+) offer [Index Lifecycle Management](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html) as alternative to Curator.
+Current versions of ElasticSearch (6.7+) offer [Index Lifecycle Management](./elasticsearch-ilm.html) as alternative to Curator.
 
 For older versions, use [cf-curator-cron](https://github.com/swisscom/cf-curator-cron) as workaround to periodically clean up your Indices.
 
 ## <a id='highavailablility'></a> High Availability
 
-The Elasticsearch cluster consists of 3 nodes in 3 different availability zones. By default, each index in Elasticsearch has 5 primary shards and 1 replica allocated to it. If you don’t want to use the default settings, make sure to configure the number of shards & replicas accordingly in the index templates. Swisscom cannot guarantee the availability of your data unless you configure at least one replica.
+The Elasticsearch cluster consists of 3 nodes in 3 different availability zones. By default, each index in Elasticsearch has 5 primary shards and 1 replica allocated to it. If you don’t want to use the default settings, make sure to configure the number of shards & replicas accordingly in the [index templates](./elasticsearch-ilm.html#create-index-template). Swisscom cannot guarantee the availability of your data unless you configure at least one replica.
 
 ## <a id='backups'></a> Backups
 
 If you want to create backups there is an app available that allows for automatic scheduled backups: [backman - the appcloud backup manager](https://github.com/swisscom/backman).
 Any Elasticsearch service instance bound to this app will be automatically backed up, can be downloaded and also restored on-demand.
+
+## <a id='further-reading'></a> Further reading
+
+[Official ElasticSearch Documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
