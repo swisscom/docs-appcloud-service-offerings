@@ -56,7 +56,7 @@ filter{
   }
   if [cf_component] == "RTR" {
       grok {
-        match => { "message" => "%{HOSTNAME:host} - \[%{TIMESTAMP_ISO8601}\] \"%{WORD:http_method} %{URIPATH:http_uri} HTTP/%{NUMBER:http_version}\" %{POSINT:http_response} %{NONNEGINT:http_request_size} %{NONNEGINT:http_response_size} \"%{DATA:referrer}\" \"%{DATA:user_agent}\" \"%{IPORHOST:ip_source}:%{POSINT:ip_source_port}\" \"%{IPORHOST:ip_destination}:%{POSINT:ip_destination_port}\" x_forwarded_for\:\"%{DATA:x_forwarded_for}\" x_forwarded_proto:\"%{DATA:x_forwarded_proto}\" vcap_request_id:\"%{UUID:vcap_request_id}\" response_time:%{NUMBER:response_time} app_id:\"%{UUID:app_id}\" app_index:\"%{NONNEGINT:app_index}\" x_b3_traceid:\"%{DATA:x_b3_traceid}\" x_b3_spanid:\"%{DATA:x_b3_spanid}\" x_b3_parentspanid:\"%{DATA:x_b3_parentspanid}\" b3:\"%{DATA:b3}\"" }
+        match => { "message" => "%{HOSTNAME:host} - \[%{TIMESTAMP_ISO8601}\] \"%{WORD:http_method} %{URIPATH:http_uri} HTTP/%{NUMBER:http_version}\" %{POSINT:http_response} %{NONNEGINT:http_request_size} %{NONNEGINT:http_response_size} \"%{DATA:referrer}\" \"%{DATA:user_agent}\" \"%{IPORHOST:ip_source}:%{POSINT:ip_source_port}\" \"%{IPORHOST:ip_destination}:%{POSINT:ip_destination_port}\" x_forwarded_for\:\"%{DATA:x_forwarded_for}\" x_forwarded_proto:\"%{DATA:x_forwarded_proto}\" vcap_request_id:\"%{UUID:vcap_request_id}\" response_time:%{NUMBER:response_time} gorouter_time:%{NUMBER:gorouter_time} app_id:\"%{UUID:app_id}\" app_index:\"%{NONNEGINT:app_index}\" x_b3_traceid:\"%{DATA:x_b3_traceid}\" x_b3_spanid:\"%{DATA:x_b3_spanid}\" x_b3_parentspanid:\"%{DATA:x_b3_parentspanid}\" b3:\"%{DATA:b3}\"" }
         tag_on_failure => []
         break_on_match => false
       }
@@ -128,7 +128,7 @@ applications:
     services:
       - my-elasticsearch
     docker:
-      image: docker.elastic.co/logstash/logstash:7.3.1
+      image: docker.elastic.co/logstash/logstash:7.5.2
     command: |
       export XPACK_MANAGEMENT_ELASTICSEARCH_HOSTS=$(echo $VCAP_SERVICES | grep -Po '"host":\s"\K(.*?)(?=")') &&
       export XPACK_MANAGEMENT_ELASTICSEARCH_USERNAME=$(echo $VCAP_SERVICES | grep -Po '"full_access_username":\s"\K(.*?)(?=")') &&

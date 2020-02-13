@@ -32,7 +32,7 @@ applications:
     services:
         - my-elasticsearch
     docker:
-      image: docker.elastic.co/kibana/kibana:7.3.1
+      image: docker.elastic.co/kibana/kibana:7.5.2
     command: |
       export ELASTICSEARCH_HOSTS=$(echo $VCAP_SERVICES | grep -Po '"host":\s"\K(.*?)(?=")') &&
       export ELASTICSEARCH_USERNAME=$(echo $VCAP_SERVICES | grep -Po '"full_access_username":\s"\K(.*?)(?=")') &&
