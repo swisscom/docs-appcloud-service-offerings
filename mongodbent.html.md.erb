@@ -116,3 +116,24 @@ On the MongoDB Ops Manager you will receive the role `Monitoring Admin`.
 - Consider a query timeout
 
   MongoDB targets operations for termination if the associated cursor exceeds its allotted time limit. See [cursor.maxTimeMS()](https://docs.mongodb.com/manual/reference/method/cursor.maxTimeMS/) for more details.
+
+
+## <a id='databases'></a> Additional Databases
+
+MongoDB Enterprise offers additional databases on the same replicaset.
+
+The first database is automatically initialized after creating the replicaset. It can be accessed by creating bindings or service-keys on the mongodbent service instance.
+
+A limited number of additional databases can be created on top of each MongoDB Enterprise replicaset. To create an additional database you must first get the GUID of your replicaset:
+
+```
+cf service my-mongodb-enterprise --guid
+```
+
+Then, create a database (where `parent_reference` is the GUID of your service instance):
+
+````
+cf create-service mongodbent-database default my-mongodb-enterprise-db -c '{ "parent_reference": "<MONGODBENTCLUSTER_GUID>" }'
+````
+
+Please note that databases are competing for resources. Thus, you should limit the number of databases on your production replicasets.
