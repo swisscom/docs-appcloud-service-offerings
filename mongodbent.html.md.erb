@@ -138,6 +138,10 @@ cf create-service mongodbent-database default my-mongodb-enterprise-db -c '{ "pa
 
 Please note that databases are competing for resources. Thus, you should limit the number of databases on your production replicasets.
 
+Known limitations:
+
+All bind and unbind operations of additional databases of the same cluster must happen sequentially.
+
 ## <a id='backup'></a> Backup
 If you want to create backups, and also be able to restore them afterwards, there is an app available that allows for automatic scheduled backups: [backman - the appcloud backup manager](https://github.com/swisscom/backman).
 
