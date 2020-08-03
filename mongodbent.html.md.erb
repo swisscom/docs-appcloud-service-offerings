@@ -131,11 +131,14 @@ cf service my-mongodb-enterprise --guid
 ```
 
 Then, create a database (where `parent_reference` is the GUID of your service instance):
-
+On Linux:
 ````
 cf create-service mongodbent-database default my-mongodb-enterprise-db -c '{ "parent_reference": "<MONGODBENTCLUSTER_GUID>" }'
 ````
-
+On Windows PowerShell:
+````
+cf create-service mongodbent-database default my-mongodb-enterprise-db -c '{ \"parent_reference\": \"<MONGODBENTCLUSTER_GUID>\" }'
+````
 Please note that databases are competing for resources. Thus, you should limit the number of databases on your production replicasets.
 
 Known limitations:
