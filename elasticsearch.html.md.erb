@@ -37,8 +37,8 @@ Each [service key](../devguide/services/service-keys.html) or [binding](../devgu
 - `kibana_read_only_username`: a user which has read access to Kibana. This user should be used when giving access to your Kibana.
 - `kibana_dashboard_only_username`: a user which has the `kibana_dashboard_only_role` assigned and can only access dashboards in Kibana.
 - `full_access_username`: a user which has read and write access to all indices. This user is optimal for integration with your application.
-- `kibana_system_username`: a system user for the Kibana application.
-- `logstash_system_username`: a system user for the Logstash application
+- `kibana_system_username`: a system user for the Kibana application. This is a system user and you should not use it (e.g. for logging in to Kibana).
+- `logstash_system_username`: a system user for the Logstash application. This is a system user and you should not use it.
 
 ## <a id='versions'></a> Versions
 
