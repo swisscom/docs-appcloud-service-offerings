@@ -42,11 +42,11 @@ EOF
 
 #delete all buckets
 echo "Trying to delete all files/buckets on $service."
-#s3cmd ls|awk '{print $3}' | while read bucket; do #loop through buckets
-#  s3cmd del --recursive $bucket --force || echo "Error deleting the files on the bucket." #delete bucket content 
-#  s3cmd rb $bucket || echo "Error removing the bucket itself." #remove actual bucket
-#done
-#rm $HOME/.s3cfg
+s3cmd ls|awk '{print $3}' | while read bucket; do #loop through buckets
+  s3cmd del --recursive $bucket --force || echo "Error deleting the files on the bucket." #delete bucket content 
+  s3cmd rb $bucket || echo "Error removing the bucket itself." #remove actual bucket
+done
+rm $HOME/.s3cfg
 
 echo "Removing temporary service key."
 cf delete-service-key $service tempkey -f
