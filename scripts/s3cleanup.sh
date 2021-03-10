@@ -26,7 +26,7 @@ secret_key=`echo $service_key|jq -r .sharedSecret`
 
 read -p "Is your s3 instance reachable from where this script is executed (y/n)?" choice
 case "$choice" in 
-  y|Y ) echo "Continuing without cf ssh tunnel";;
+  y|Y ) echo "Continuing without cf ssh tunnel" && port="";;
   n|N ) echo "Setting port for cf ssh forwarding in generated config" && port=":4443";;
   * ) echo "invalid";;
 esac
