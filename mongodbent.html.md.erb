@@ -67,6 +67,14 @@ To upgrade both the MongoDB Enteprise binaries (if not already done) and the fea
 
 `cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"3.6"}'`
 
+## <a id='plan-upgrade'></a> Plan Upgrade
+
+MongoDB Enterprise service instances can be upgraded to larger plans (downgrading to smaller plans is not possible).
+
+The upgrade to a larger plan is done through the CF CLI by running the update service command.
+
+`cf update-service <service-name> -p <new-plan-name>`
+
 ## <a id='opsmanager'></a> MongoDB Ops Manager
 
 As a MongoDB Enterprise customer, you receive access to the [Ops Manager](https://docs.opsmanager.mongodb.com/current/) to see detailed performance metrics and health state.
