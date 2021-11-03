@@ -45,9 +45,37 @@ To connect to a running MongoDB Enterprise instance with your local development 
 
 Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
 
-## <a id='version-upgrade'></a> Version Upgrade and Feature Compatibility
+## <a id='version-upgrade'></a> Version Upgrade
 
-New versions of MongoDB Enterprise will be announced in the newsletter as soon as they are available.
+_Upgrading a Service Instance requires cf CLI v6.46.0+ and CAPI release 1.83.0+_
+
+Some service brokers support upgrading service instances to the latest version of a service plan. For example, a broker may want to provide a way for users of the service to upgrade the underlying operating system that their service instances run on.
+
+To upgrade your service instances, do the following:
+
+1. Confirm that an upgrade is available by running `cf services` and reviewing the `upgrade available` column:
+
+	```
+	$ cf services
+	Getting services in org acceptance / space dev as admin...
+
+	name      service   plan     bound apps   last operation     broker         upgrade available
+	mydb      p-mysql   small                 create succeeded   mysql-broker   yes
+	otherdb   p-mysql   medium                create succeeded   mysql-broker   no
+	```
+
+1. Upgrade the service instance using the `--upgrade` flag:
+
+	```
+	$ cf update-service mydb --upgrade
+	You are about to update mydb.
+	Warning: This operation may be long running and will block further operations on the service until complete.
+	Really update service mydb? [yN]: y
+	OK
+	```
+
+
+## <a id='feature-compatibility'></a> Feature Compatibility
 
 The upgrade to the new version is done through the CF CLI by running the update service command. This command will always upgrade the binaries to the lastest available version. To ensure the compatibility with your application MongoDB provides a feature flag for breaking changes which is called "featureCompatibilityVersion".
 
