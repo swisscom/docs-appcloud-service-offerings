@@ -58,11 +58,38 @@ Or you can update any existing service by using the update-service command. E.g.
 *Note*: when using a custom Elasticsearch version you must specify the version on all `cf update-service` calls.
 Otherwise, we will use the default version.
 
-## <a id='version-upgrade'></a> Version Upgrade
+## <a id='upgrade'></a> Version Upgrade
 
-New versions of Elasticsearch will be announced in the newsletter as soon as they are available.
+_Upgrading a Service Instance requires cf CLI v6.46.0+ and CAPI release 1.83.0+_
 
-The upgrade to the new version is done through the CF CLI by running the update service command.
+Elasticsearch supports upgrading service instances to newer versions. Upgrades to specific versions of Elasticsearch are described below.
+
+To upgrade your service instances, do the following:
+
+1. Confirm that an upgrade is available by running `cf services` and reviewing the `upgrade available` column:
+
+	```
+	$ cf services
+	Getting services in org acceptance / space dev as admin...
+
+	name      service   plan     bound apps   last operation     broker         upgrade available
+	mydb      p-mysql   small                 create succeeded   mysql-broker   yes
+	otherdb   p-mysql   medium                create succeeded   mysql-broker   no
+	```
+
+2. Upgrade the service instance using the `--upgrade` flag:
+
+	```
+	$ cf update-service mydb --upgrade
+	You are about to update mydb.
+	Warning: This operation may be long running and will block further operations on the service until complete.
+	Really update service mydb? [yN]: y
+	OK
+	```
+
+## <a id='version-upgrade'></a> Upgrade to Specific Version
+
+The upgrade to the specific versions is done through the CF CLI by running the update service command.
 
 `cf update-service <service-name> -c '{"version":"X.Y.Z"}'`
 
