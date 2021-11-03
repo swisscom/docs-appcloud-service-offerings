@@ -62,7 +62,7 @@ Otherwise, we will use the default version.
 
 _Upgrading a Service Instance requires cf CLI v6.46.0+ and CAPI release 1.83.0+_
 
-Some service brokers support upgrading service instances to the latest version of a service plan. For example, a broker may want to provide a way for users of the service to upgrade the underlying operating system that their service instances run on.
+Elasticsearch supports upgrading service instances to newer versions. Upgrades to specific versions of Elasticsearch are described below.
 
 To upgrade your service instances, do the following:
 
@@ -77,7 +77,7 @@ To upgrade your service instances, do the following:
 	otherdb   p-mysql   medium                create succeeded   mysql-broker   no
 	```
 
-1. Upgrade the service instance using the `--upgrade` flag:
+2. Upgrade the service instance using the `--upgrade` flag:
 
 	```
 	$ cf update-service mydb --upgrade
