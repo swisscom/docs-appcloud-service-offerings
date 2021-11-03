@@ -57,15 +57,15 @@ You can either upgrade the service to the new version without changing the featu
 
 Example:
 
-Assume you have a MongoDB Enterprise with version 4.0.16 called my-mongodb-enterprise
+Assume you have a MongoDB Enterprise with version 4.0.xx called my-mongodb-enterprise
 
-To upgrade to the MongoDB Enterprise 4.2.15 binaries without enabling the new features (keep featureCompatibility at 4.0.16) you must run the following command:
+To upgrade to the MongoDB Enterprise 4.2.xx binaries without enabling the new features (keep featureCompatibility at 4.0.xx) you must run the following command:
 
-`cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"4.0.16"}'`
+`cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"4.0"}'`
 
-To upgrade both the MongoDB Enteprise binaries (if not already done) and the feature set to version 4.2.15, you must run the following command:
+To upgrade both the MongoDB Enteprise binaries (if not already done) and the feature set to version 4.2.xx, you must run the following command:
 
-`cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"4.2.15"}'`
+`cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"4.2"}'`
 
 ## <a id='plan-upgrade'></a> Plan Upgrade
 
