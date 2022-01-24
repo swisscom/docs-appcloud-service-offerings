@@ -31,12 +31,12 @@ applications:
     services:
         - my-elasticsearch
     docker:
-      image: docker.elastic.co/kibana/kibana:7.5.2
+      image: docker.elastic.co/kibana/kibana:7.16.3
     command: |
-      export ELASTICSEARCH_HOSTS=$(echo $VCAP_SERVICES | grep -Po '"host":\s"\K(.*?)(?=")') &&
-      export ELASTICSEARCH_USERNAME=$(echo $VCAP_SERVICES | grep -Po '"full_access_username":\s"\K(.*?)(?=")') &&
-      export ELASTICSEARCH_PASSWORD=$(echo $VCAP_SERVICES | grep -Po '"full_access_password":\s"\K(.*?)(?=")') &&
-      /usr/local/bin/dumb-init -- /usr/local/bin/kibana-docker
+      ELASTICSEARCH_HOSTS=$(echo $VCAP_SERVICES | grep -Po '"host":\s"\K(.*?)(?=")' | sed "s/https:\/\///" | sed "s/:443//") &&
+      ELASTICSEARCH_USERNAME=$(echo $VCAP_SERVICES | grep -Po '"full_access_username":\s"\K(.*?)(?=")') &&
+      ELASTICSEARCH_PASSWORD=$(echo $VCAP_SERVICES | grep -Po '"full_access_password":\s"\K(.*?)(?=")') &&
+      ./bin/kibana -e https://$ELASTICSEARCH_USERNAME:$ELASTICSEARCH_PASSWORD@$ELASTICSEARCH_HOSTS
 ```
 
 Use `ELASTICSEARCH_URL` instead of `ELASTICSEARCH_HOSTS`, if you are using version 6.x of Kibana.
