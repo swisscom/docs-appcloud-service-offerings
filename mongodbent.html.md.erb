@@ -59,9 +59,9 @@ To upgrade your service instances, do the following:
 	$ cf services
 	Getting services in org acceptance / space dev as admin...
 
-	name      service   plan     bound apps   last operation     broker         upgrade available
-	mydb      p-mysql   small                 create succeeded   mysql-broker   yes
-	otherdb   p-mysql   medium                create succeeded   mysql-broker   no
+	name      service      plan     bound apps   last operation     broker           upgrade available
+	mydb      mongodbent   small                 create succeeded   mongodb-broker   yes
+	otherdb   mongodbent   medium                create succeeded   mongodb-broker   no
 	```
 
 1. Upgrade the service instance using the `--upgrade` flag:
@@ -74,26 +74,7 @@ To upgrade your service instances, do the following:
 	OK
 	```
 
-
-## <a id='feature-compatibility'></a> Feature Compatibility
-
-The upgrade to the new version is done through the CF CLI by running the update service command. This command will always upgrade the binaries to the lastest available version. To ensure the compatibility with your application MongoDB provides a feature flag for breaking changes which is called "featureCompatibilityVersion".
-
-`cf update-service <service-name> -c '{"featureCompatibilityVersion":"X.Y"}'`
-
-You can either upgrade the service to the new version without changing the feature compatibility or upgrade both.
-
-Example:
-
-Assume you have a MongoDB Enterprise with version 4.0.xx called my-mongodb-enterprise
-
-To upgrade to the MongoDB Enterprise 4.2.xx binaries without enabling the new features (keep featureCompatibility at 4.0.xx) you must run the following command:
-
-`cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"4.0"}'`
-
-To upgrade both the MongoDB Enteprise binaries (if not already done) and the feature set to version 4.2.xx, you must run the following command:
-
-`cf update-service my-mongodb-enterprise -c '{"featureCompatibilityVersion":"4.2"}'`
+We recommend creating a backup before evey upgrade, to prevent possible data loss. The preferred method is using [backman](https://github.com/swisscom/backman).
 
 ## <a id='plan-upgrade'></a> Plan Upgrade
 
