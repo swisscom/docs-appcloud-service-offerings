@@ -44,8 +44,11 @@ Each [service key](../devguide/services/service-keys.html) or [binding](../devgu
 For the Elasticsearch service multiple versions are available.
 Currently available versions:
 
-- 6.8.12
-- 7.8.1 (default)
+- 7.16.1
+
+Deprecated versions:
+- 6.8.*
+- 7.8.*
 
 To create a cluster with a specific version you must provide the version (from the list above) as a parameter. E.g.:
 
@@ -72,9 +75,9 @@ To upgrade your service instances, do the following:
 	$ cf services
 	Getting services in org acceptance / space dev as admin...
 
-	name      service   plan     bound apps   last operation     broker         upgrade available
-	mydb      p-mysql   small                 create succeeded   mysql-broker   yes
-	otherdb   p-mysql   medium                create succeeded   mysql-broker   no
+	name      service         plan     bound apps   last operation     broker         upgrade available
+	mydb      elasticsearch   small                 create succeeded   ece-broker     yes
+	otherdb   elasticsearch   medium                create succeeded   ece-broker     no
 	```
 
 2. Upgrade the service instance using the `--upgrade` flag:
@@ -86,6 +89,8 @@ To upgrade your service instances, do the following:
 	Really update service mydb? [yN]: y
 	OK
 	```
+
+We recommend creating a backup before evey upgrade, to prevent possible data loss. The preferred method is using [backman](https://github.com/swisscom/backman).
 
 ## <a id='version-upgrade'></a> Upgrade to Specific Version
 
