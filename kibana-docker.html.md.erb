@@ -20,7 +20,8 @@ Before you can set up Kibana, you need an Elasticsearch-service.
 ### <a id='push-logstash-buildpack'></a> Create the manifest.yml
 Create a manifest.yml in an empty folder according to the following example to configure your Kibana.
 
-```txt
+```yaml
+----
 applications:
   - name: mykibana
     memory: 2G
@@ -31,17 +32,19 @@ applications:
     services:
         - my-elasticsearch
     docker:
-      image: docker.elastic.co/kibana/kibana:7.16.3
+      image: docker.elastic.co/kibana/kibana:7.16.1
     command: |
-      ELASTICSEARCH_HOSTS=$(echo $VCAP_SERVICES | grep -Po '"host":\s"\K(.*?)(?=")' | sed "s/https:\/\///" | sed "s/:443//") &&
-      ELASTICSEARCH_USERNAME=$(echo $VCAP_SERVICES | grep -Po '"full_access_username":\s"\K(.*?)(?=")') &&
-      ELASTICSEARCH_PASSWORD=$(echo $VCAP_SERVICES | grep -Po '"full_access_password":\s"\K(.*?)(?=")') &&
-      ./bin/kibana -e https://$ELASTICSEARCH_USERNAME:$ELASTICSEARCH_PASSWORD@$ELASTICSEARCH_HOSTS
+      export ELASTICSEARCH_HOSTS=$(echo $VCAP_SERVICES | grep -Po '"host":\s"\K(.*?)(?=")') &&
+      export ELASTICSEARCH_USERNAME=$(echo $VCAP_SERVICES | grep -Po '"kibana_system_username":\s"\K(.*?)(?=")') &&
+      export ELASTICSEARCH_PASSWORD=$(echo $VCAP_SERVICES | grep -Po '"kibana_system_password":\s"\K(.*?)(?=")') &&
+      /bin/tini -- /usr/local/bin/kibana-docker
+----
 ```
 
 Use `ELASTICSEARCH_URL` instead of `ELASTICSEARCH_HOSTS`, if you are using version 6.x of Kibana.
 
-Push the Docker container as usual with `cf push` and access it via the configured route using the full-access-user.
+Push the Docker container as usual with `cf push`.
+Then access it via the configured route using the full-access-user.
 
 ### <a id='next-step'></a> Next Step
 
