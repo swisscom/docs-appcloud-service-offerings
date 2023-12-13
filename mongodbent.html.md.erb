@@ -84,6 +84,8 @@ The upgrade to a larger plan is done through the CF CLI by running the update se
 
 `cf update-service <service-name> -p <new-plan-name>`
 
+Caution: If your cluster is not running on the latest available MongoDB version in the marketplace, a plan upgrade will automatically trigger also a version upgrade (see chapter [Version Upgrade](https://docs.developer.swisscom.com/service-offerings/mongodbent.html#version-upgrade) for more details).
+
 ## <a id='opsmanager'></a> MongoDB Ops Manager
 
 As a MongoDB Enterprise customer, you receive access to the [Ops Manager](https://docs.opsmanager.mongodb.com/current/) to see detailed performance metrics and health state.
