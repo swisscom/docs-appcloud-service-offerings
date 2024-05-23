@@ -156,6 +156,14 @@ By default, every queue created on RabbitMQ is created on one node (the queue ma
 
 In certain cases, high availability is sacrificed to avoid the overhead of replication to achieve higher performance. For this, just create the queue with the prefix `appcloud-non-ha` and it will not be replicated to other nodes.
 
+#### Quorum Queues
+
+Quorum queues were introduced in RabbitMQ 3.8 version. This type of queue implements a replicated FIFO queue based on Raft consensus algorithm. It came to "replace" classic mirrored queues as a more reliable solution for high availability with still good throughput.
+
+To use quorum queues, just create the queue with the quorum type.
+
+Classic Queues are deprecated and will be removed in RabbitMQ 4.0. Furthermore in times of high load classic queues can get corruped and lose synchronisation, this is a know limitation of RabbitMQ.
+
 #### Consistent Hash exchange
 For a different approach to scale your queues on the cluster, the [Consistent hash exchange plugin](https://github.com/rabbitmq/rabbitmq-consistent-hash-exchange) is enabled.
 
