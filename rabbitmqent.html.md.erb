@@ -229,9 +229,9 @@ RabbitMQ features acknowledgments (ack's) for receiving message and publisher co
 
 Note: Ack's and confirms have a small performance impact.
 
-== <a id='migration-to-quorum-queues'></a> Migration to Quorum Queues
+## <a id='migration-to-quorum-queues'></a> Migration to Quorum Queues
 
-=== Quorum Queues
+### Quorum Queues
 
 Quorum Queues are a superior replacement for Classic Mirrored Queues that were introduced in RabbitMQ version 3.8. And there are two complementary reasons why you would need to migrate:
 
@@ -240,13 +240,13 @@ Quorum Queues are a superior replacement for Classic Mirrored Queues that were i
 
 Quorum Queues are better in all regards, but they are not 100%-compatible feature-wise with Mirrored Queues.
 
-=== How to Make Use of Quorum Queues
+### How to Make Use of Quorum Queues
 
 Declare a queue by setting the `x-queue-type` argument to `quorum`. This will declare a quorum queue with three replicas.
 
 After declaring a quorum queue, you can bind it to any exchange just as with other queue types.
 
-=== How to Migrate to Quorum Queues from Classic Mirrored Queues
+### How to Migrate to Quorum Queues from Classic Mirrored Queues
 
 Directly changing queue types is not possible. Instead, there are two options when moving from classic mirrored queues to quorum queues:
 
@@ -271,7 +271,7 @@ to change, while [others](https://www.rabbitmq.com/blog/2023/03/02/quorum-queues
 
 <%= image_tag("./images/rmq_queues_feature_matrix.png") %>
 
-==== Breaking changes
+#### Breaking changes
 
 **Priority queues**
 
@@ -293,7 +293,7 @@ Quorum queues are less exposed to such behaviour - the only case when it still c
 
 And redeliveries can also happen for inflight messages when the consumer is cancelled or the channel is closed. So application needs to be prepared for redeliveries anyway, without specifically asking for such information.
 
-==== Trivial Changes
+#### Trivial Changes
 
 **Lazy queues**
 
