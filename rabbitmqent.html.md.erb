@@ -227,3 +227,87 @@ Large messages can take up a lot of resources and should generally be avoided. R
 RabbitMQ features acknowledgments (ack's) for receiving message and publisher confirms (confirms) for sending messages. These mechanisms can be used to ensure that a message has been send / received correctly. Ack's and confirms are generally a good idea to implement as they increase the reliability and consistency of the message flow.
 
 Note: Ack's and confirms have a small performance impact.
+
+== <a id='migration-to-quorum-queues'></a> Migration to Quorum Queues
+
+=== Quorum Queues
+
+Quorum Queues are a superior replacement for Classic Mirrored Queues that were introduced in RabbitMQ version 3.8. And there are two complementary reasons why you would need to migrate:
+
+- Classic Mirrored Queues were deprecated in 3.9 and will be completely removed in 4.0
+- they are more reliable and predictable, faster for most workloads and require less maintenance
+
+Quorum Queues are better in all regards, but they are not 100%-compatible feature-wise with Mirrored Queues.
+
+=== How to Make Use of Quorum Queues
+
+Declare a queue by setting the `x-queue-type` argument to `quorum`. This will declare a quorum queue with three replicas.
+
+After declaring a quorum queue, you can bind it to any exchange just as with other queue types.
+
+=== How to Migrate to Quorum Queues from Classic Mirrored Queues
+
+Directly changing queue types is not possible. Instead, there are two options when moving from classic mirrored queues to quorum queues:
+
+**Option 1: Create a new queue with the type quorum and move the publisher, then the consumer.**
+
+- **Declare a Quorum Queue:** Set the `x-queue-type` queue argument to `quorum` . The queue argument should be provided by the client and set when declaring the queue.
+- **Move the publisher and empty the queue:** Empty the queue by moving the publisher to the new queue and allowing the consumer to consume messages from the old queue until it's empty.
+- **Move the consumer:** Finally, switch the consumer to the new queue.
+
+**Option 2: Move messages from the old queue to the new queue by using a shovel.**
+
+- **Set up a shovel:** Create a shovel from the RabbitMQ management interface. Click on the Admin tab and select Shovel Management from the dropdown menu.
+- **Declare quorum queues:** Set the x-queue-type queue argument to quorum . The queue argument should be provided by the client and set when declaring the queue.
+- **Move messages:** Use the created shovel to move messages from one queue to the other.
+
+### Compatibility considerations
+
+The RabbitMQ documentation has a dedicated page on [Quorum Queues](https://www.rabbitmq.com/docs/quorum-queues). Specifically, in this document there is a
+[feature matrix](https://www.rabbitmq.com/docs/quorum-queues#feature-matrix) which provides a list with all differences between Mirrored Classic Queues and Mirrored Queues.
+These differences can require a different amount of work for a successful migration. Some of [them](https://www.rabbitmq.com/blog/2023/03/02/quorum-queues-migration#trivial-changes) can be trivial
+to change, while [others](https://www.rabbitmq.com/blog/2023/03/02/quorum-queues-migration#breaking-changes) can require changes in the way an application interacts with RabbitMQ.
+
+<%= image_tag("./images/rmq_queues_feature_matrix.png") %>
+
+==== Breaking changes
+
+**Priority queues**
+
+Classic mirrored queues actually create a separate queue for every priority behind the scenes. For migration it’s necessary for the applications to explicitly handle creation of those queues, and also publishing/consuming to and from them.
+
+**Overflow dead lettering**
+
+Overflow mode `reject-publish-dlx` is not supported by quorum queues. The code needs to be updated to use publisher confirms and to do dead lettering by itself.
+
+**Global QoS for consumers**
+
+Global QoS for consumers is not supported for quorum queues. A decision needs to be made about how necessary results can be achieved using alternative means, e.g. by using a lower per-consumer QoS that can give approximately the same results (given the known application load pattern).
+
+**`x-cancel-on-ha-failover` for consumers**
+
+Mirrored queues consumers can be automatically cancelled when a queue leader fails over. This can cause a loss of information about which messages were sent to which consumer, and redelivery of such messages.
+
+Quorum queues are less exposed to such behaviour - the only case when it still can happen is when a whole node goes down. For other leader changes (e.g. caused by rebalancing), there will be no redeliveries.
+
+And redeliveries can also happen for inflight messages when the consumer is cancelled or the channel is closed. So application needs to be prepared for redeliveries anyway, without specifically asking for such information.
+
+==== Trivial Changes
+
+**Lazy queues**
+
+Classic queue can optionally operate in lazy mode, but for quorum queues this is the only way of operation.
+
+**Non-durable queues**
+
+Non-durable queues will be deleted on a node/cluster boot.
+
+Non-durable queues concept is also going away in the future releases: the only option for ephemeral queues will be exclusive queues. This affects only durability of queue definitions, messages can still be marked transient.
+
+For such queues a decision has to be made one way or another: is this queue content important enough to get availability guarantees of quorum queues, or it's better to downgrade it to a classic (but durable) queue.
+
+**Exclusive queues**
+
+Exclusive queues are not mirrored even if the policy says so. But attempt to declare an exclusive quorum queue will result in an error.
+
+This is clearly one of the cases where migration is not needed, but care must be taken as to avoid exclusive queue declarations with an explicit `x-queue-type: quorum` argument.
