@@ -45,7 +45,40 @@ To connect to a running MongoDB Enterprise instance with your local development 
 
 Cloud Foundry: [Spring Music Example](https://github.com/cloudfoundry-samples/spring-music)
 
+## <a id='databases'></a> Additional Databases
+
+MongoDB Enterprise offers additional databases on the same replica set.
+
+The first database is automatically initialized after creating the replica set. It can be accessed by creating bindings or service-keys on the mongodbent service instance.
+
+A limited number of additional databases can be created on top of each MongoDB Enterprise replica set. To create an additional database you must first get the GUID of your replica set:
+
+```
+cf service my-mongodb-enterprise --guid
+```
+
+Then, create a database (where `parent_reference` is the GUID of your service instance):
+On Linux:
+````
+cf create-service mongodbent-database default my-mongodb-enterprise-db -c '{ "parent_reference": "<MONGODBENTCLUSTER_GUID>" }'
+````
+On Windows PowerShell:
+````
+cf create-service mongodbent-database default my-mongodb-enterprise-db -c '{ \"parent_reference\": \"<MONGODBENTCLUSTER_GUID>\" }'
+````
+Please note that databases are competing for resources. Thus, you should limit the number of databases on your production replica sets.
+
+Known limitations:
+
+All bind and unbind operations of additional databases of the same cluster must happen sequentially.
+
 ## <a id='version-upgrade'></a> Version Upgrade
+
+MongoDB Enterprise service supports upgrading service instances to new versions.
+
+<p class='note'>
+  <strong>CAUTION</strong>: Before upgrading your service, please carefully review the release notes and compatibility changes of newer version on the official MongoDB documentation.
+</p>
 
 _Upgrading a Service Instance requires cf CLI v6.46.0+ and CAPI release 1.83.0+_
 
@@ -64,10 +97,19 @@ To upgrade your service instances, do the following:
 	otherdb   mongodbent   medium                create succeeded   mongodb-broker   no
 	```
 
-1. Upgrade the service instance using the `--upgrade` flag:
+1. Upgrade the service instance:
+
+	```shell
+	# cf-cli v6/v7
+	cf update-service mydb --upgrade
+	
+	# cf-cli v8
+	cf update-service mydb
+	```
+    
+1. Confirm the operation:
 
 	```
-	$ cf update-service mydb --upgrade
 	You are about to update mydb.
 	Warning: This operation may be long running and will block further operations on the service until complete.
 	Really update service mydb? [yN]: y
@@ -86,7 +128,7 @@ The upgrade to a larger plan is done through the CF CLI by running the update se
 
 Caution: If your cluster is not running on the latest available MongoDB version in the marketplace, a plan upgrade will automatically trigger also a version upgrade (see chapter [Version Upgrade](https://docs.developer.swisscom.com/service-offerings/mongodbent.html#version-upgrade) for more details).
 
-## <a id='opsmanager'></a> MongoDB Ops Manager
+## <a id='opsmanager'></a> Ops Manager
 
 As a MongoDB Enterprise customer, you receive access to the [Ops Manager](https://docs.opsmanager.mongodb.com/current/) to see detailed performance metrics and health state.
 
@@ -98,7 +140,7 @@ After forwarding the port you can access Ops Manager under http://localhost:8080
 
 ## <a id='specifications'></a> Specifications
 
-Our [MongoDB Enterprise](https://www.mongodb.com/products/mongodb-enterprise-advanced) offering consists of 3 dedicated VMs configured as a replicaset.
+Our [MongoDB Enterprise](https://www.mongodb.com/products/mongodb-enterprise-advanced) offering consists of 3 dedicated VMs configured as a replica set.
 
 ## <a id='hostmappings'></a> Ops Manager Host Mappings
 
@@ -107,9 +149,9 @@ There is a known bug regarding host mappings. When the deployment overview shows
 <%= image_tag("./images/overview_host_mappings.png") %>
 <%= image_tag("./images/delete_host_mapping.png") %>
 
-## <a id='roles'></a> Roles
+## <a id='roles'></a> Permission Roles
 
-On the MongoDB replicaset you will receive the role `readWrite@rs_DBNAME`.
+On the MongoDB replica set you will receive the role `readWrite@rs_DBNAME`.
 
 On the MongoDB Ops Manager you will receive the role `Monitoring Admin`.
 
@@ -117,56 +159,30 @@ On the MongoDB Ops Manager you will receive the role `Monitoring Admin`.
 
 - Write concern majority
 
-  Please read [Replica Set Read and Write Semantics](https://docs.mongodb.com/manual/applications/replication). We recommend a "Write Concern" of `majority` to avoid [Rollbacks During Replica Set Failover](https://docs.mongodb.com/manual/core/replica-set-rollbacks/).
+   Please read [Replica Set Read and Write Semantics](https://docs.mongodb.com/manual/applications/replication). We recommend a "Write Concern" of `majority` to avoid [Rollbacks During Replica Set Failover](https://docs.mongodb.com/manual/core/replica-set-rollbacks/).
 
 - Check Ops Manager metrics regularly
 
-  Please check your Ops Manager metrics and graphs regularly. The performance statistics are particularly important after app deployments.
+   Please check your Ops Manager metrics and graphs regularly. The performance statistics are particularly important after app deployments.
 
 - Use an application driver maintained by the MongoDB team
 
-  It’s critical to find a driver that [is well-maintained](https://docs.mongodb.com/ecosystem/drivers/) and stays up to date with the latest MongoDB features.
+   It’s critical to find a driver that [is well-maintained](https://docs.mongodb.com/ecosystem/drivers/) and stays up to date with the latest MongoDB features.
 
 - Index early and often
 
-  Without question, the most common database performance issue is improper indexing (or a complete lack thereof). Have a look at [Indexes docs](https://docs.mongodb.com/manual/indexes/).
+   Without question, the most common database performance issue is improper indexing (or a complete lack thereof). Have a look at [Indexes docs](https://docs.mongodb.com/manual/indexes/).
 
 - Consider a query timeout
 
-  MongoDB targets operations for termination if the associated cursor exceeds its allotted time limit. See [cursor.maxTimeMS()](https://docs.mongodb.com/manual/reference/method/cursor.maxTimeMS/) for more details.
+   MongoDB targets operations for termination if the associated cursor exceeds its allotted time limit. See [cursor.maxTimeMS()](https://docs.mongodb.com/manual/reference/method/cursor.maxTimeMS/) for more details.
   
 - Implement connection pool
 
-  It’s crucial to properly implement and manage the connections made from your app to the database. Please observe the number of connections via Opsmanager to see if connections are not closing correctly. Please also consider implementing connection pools in your app. You can find more information on this topic in the MongoDB documentation [Create and Use a Connection Pool](https://www.mongodb.com/docs/manual/administration/connection-pool-overview/#create-and-use-a-connection-pool) 
-
-## <a id='databases'></a> Additional Databases
-
-MongoDB Enterprise offers additional databases on the same replicaset.
-
-The first database is automatically initialized after creating the replicaset. It can be accessed by creating bindings or service-keys on the mongodbent service instance.
-
-A limited number of additional databases can be created on top of each MongoDB Enterprise replicaset. To create an additional database you must first get the GUID of your replicaset:
-
-```
-cf service my-mongodb-enterprise --guid
-```
-
-Then, create a database (where `parent_reference` is the GUID of your service instance):
-On Linux:
-````
-cf create-service mongodbent-database default my-mongodb-enterprise-db -c '{ "parent_reference": "<MONGODBENTCLUSTER_GUID>" }'
-````
-On Windows PowerShell:
-````
-cf create-service mongodbent-database default my-mongodb-enterprise-db -c '{ \"parent_reference\": \"<MONGODBENTCLUSTER_GUID>\" }'
-````
-Please note that databases are competing for resources. Thus, you should limit the number of databases on your production replicasets.
-
-Known limitations:
-
-All bind and unbind operations of additional databases of the same cluster must happen sequentially.
+   It’s crucial to properly implement and manage the connections made from your app to the database. Please observe the number of connections via Opsmanager to see if connections are not closing correctly. Please also consider implementing connection pools in your app. You can find more information on this topic in the MongoDB documentation [Create and Use a Connection Pool](https://www.mongodb.com/docs/manual/administration/connection-pool-overview/#create-and-use-a-connection-pool) 
 
 ## <a id='backup'></a> Backup
+
 If you want to create backups, and also be able to restore them afterwards, there is an app available that allows for automatic scheduled backups: [backman - the appcloud backup manager](https://github.com/swisscom/backman).
 
 Service instances bound to this app will be automatically backed up, can be downloaded and also restored on-demand.
