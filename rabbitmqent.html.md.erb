@@ -144,32 +144,63 @@ The full list of exposed plugins:
 - `rabbitmq_consistent_hash_exchange`
 - `rabbitmq_event_exchange`
 - `rabbitmq_management`
+- `rabbitmq_management_agent`
 - `rabbitmq_mqtt`
 - `rabbitmq_prometheus`
 - `rabbitmq_shovel`
 - `rabbitmq_shovel_management`
 - `rabbitmq_stomp`
+- `rabbitmq_web_dispatch`
 
-### Advanced configuration
+## <a id='advanced-configuration'></a> Advanced configuration
 In most cases, connecting your applications to the loadbalanced service is completely sufficient.
 For some high end setups, getting the last drop of performance and scalability from the cluster is an advanced task and might include strategies which need more logic on the client side:
 
-#### Non-HA queues
-By default, every queue created on RabbitMQ is created on one node (the queue master) and is replicated to other nodes to achieve high availability.
+### Non-HA queues
+By default, every queue created on RabbitMQ is created on one node (the queugge master) and is replicated to other nodes to achieve high availability.
 
 In certain cases, high availability is sacrificed to avoid the overhead of replication to achieve higher performance. For this, just create the queue with the prefix `appcloud-non-ha` and it will not be replicated to other nodes.
 
-#### Consistent Hash exchange
-For a different approach to scale your queues on the cluster, the [Consistent hash exchange plugin](https://github.com/rabbitmq/rabbitmq-consistent-hash-exchange) is enabled.
+### Queue Limits
+In shared cluster environments, in order to protect the clusters from the sometimes unintentional ["noisy neighbor" effect](https://en.wikipedia.org/wiki/Cloud_computing_issues#Performance_interference_and_noisy_neighbors) it is advisable
+to configure limits on the queues.
 
-## Limitations
+Such limitations are already in place using Operator Policies (see [Limitations](#limitations)) and they will take precedence. As these operator policies were only applied on a newer generation of vhosts, some older vhosts don't benefit from this configuration. Recreating a RabbitMQ service instance will create a vhost using the lastest configuration. Sometimes this is not possible in production environments. In such situation the limits can be configured using:
+
+- user policies configured on the vhost level
+- [optional arguments](https://www.rabbitmq.com/docs/3.13/queues#optional-arguments) on the queue level
+
+The recommended way is to use policies, as they are scoped per vhost and are dynamically for all matching queues. See [how policies work](https://www.rabbitmq.com/docs/3.13/parameters#how-policies-work) (including examples) on the RabbitMQ documentation page.
+
+A more concrete example using the HTTP API can be used for the older generation vhosts. This policy named `user-queue-limits` captured all (`.*`) queues and sets the maximum queue length (`max-length`) to 100'000 messages, the maximum queue size (`max-length-bytes`) to 100 MB and the time-to-live (`message-ttl`) for the messages in the queue to 14 days:
+
+```
+PUT /api/policies/<your-vhost-uuid>/user-queue-limits
+  {
+    "pattern": ".*",
+    "definition": {
+      "max-length": 100000,
+      "max-length-bytes": 104857600,
+      "message-ttl": 1209600000
+    },
+    "priority": 1,
+    "apply-to": "queues"
+  }
+```
+
+For more details see the [RabbitMQ documentation](https://www.rabbitmq.com/docs/3.13/parameters).
+
+### Consistent Hash exchange
+For a different approach to scale your queues on the cluster, the [Consistent hash exchange plugin](https://github.com/rabbitmq/rabbitmq-server/tree/main/deps/rabbitmq_consistent_hash_exchange) is enabled.
+
+## <a id='limitations'></a> Limitations
 The RabbitMQ service enforces some limitations to ensure the cluster's performance. 
 
 ### Per-Queue Message TTL of 14 days
-To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://www.rabbitmq.com/ttl.html#per-queue-message-ttl) is set to **14 days**. Messages that are in the queue for longer than 14 days are automatically discarded.
+To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://www.rabbitmq.com/docs/3.13/ttl#per-queue-message-ttl) is set to **14 days**. Messages that are in the queue for longer than 14 days are automatically discarded.
 
 ### Operator Policies
-The RabbitMQ cluster implements [operator policies](https://www.rabbitmq.com/parameters.html#operator-policies) to set certain limits on queues and messages. The following operator policies are defined:
+The RabbitMQ cluster implements [operator policies](https://www.rabbitmq.com/docs/3.13/parameters#operator-policies) to set certain limits on queues and messages. The following operator policies are defined:
 
 - `max-length: 100’000`: If a queue holds 100'000 messages, the most recently published messages will be discarded.
 - `max-length-bytes: 100MB`: If a queue holds more than 100MB of message data, the oldest messages are discarded from the head of the queue. 
