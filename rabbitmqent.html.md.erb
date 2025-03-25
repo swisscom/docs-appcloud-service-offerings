@@ -157,7 +157,7 @@ In most cases, connecting your applications to the loadbalanced service is compl
 For some high end setups, getting the last drop of performance and scalability from the cluster is an advanced task and might include strategies which need more logic on the client side:
 
 ### Non-HA queues
-By default, every queue created on RabbitMQ is created on one node (the queugge master) and is replicated to other nodes to achieve high availability.
+By default, every queue created on RabbitMQ is created on one node (the queue master) and is replicated to other nodes to achieve high availability.
 
 In certain cases, high availability is sacrificed to avoid the overhead of replication to achieve higher performance. For this, just create the queue with the prefix `appcloud-non-ha` and it will not be replicated to other nodes.
 
