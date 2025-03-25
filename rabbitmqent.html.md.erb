@@ -165,7 +165,7 @@ In certain cases, high availability is sacrificed to avoid the overhead of repli
 In shared cluster environments, in order to protect the clusters from the sometimes unintentional ["noisy neighbor" effect](https://en.wikipedia.org/wiki/Cloud_computing_issues#Performance_interference_and_noisy_neighbors) it is advisable
 to configure limits on the queues.
 
-Such limitations are already in place using Operator Policies (see [Limitations](#limitations)) and they will take precedence. As these operator policies were only applied on a newer generation of vhosts, some older vhosts don't benefit from this configuration. Recreating a RabbitMQ service instance will create a vhost using the lastest configuration. Sometimes this is not possible in production environments. In such situation the limits can be configured using:
+Such limitations are already in place using Operator Policies (see [Limitations](#limitations)) and they will take precedence. As these operator policies were only applied on a newer generation of vhosts, some older vhosts don't benefit from this configuration. Recreating a RabbitMQ service instance will create a vhost using the latest configuration. Sometimes this is not possible in production environments. In such situation the limits can be configured using:
 
 - user policies configured on the vhost level
 - [optional arguments](https://www.rabbitmq.com/docs/3.13/queues#optional-arguments) on the queue level
