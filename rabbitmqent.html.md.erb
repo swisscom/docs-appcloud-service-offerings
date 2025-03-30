@@ -197,7 +197,7 @@ For a different approach to scale your queues on the cluster, the [Consistent ha
 The RabbitMQ service enforces some limitations to ensure the cluster's performance. 
 
 ### Per-Queue Message TTL of 14 days
-To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://v3-12.rabbitmq.com/ttl.html) is set to **14 days**. Messages that are in the queue for longer than 14 days are automatically discarded.
+To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://v3-12.rabbitmq.com/ttl.html#per-queue-message-ttl) is set to **14 days**. Messages that are in the queue for longer than 14 days are automatically discarded.
 
 ### Operator Policies
 The RabbitMQ cluster implements [operator policies](https://v3-12.rabbitmq.com/parameters.html#operator-policies) to set certain limits on queues and messages. The following operator policies are defined:
