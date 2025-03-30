@@ -168,7 +168,7 @@ to configure limits on the queues.
 Such limitations are already in place using Operator Policies (see [Limitations](#limitations)) and they will take precedence. As these operator policies were only applied on a newer generation of vhosts, some older vhosts don't benefit from this configuration. Recreating a RabbitMQ service instance will create a vhost using the latest configuration. Sometimes this is not possible in production environments. In such situation the limits can be configured using:
 
 - user policies configured on the vhost level
-- [optional arguments](https://v3-12.rabbitmq.com/queues.html) on the queue level
+- [optional arguments](https://v3-12.rabbitmq.com/queues.html#optional-arguments) on the queue level
 
 The recommended way is to use policies, as they are scoped per vhost and are dynamically for all matching queues. See [how policies work](https://v3-12.rabbitmq.com/parameters.html#how-policies-work) (including examples) on the RabbitMQ documentation page.
 
