@@ -236,7 +236,7 @@ Queues will remain forever on the cluster by default (even when they're not acti
 
 ### Connections
 #### General
-Connections in RabbitMQ use up a lot of memory. In order to keep the cluster healthy and fast, it is important that there are as few open connections as possible. This can be achieved by keeping connections open for client applications. A good practise is to keep the connection open throughout the lifetime of the client application.
+Connections in RabbitMQ use up a lot of memory. In order to keep the cluster healthy and fast, it is important that there are as few open connections as possible. This can be achieved by keeping connections open for client applications. A good practice is to keep the connection open throughout the lifetime of the client application.
 
 #### Auto reconnect
 Connections between client applications and the RabbitMQ cluster are stable for the most part. However, it's possible that a network outage can occur or the cluster has an unexpected downtime. In such a case, the client application usually needs to reconnect to the cluster and reopen connections and channels. To automate this process, most RabbitMQ Client APIs support the auto-reconnect feature (see the Java Client API for an example). It is advised to enable the auto-reconnect feature on the client applications.
