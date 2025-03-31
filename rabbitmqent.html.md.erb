@@ -168,9 +168,9 @@ to configure limits on the queues.
 Such limitations are already in place using Operator Policies (see [Limitations](#limitations)) and they will take precedence. As these operator policies were only applied on a newer generation of vhosts, some older vhosts don't benefit from this configuration. Recreating a RabbitMQ service instance will create a vhost using the latest configuration. Sometimes this is not possible in production environments. In such situation the limits can be configured using:
 
 - user policies configured on the vhost level
-- [optional arguments](https://www.rabbitmq.com/docs/3.13/queues#optional-arguments) on the queue level
+- [optional arguments](https://v3-12.rabbitmq.com/queues.html#optional-arguments) on the queue level
 
-The recommended way is to use policies, as they are scoped per vhost and are dynamically for all matching queues. See [how policies work](https://www.rabbitmq.com/docs/3.13/parameters#how-policies-work) (including examples) on the RabbitMQ documentation page.
+The recommended way is to use policies, as they are scoped per vhost and are dynamically for all matching queues. See [how policies work](https://v3-12.rabbitmq.com/parameters.html#how-policies-work) (including examples) on the RabbitMQ documentation page.
 
 A more concrete example using the HTTP API can be used for the older generation vhosts. This policy named `user-queue-limits` captured all (`.*`) queues and sets the maximum queue length (`max-length`) to 100'000 messages, the maximum queue size (`max-length-bytes`) to 100 MB and the time-to-live (`message-ttl`) for the messages in the queue to 14 days:
 
@@ -188,19 +188,19 @@ PUT /api/policies/<your-vhost-uuid>/user-queue-limits
   }
 ```
 
-For more details see the [RabbitMQ documentation](https://www.rabbitmq.com/docs/3.13/parameters).
+For more details see the [RabbitMQ documentation](https://v3-12.rabbitmq.com/parameters.html).
 
 ### Consistent Hash exchange
-For a different approach to scale your queues on the cluster, the [Consistent hash exchange plugin](https://github.com/rabbitmq/rabbitmq-server/tree/main/deps/rabbitmq_consistent_hash_exchange) is enabled.
+For a different approach to scale your queues on the cluster, the [Consistent hash exchange plugin](https://github.com/rabbitmq/rabbitmq-server/tree/3.12.13/deps/rabbitmq_consistent_hash_exchange) is enabled.
 
 ## <a id='limitations'></a> Limitations
 The RabbitMQ service enforces some limitations to ensure the cluster's performance. 
 
 ### Per-Queue Message TTL of 14 days
-To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://www.rabbitmq.com/docs/3.13/ttl#per-queue-message-ttl) is set to **14 days**. Messages that are in the queue for longer than 14 days are automatically discarded.
+To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://v3-12.rabbitmq.com/ttl.html#per-queue-message-ttl) is set to **14 days**. Messages that are in the queue for longer than 14 days are automatically discarded.
 
 ### Operator Policies
-The RabbitMQ cluster implements [operator policies](https://www.rabbitmq.com/docs/3.13/parameters#operator-policies) to set certain limits on queues and messages. The following operator policies are defined:
+The RabbitMQ cluster implements [operator policies](https://v3-12.rabbitmq.com/parameters.html#operator-policies) to set certain limits on queues and messages. The following operator policies are defined:
 
 - `max-length: 100’000`: If a queue holds 100'000 messages, the most recently published messages will be discarded.
 - `max-length-bytes: 100MB`: If a queue holds more than 100MB of message data, the oldest messages are discarded from the head of the queue. 
@@ -236,7 +236,7 @@ Queues will remain forever on the cluster by default (even when they're not acti
 
 ### Connections
 #### General
-Connections in RabbitMQ use up a lot of memory. In order to keep the cluster healthy and fast, it is important that there are as few open connections as possible. This can be achieved by keeping connections open for client applications. A good practise is to keep the connection open throughout the lifetime of the client application.
+Connections in RabbitMQ use up a lot of memory. In order to keep the cluster healthy and fast, it is important that there are as few open connections as possible. This can be achieved by keeping connections open for client applications. A good practice is to keep the connection open throughout the lifetime of the client application.
 
 #### Auto reconnect
 Connections between client applications and the RabbitMQ cluster are stable for the most part. However, it's possible that a network outage can occur or the cluster has an unexpected downtime. In such a case, the client application usually needs to reconnect to the cluster and reopen connections and channels. To automate this process, most RabbitMQ Client APIs support the auto-reconnect feature (see the Java Client API for an example). It is advised to enable the auto-reconnect feature on the client applications.
@@ -251,7 +251,7 @@ Channels are not thread safe and should not be shared between different threads.
 #### Prefetch
 RabbitMQ allows the for the control over how many messages are sent to the consumer at the same time. Per default, the prefetch value is sent to unlimited, meaning the server tries to send as many messages as possible at the same time. Setting a proper prefetch value can help to achieve the desired performance of the service. If the prefetch count is set too low, the server while idle and wait for more the client to send more message. On the other hand, if the prefetch count is too high the client might take a long time to consume the messages. 
 
-Setting the correct prefetch value depends on the setup of the client application. As such, there is not one prefetch value that is best for all cases. As a general rule the prefetch count should be higher if there is only one / few consumers that consume messages quickly. If the client application feature many consumers, a lower prefetch value should be set. More information can be found here: https://www.rabbitmq.com/consumer-prefetch.html.
+Setting the correct prefetch value depends on the setup of the client application. As such, there is not one prefetch value that is best for all cases. As a general rule the prefetch count should be higher if there is only one / few consumers that consume messages quickly. If the client application feature many consumers, a lower prefetch value should be set. More information can be found here: https://v3-12.rabbitmq.com/consumer-prefetch.html.
 
 ### Messages
 #### Message size
@@ -297,8 +297,8 @@ Directly changing queue types is not possible. Instead, there are two options wh
 
 ### Compatibility considerations
 
-The RabbitMQ documentation has a dedicated page on [Quorum Queues](https://www.rabbitmq.com/docs/quorum-queues). Specifically, in this document there is a
-[feature matrix](https://www.rabbitmq.com/docs/quorum-queues#feature-matrix) which provides a list with all differences between Mirrored Classic Queues and Mirrored Queues.
+The RabbitMQ documentation has a dedicated page on [Quorum Queues](https://v3-12.rabbitmq.com/quorum-queues.html). Specifically, in this document there is a
+[feature matrix](https://v3-12.rabbitmq.com/quorum-queues.html#feature-matrix) which provides a list with all differences between Mirrored Classic Queues and Mirrored Queues.
 These differences can require a different amount of work for a successful migration. Some of [them](https://www.rabbitmq.com/blog/2023/03/02/quorum-queues-migration#trivial-changes) can be trivial
 to change, while [others](https://www.rabbitmq.com/blog/2023/03/02/quorum-queues-migration#breaking-changes) can require changes in the way an application interacts with RabbitMQ.
 
