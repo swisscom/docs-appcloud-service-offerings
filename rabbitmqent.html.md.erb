@@ -299,8 +299,8 @@ Directly changing queue types is not possible. Instead, there are two options wh
 
 The RabbitMQ documentation has a dedicated page on [Quorum Queues](https://v3-12.rabbitmq.com/quorum-queues.html). Specifically, in this document there is a
 [feature matrix](https://v3-12.rabbitmq.com/quorum-queues.html#feature-matrix) which provides a list with all differences between Mirrored Classic Queues and Mirrored Queues.
-These differences can require a different amount of work for a successful migration. Some of [them](https://v3-12.rabbitmq.com/migrate-mcq-to-qq.html#mcq-features-to-remove) can be trivial
-to change, while [others](https://v3-12.rabbitmq.com/migrate-mcq-to-qq.html#mcq-changes-way-queue-is-used) can require changes in the way an application interacts with RabbitMQ.
+These differences can require a different amount of work for a successful migration. Some of [them](https://www.rabbitmq.com/blog/2023/03/02/quorum-queues-migration#trivial-changes) can be trivial
+to change, while [others](https://www.rabbitmq.com/blog/2023/03/02/quorum-queues-migration#breaking-changes) can require changes in the way an application interacts with RabbitMQ.
 
 <%= image_tag("./images/rmq_queues_feature_matrix.png") %>
 
