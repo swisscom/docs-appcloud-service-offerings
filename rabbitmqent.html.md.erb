@@ -200,7 +200,7 @@ The RabbitMQ service enforces some limitations to ensure the cluster's performan
 To protect the cluster's disk from filling up with old messages that were never picked up, the [per-queue message TTL](https://www.rabbitmq.com/docs/3.13/ttl#per-queue-message-ttl) is set to **14 days**. Messages that are in the queue for longer than 14 days are automatically discarded.
 
 ### Operator Policies
-The RabbitMQ cluster implements [operator policies](https://www.rabbitmq.com/docs/3.13/parameters#operator-policies) to set certain limits on queues and messages. The following operator policies are defined:
+The RabbitMQ cluster implements [operator policies](https://www.rabbitmq.com/docs/3.13/policies#operator-policies) to set certain limits on queues and messages. The following operator policies are defined:
 
 - `max-length: 100’000`: If a queue holds 100'000 messages, the most recently published messages will be discarded.
 - `max-length-bytes: 100MB`: If a queue holds more than 100MB of message data, the oldest messages are discarded from the head of the queue. 
