@@ -223,7 +223,7 @@ To get access to the RabbitMQ management console, you can use the [`cf ssh` comm
 
 Cloud Foundry: [RabbitMQ Example](https://github.com/cloudfoundry-samples/rabbitmq-cloudfoundry-samples)
 
-## <a id='best-pracitces'></a> Best Practices
+## <a id='best-practices'></a> Best Practices
 ### Queues
 #### Keep queues short
 RabbitMQ queues work fast and reliably when the they're empty / have only a few messages queued up. RabbitMQ is not designed to hold message over a long period of time and it should always be the goal to keep the queues empty. Not only does this minimise the risk of message loss, it also increases the overall stability of the cluster and its performance.
@@ -261,6 +261,17 @@ Large messages can take up a lot of resources and should generally be avoided. R
 RabbitMQ features acknowledgments (ack's) for receiving message and publisher confirms (confirms) for sending messages. These mechanisms can be used to ensure that a message has been send / received correctly. Ack's and confirms are generally a good idea to implement as they increase the reliability and consistency of the message flow.
 
 Note: Ack's and confirms have a small performance impact.
+
+## <a id='backups-and-restore'></a> Backups and Restore
+
+RabbitMQ contains two types of data: definitions (metadata, schema/topology) and messages.
+Our backup system takes care of saving only the definitions, but not the messages. The reason for this is that messages are short-lived, 
+transient in nature, and RabbitMQ is not designed as a data storage solution.
+The automated backups for the definitions are stored in an encrypted, environment-specific S3 bucket for 30 days. This is done by the
+[backman](https://github.com/swisscom/backman) component every 12 hours.
+
+The restoration process is manual and requires intervention from the RabbitMQ operations team; therefore it will only be performed for *disaster recovery cases*.
+All nodes in the cluster must be restored together and all customers will be affected, which means that it is not possible to restore a backup for a single cluster node or a single customer.
 
 ## <a id='migration-to-quorum-queues'></a> Migration to Quorum Queues
 
